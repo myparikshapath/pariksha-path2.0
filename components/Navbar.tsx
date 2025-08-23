@@ -1,269 +1,179 @@
-import { BookOpenIcon, InfoIcon, LifeBuoyIcon } from "lucide-react"
+"use client";
 
-import Logo from "@/components/logo"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu, X, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Navigation links array to be used in both desktop and mobile menus
-const navigationLinks = [
-  { href: "#", label: "Home" },
-  {
-    label: "Features",
-    submenu: true,
-    type: "description",
-    items: [
-      {
-        href: "#",
-        label: "Components",
-        description: "Browse all components in the library.",
-      },
-      {
-        href: "#",
-        label: "Documentation",
-        description: "Learn how to use the library.",
-      },
-      {
-        href: "#",
-        label: "Templates",
-        description: "Pre-built layouts for common use cases.",
-      },
-    ],
-  },
-  {
-    label: "Pricing",
-    submenu: true,
-    type: "simple",
-    items: [
-      { href: "#", label: "Product A" },
-      { href: "#", label: "Product B" },
-      { href: "#", label: "Product C" },
-      { href: "#", label: "Product D" },
-    ],
-  },
-  {
-    label: "About",
-    submenu: true,
-    type: "icon",
-    items: [
-      { href: "#", label: "Getting Started", icon: "BookOpenIcon" },
-      { href: "#", label: "Tutorials", icon: "LifeBuoyIcon" },
-      { href: "#", label: "About Us", icon: "InfoIcon" },
-    ],
-  },
-]
+const navLinks = [
+    { name: "Home", href: "/" },
+    { name: "About", href: "/about" },
+    {
+        name: "Courses / Programs",
+        dropdown: [
+            { category: "Defence", items: ["NDA", "CDS", "Airforce X/Y", "Navy", "Agniveer"] },
+            { category: "State Exams", items: ["HSSC", "HCS", "Patwari", "Police", "Teachers"] },
+        ],
+    },
+    { name: "Mock", href: "/mock" },
+    { name: "Blog", href: "/blog" },
+    { name: "Contact", href: "/contact" },
+];
 
-export default function Component() {
-  return (
-    <header className="border-b px-4 md:px-6">
-      <div className="flex h-16 items-center justify-between gap-4">
-        {/* Left side */}
-        <div className="flex items-center gap-2">
-          {/* Mobile menu trigger */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                className="group size-8 md:hidden"
-                variant="ghost"
-                size="icon"
-              >
-                <svg
-                  className="pointer-events-none"
-                  width={16}
-                  height={16}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M4 12L20 12"
-                    className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-x-0 group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[315deg]"
-                  />
-                  <path
-                    d="M4 12H20"
-                    className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.8)] group-aria-expanded:rotate-45"
-                  />
-                  <path
-                    d="M4 12H20"
-                    className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
-                  />
-                </svg>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-64 p-1 md:hidden">
-              <NavigationMenu className="max-w-none *:w-full">
-                <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
-                  {navigationLinks.map((link, index) => (
-                    <NavigationMenuItem key={index} className="w-full">
-                      {link.submenu ? (
-                        <>
-                          <div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
-                            {link.label}
-                          </div>
-                          <ul>
-                            {link.items.map((item, itemIndex) => (
-                              <li key={itemIndex}>
-                                <NavigationMenuLink
-                                  href={item.href}
-                                  className="py-1.5"
+export default function Navbar() {
+    const pathname = usePathname();
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const isActive = (href: string) => pathname === href;
+
+    return (
+        <nav className="w-full bg-white/90 backdrop-blur-2xl shadow-md fixed top-0 left-0 z-50">
+            <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center px-6 py-4">
+                {/* Logo */}
+                <Link href="/" className="text-2xl font-bold text-blue-700 tracking-tight">
+                    Pariksha Path
+                </Link>
+
+                {/* Desktop Menu */}
+                <ul className="hidden lg:flex flex-1 justify-center items-center space-x-8 font-medium">
+                    {navLinks.map((link, idx) => (
+                        <li key={idx} className="relative">
+                            {link.dropdown ? (
+                                <div
+                                    className={`flex items-center cursor-pointer transition-colors ${pathname.startsWith("/courses") ? "text-blue-600" : "hover:text-blue-600"}`}
+                                    onMouseEnter={() => setDropdownOpen(true)}
+                                    onMouseLeave={() => setDropdownOpen(false)}
                                 >
-                                  {item.label}
-                                </NavigationMenuLink>
-                              </li>
-                            ))}
-                          </ul>
-                        </>
-                      ) : (
-                        <NavigationMenuLink href={link.href} className="py-1.5">
-                          {link.label}
-                        </NavigationMenuLink>
-                      )}
-                      {/* Add separator between different types of items */}
-                      {index < navigationLinks.length - 1 &&
-                        // Show separator if:
-                        // 1. One is submenu and one is simple link OR
-                        // 2. Both are submenus but with different types
-                        ((!link.submenu &&
-                          navigationLinks[index + 1].submenu) ||
-                          (link.submenu &&
-                            !navigationLinks[index + 1].submenu) ||
-                          (link.submenu &&
-                            navigationLinks[index + 1].submenu &&
-                            link.type !== navigationLinks[index + 1].type)) && (
-                          <div
-                            role="separator"
-                            aria-orientation="horizontal"
-                            className="bg-border -mx-1 my-1 h-px w-full"
-                          />
-                        )}
-                    </NavigationMenuItem>
-                  ))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </PopoverContent>
-          </Popover>
-          {/* Main nav */}
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-primary hover:text-primary/90">
-              <Logo />
-            </a>
-            {/* Navigation menu */}
-            <NavigationMenu viewport={false} className="max-md:hidden">
-              <NavigationMenuList className="gap-2">
-                {navigationLinks.map((link, index) => (
-                  <NavigationMenuItem key={index}>
-                    {link.submenu ? (
-                      <>
-                        <NavigationMenuTrigger className="text-muted-foreground hover:text-primary bg-transparent px-2 py-1.5 font-medium *:[svg]:-me-0.5 *:[svg]:size-3.5">
-                          {link.label}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="data-[motion=from-end]:slide-in-from-right-16! data-[motion=from-start]:slide-in-from-left-16! data-[motion=to-end]:slide-out-to-right-16! data-[motion=to-start]:slide-out-to-left-16! z-50 p-1">
-                          <ul
-                            className={cn(
-                              link.type === "description"
-                                ? "min-w-64"
-                                : "min-w-48"
+                                    {link.name} <ChevronDown size={18} className="ml-1" />
+                                </div>
+                            ) : (
+                                <Link
+                                    href={link.href}
+                                    className={`transition-colors ${isActive(link.href) ? "text-blue-600" : "hover:text-blue-600"}`}
+                                >
+                                    {link.name}
+                                </Link>
                             )}
-                          >
-                            {link.items.map((item, itemIndex) => (
-                              <li key={itemIndex}>
-                                <NavigationMenuLink
-                                  href={item.href}
-                                  className="py-1.5"
-                                >
-                                  {/* Display icon if present */}
-                                  {link.type === "icon" && "icon" in item && (
-                                    <div className="flex items-center gap-2">
-                                      {item.icon === "BookOpenIcon" && (
-                                        <BookOpenIcon
-                                          size={16}
-                                          className="text-foreground opacity-60"
-                                          aria-hidden="true"
-                                        />
-                                      )}
-                                      {item.icon === "LifeBuoyIcon" && (
-                                        <LifeBuoyIcon
-                                          size={16}
-                                          className="text-foreground opacity-60"
-                                          aria-hidden="true"
-                                        />
-                                      )}
-                                      {item.icon === "InfoIcon" && (
-                                        <InfoIcon
-                                          size={16}
-                                          className="text-foreground opacity-60"
-                                          aria-hidden="true"
-                                        />
-                                      )}
-                                      <span>{item.label}</span>
-                                    </div>
-                                  )}
 
-                                  {/* Display label with description if present */}
-                                  {link.type === "description" &&
-                                  "description" in item ? (
-                                    <div className="space-y-1">
-                                      <div className="font-medium">
-                                        {item.label}
-                                      </div>
-                                      <p className="text-muted-foreground line-clamp-2 text-xs">
-                                        {item.description}
-                                      </p>
-                                    </div>
-                                  ) : (
-                                    // Display simple label if not icon or description type
-                                    !link.type ||
-                                    (link.type !== "icon" &&
-                                      link.type !== "description" && (
-                                        <span>{item.label}</span>
-                                      ))
-                                  )}
-                                </NavigationMenuLink>
-                              </li>
-                            ))}
-                          </ul>
-                        </NavigationMenuContent>
-                      </>
+                            {/* Dropdown */}
+                            <AnimatePresence>
+                                {dropdownOpen && link.dropdown && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="absolute left-1/2 -translate-x-1/2 top-full w-[85vw] max-w-4xl bg-white/90 backdrop-blur-xl shadow-2xl border border-gray-200 rounded-2xl p-6 grid grid-cols-2 gap-8 mt-4"
+                                        onMouseEnter={() => setDropdownOpen(true)}
+                                        onMouseLeave={() => setDropdownOpen(false)}
+                                    >
+                                        {link.dropdown.map((section, sidx) => (
+                                            <div key={sidx}>
+                                                <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-3">
+                                                    {section.category}
+                                                </h3>
+                                                <ul className="space-y-2">
+                                                    {section.items.map((item, iidx) => (
+                                                        <li
+                                                            key={iidx}
+                                                            className="px-2 py-1 rounded-md hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors"
+                                                        >
+                                                            <Link href={`/courses/${item.toLowerCase().replace(/\s+/g, "-")}`}>
+                                                                {item}
+                                                            </Link>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                {sidx < link.dropdown.length - 1 && (
+                                                    <div className="my-4 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Desktop Login Button */}
+                <Button className="hidden lg:block bg-blue-600 hover:bg-blue-700 hover:cursor-pointer text-white px-6 py-2 shadow-md transition-transform hover:scale-105">
+                    Login
+                </Button>
+
+                {/* Mobile Menu Toggle */}
+                <div className="lg:hidden">
+                    {menuOpen ? (
+                        <X size={28} onClick={() => setMenuOpen(false)} className="cursor-pointer" />
                     ) : (
-                      <NavigationMenuLink
-                        href={link.href}
-                        className="text-muted-foreground hover:text-primary py-1.5 font-medium"
-                      >
-                        {link.label}
-                      </NavigationMenuLink>
+                        <Menu size={28} onClick={() => setMenuOpen(true)} className="cursor-pointer" />
                     )}
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
-          </div>
-        </div>
-        {/* Right side */}
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="text-sm">
-            <a href="#">Sign In</a>
-          </Button>
-          <Button asChild size="sm" className="text-sm">
-            <a href="#">Get Started</a>
-          </Button>
-        </div>
-      </div>
-    </header>
-  )
+                </div>
+            </div>
+
+            {/* Mobile Dropdown */}
+            <AnimatePresence>
+                {menuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="lg:hidden bg-white/95 backdrop-blur-md shadow-lg px-6 py-4 space-y-4"
+                    >
+                        {navLinks.map((link, idx) => (
+                            <div key={idx}>
+                                {link.dropdown ? (
+                                    <details className="group">
+                                        <summary className="cursor-pointer font-medium flex items-center justify-between list-none">
+                                            {link.name}
+                                            <ChevronDown
+                                                size={18}
+                                                className="ml-2 text-gray-500 transition-transform duration-300 group-open:rotate-180"
+                                            />
+                                        </summary>
+                                        <div className="pl-4 pt-2 space-y-2">
+                                            {link.dropdown.map((section, sidx) => (
+                                                <div key={sidx}>
+                                                    <p className="font-semibold text-gray-700">{section.category}</p>
+                                                    <ul className="pl-2 space-y-1">
+                                                        {section.items.map((item, iidx) => (
+                                                            <li
+                                                                key={iidx}
+                                                                className="hover:text-blue-600 cursor-pointer transition-colors"
+                                                            >
+                                                                <Link
+                                                                    href={`/courses/${item.toLowerCase().replace(/\s+/g, "-")}`}
+                                                                    className="block w-full"
+                                                                >
+                                                                    {item}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </details>
+                                ) : (
+                                    <Link
+                                        href={link.href}
+                                        className={`hover:text-blue-600 cursor-pointer ${isActive(link.href) ? "text-blue-600" : ""}`}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                )}
+                            </div>
+                        ))}
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                            Login
+                        </Button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </nav>
+    );
 }
