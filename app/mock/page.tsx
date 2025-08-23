@@ -59,7 +59,7 @@ export default function MockPage() {
                                     scale: 1.05,
                                     boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
                                 }}
-                                className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50 transition"
+                                className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50 transition"
                             >
                                 <div className="text-[#0000D3] mb-3">{cat.icon}</div>
                                 <h3 className="font-semibold text-lg">{cat.name}</h3>
@@ -84,14 +84,14 @@ export default function MockPage() {
                             <motion.div
                                 key={demo}
                                 whileHover={{ scale: 1.02 }}
-                                className="bg-white p-6 rounded-xl shadow hover:shadow-lg flex flex-col justify-between"
+                                className="bg-white p-6 rounded-sm shadow hover:shadow-lg flex flex-col justify-between"
                             >
                                 <h3 className="font-semibold mb-2">Demo Test {demo}</h3>
                                 <p className="text-gray-600 text-sm mb-4">
                                     Try a restricted set of questions for free and experience the
                                     test interface.
                                 </p>
-                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full rounded-md">
+                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full rounded-sm">
                                     Attempt
                                 </Button>
                             </motion.div>
@@ -114,7 +114,7 @@ export default function MockPage() {
                             <motion.div
                                 key={series}
                                 whileHover={{ scale: 1.02 }}
-                                className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg flex flex-col justify-between"
+                                className="bg-white p-6 rounded-sm shadow-md hover:shadow-lg flex flex-col justify-between"
                             >
                                 <h3 className="font-semibold mb-2">
                                     Full-Length Test Series {series}
@@ -122,7 +122,7 @@ export default function MockPage() {
                                 <p className="text-gray-600 mb-4">
                                     Sectional and full-length tests with detailed solutions.
                                 </p>
-                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full rounded-md">
+                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full rounded-sm">
                                     Buy Now
                                 </Button>
                             </motion.div>
@@ -146,11 +146,11 @@ export default function MockPage() {
                             <motion.div
                                 key={pdf}
                                 whileHover={{ scale: 1.02 }}
-                                className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center justify-center"
+                                className="bg-white p-6 rounded-sm shadow-md flex flex-col items-center justify-center"
                             >
                                 <div className="w-16 h-20 bg-gray-200 rounded mb-4" />
                                 <h3 className="font-semibold mb-2">Study Notes {pdf}</h3>
-                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full mt-2 rounded-md">
+                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full mt-2 rounded-sm">
                                     Download
                                 </Button>
                             </motion.div>

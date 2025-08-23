@@ -46,7 +46,7 @@ export default function ContactPage() {
                             href="https://wa.me/919876543210"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-white bg-green-500 px-5 py-3 rounded-xl shadow-lg hover:bg-green-600 transition transform hover:-translate-y-1 hover:scale-105"
+                            className="flex items-center gap-2 text-white bg-green-500 px-5 py-3 rounded-sm shadow-lg hover:bg-green-600 transition transform hover:-translate-y-1 hover:scale-105"
                         >
                             <MessageCircle size={20} /> Chat on WhatsApp
                         </a>
@@ -56,7 +56,7 @@ export default function ContactPage() {
                 {/* Right: Modern Highlighted Contact Form */}
                 <form
                     onSubmit={handleSubmit}
-                    className="relative bg-white rounded-3xl shadow-2xl p-10 hover:shadow-3xl transition-shadow duration-500 space-y-6 border border-gray-100"
+                    className="relative bg-white rounded-sm shadow-2xl p-10 hover:shadow-3xl transition-shadow duration-500 space-y-6 border border-gray-100"
                 >
                     <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Send Us a Message</h2>
 
@@ -73,7 +73,7 @@ export default function ContactPage() {
                                 onChange={handleChange}
                                 placeholder=" "
                                 required
-                                className="peer w-full border border-gray-300 rounded-xl px-4 pt-5 pb-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300"
+                                className="peer w-full border border-gray-300 rounded-sm px-4 pt-5 pb-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300"
                             />
                             <label className="absolute left-4 top-2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-blue-500 peer-focus:text-sm">
                                 {field.label}
@@ -89,7 +89,7 @@ export default function ContactPage() {
                             required
                             rows={5}
                             placeholder=" "
-                            className="peer w-full border border-gray-300 rounded-xl px-4 pt-5 pb-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300 resize-none"
+                            className="peer w-full border border-gray-300 rounded-sm px-4 pt-5 pb-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300 resize-none"
                         />
                         <label className="absolute left-4 top-2 text-gray-400 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-blue-500 peer-focus:text-sm">
                             Your Message
@@ -98,7 +98,7 @@ export default function ContactPage() {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-xl transition transform hover:-translate-y-1 hover:scale-105"
+                        className="w-full bg-[#0000D3] hover:bg-blue-700 text-white font-bold py-3 rounded-sm shadow-xl transition transform hover:-translate-y-1 hover:scale-105"
                     >
                         Send Message
                     </button>

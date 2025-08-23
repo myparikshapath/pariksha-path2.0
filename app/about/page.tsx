@@ -12,7 +12,7 @@ export default function About() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                 >
-                    <h2 className="text-3xl font-bold mb-4">Who We Are</h2>
+                    <h2 className="text-3xl text-[#002856] font-bold mb-4">Who We Are</h2>
                     <p className="text-gray-600 leading-relaxed mb-4">
                         Pariksha Path is dedicated to guiding aspirants towards success in competitive exams.
                         Our expert mentors, structured programs, and personalized approach ensure that every student excels.
@@ -34,7 +34,7 @@ export default function About() {
 
             {/* Why Choose Us */}
             <section className="mt-20">
-                <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
+                <h2 className="text-3xl text-[#002856] font-bold text-center mb-12">Why Choose Us</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     {["Expert Mentors", "Proven Results", "Holistic Preparation"].map((item, idx) => (
                         <motion.div
@@ -56,7 +56,7 @@ export default function About() {
 
             {/* Timeline */}
             <section className="mt-20">
-                <h2 className="text-3xl font-bold text-center mb-12">Our Journey</h2>
+                <h2 className="text-3xl text-[#002856] font-bold text-center mb-12">Our Journey</h2>
                 <div className="relative ml-6 md:ml-16">
                     {/* Vertical arrow line */}
                     <div className="absolute top-5 left-1 w-1 h-full bg-gradient-to-b from-blue-400 via-blue-500 to-[#0000D3] rounded"></div>
@@ -89,7 +89,7 @@ export default function About() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="bg-gradient-to-r from-[#0000D3] to-[#4a4ae4] text-white rounded-2xl shadow-lg p-10 flex flex-col md:flex-row items-center justify-between"
+                    className="bg-gradient-to-r from-[#0000D3] to-[#4a4ae4] text-white rounded-lg shadow-lg p-10 flex flex-col md:flex-row items-center justify-between"
                 >
                     <h3 className="text-2xl font-bold mb-4 md:mb-0 text-center md:text-left">
                         Our Mission

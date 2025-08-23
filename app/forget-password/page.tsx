@@ -12,7 +12,7 @@ export default function ForgotPassword() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await api.post("/auth/forgot-password", { email });
+            const res = await api.post("/auth/student/forgot-password", { email });
             setMessage(res.data.message);
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;

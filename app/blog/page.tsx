@@ -37,7 +37,7 @@ export default function ArticlesPage() {
             <div className="flex overflow-x-auto space-x-3 mb-8 pb-2 no-scrollbar">
                 <button
                     className={`flex-shrink-0 px-5 py-2 rounded-full font-medium transition-all ${!currentCategory
-                        ? "bg-blue-600 text-white shadow-md"
+                        ? "bg-[#0000D3] text-white shadow-md"
                         : "bg-gray-200 hover:bg-blue-100"
                         }`}
                     onClick={() => setCurrentCategory(null)}
@@ -83,7 +83,7 @@ export default function ArticlesPage() {
                         <div className="h-40 bg-gray-200 rounded-md mb-4"></div>
                         <h2 className="font-semibold text-xl mb-2 text-gray-800">{article.title}</h2>
                         <p className="text-gray-600 mb-3">{article.body}</p>
-                        <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-600 font-medium">
+                        <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-[#0000D3] font-medium">
                             {article.category}
                         </span>
                     </motion.div>
@@ -104,7 +104,7 @@ export default function ArticlesPage() {
                     <button
                         key={i}
                         className={`px-4 py-2 rounded-full border font-medium transition ${currentPage === i + 1
-                            ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                            ? "bg-[#0000D3] text-white border-blue-600 shadow-md"
                             : "bg-white text-gray-600 border-gray-300 hover:bg-blue-100 hover:text-blue-600"
                             }`}
                         onClick={() => setCurrentPage(i + 1)}

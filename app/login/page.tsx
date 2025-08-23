@@ -37,9 +37,9 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
             <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden">
                 {/* Decorative gradient shape */}
-                <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+                <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
 
-                <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Login</h2>
+                <h2 className="text-3xl font-bold mb-6 text-center text-[#002856]">Login</h2>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -67,7 +67,7 @@ export default function Login() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             required
                         />
-                        <Link href="/forgot-password" className="text-sm text-blue-600 mt-1 hover:underline self-end">
+                        <Link href="/student/forgot-password" className="text-sm text-[#0000D3] mt-1 hover:underline self-end">
                             Forgot Password?
                         </Link>
                     </div>
@@ -75,7 +75,7 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-transform hover:scale-105 font-semibold"
+                        className="w-full bg-[#0000D3] text-white py-3 rounded-sm shadow-lg hover:bg-[#030397] transition-transform hover:scale-105 font-semibold"
                     >
                         {loading ? "Logging in..." : "Login"}
                     </button>
@@ -83,7 +83,7 @@ export default function Login() {
 
                 <p className="mt-6 text-center text-gray-600">
                     Not a user?{" "}
-                    <Link href="/register" className="text-blue-600 font-medium hover:underline">
+                    <Link href="/register" className="text-[#0000D3] font-medium hover:underline">
                         Register
                     </Link>
                 </p>

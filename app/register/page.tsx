@@ -48,7 +48,7 @@ export default function Register() {
                 {/* Decorative gradient shape */}
                 <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
 
-                <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Register</h2>
+                <h2 className="text-3xl font-bold mb-6 text-center text-[#002856]">Register</h2>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -59,7 +59,7 @@ export default function Register() {
                             value={form.name}
                             onChange={handleChange}
                             placeholder="Your full name"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
                     </div>
@@ -72,7 +72,7 @@ export default function Register() {
                             value={form.email}
                             onChange={handleChange}
                             placeholder="you@example.com"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
                     </div>
@@ -84,7 +84,7 @@ export default function Register() {
                             value={form.phone}
                             onChange={handleChange}
                             placeholder="+91 9876543210"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
                     </div>
@@ -97,7 +97,7 @@ export default function Register() {
                             value={form.password}
                             onChange={handleChange}
                             placeholder="Create a password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
                     </div>
@@ -143,8 +143,8 @@ export default function Register() {
                                                 });
                                             }
                                         }}
-                                        className={`px-4 py-2 rounded-full border flex-shrink-0 transition ${selected
-                                            ? "bg-blue-600 text-white border-blue-600"
+                                        className={`px-4 py-2 rounded-full hover:cursor-pointer border flex-shrink-0 transition ${selected
+                                            ? "bg-[#0000D3] text-white border-blue-600"
                                             : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                                             }`}
                                     >
@@ -162,7 +162,7 @@ export default function Register() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg shadow-lg hover:bg-blue-700 transition-transform hover:scale-105 font-semibold"
+                        className="w-full bg-[#0000D3] text-white py-3 rounded-sm shadow-lg hover:bg-[#030397] hover:cursor-pointer transition-transform hover:scale-105 font-semibold"
                     >
                         {loading ? "Registering..." : "Register"}
                     </button>
@@ -170,7 +170,7 @@ export default function Register() {
 
                 <p className="mt-6 text-center text-gray-600">
                     Already have an account?{" "}
-                    <Link href="/login" className="text-blue-600 font-medium hover:underline">
+                    <Link href="/login" className="text-[#0000D3] font-medium hover:underline">
                         Login
                     </Link>
                 </p>
