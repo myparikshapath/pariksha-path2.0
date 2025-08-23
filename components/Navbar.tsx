@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -27,6 +26,11 @@ export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
+    // Close mobile menu automatically when route changes
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [pathname]);
+
     const isActive = (href: string) => pathname === href;
 
     return (
@@ -43,7 +47,8 @@ export default function Navbar() {
                         <li key={idx} className="relative">
                             {link.dropdown ? (
                                 <div
-                                    className={`flex items-center cursor-pointer transition-colors ${pathname.startsWith("/courses") ? "text-blue-600" : "hover:text-blue-600"}`}
+                                    className={`flex items-center cursor-pointer transition-colors ${pathname.startsWith("/courses") ? "text-blue-600" : "hover:text-blue-600"
+                                        }`}
                                     onMouseEnter={() => setDropdownOpen(true)}
                                     onMouseLeave={() => setDropdownOpen(false)}
                                 >
@@ -52,7 +57,8 @@ export default function Navbar() {
                             ) : (
                                 <Link
                                     href={link.href}
-                                    className={`transition-colors ${isActive(link.href) ? "text-blue-600" : "hover:text-blue-600"}`}
+                                    className={`transition-colors ${isActive(link.href) ? "text-blue-600" : "hover:text-blue-600"
+                                        }`}
                                 >
                                     {link.name}
                                 </Link>
@@ -81,7 +87,9 @@ export default function Navbar() {
                                                             key={iidx}
                                                             className="px-2 py-1 rounded-md hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors"
                                                         >
-                                                            <Link href={`/courses/${item.toLowerCase().replace(/\s+/g, "-")}`}>
+                                                            <Link
+                                                                href={`/courses/${item.toLowerCase().replace(/\s+/g, "-")}`}
+                                                            >
                                                                 {item}
                                                             </Link>
                                                         </li>
@@ -161,7 +169,8 @@ export default function Navbar() {
                                 ) : (
                                     <Link
                                         href={link.href}
-                                        className={`hover:text-blue-600 cursor-pointer ${isActive(link.href) ? "text-blue-600" : ""}`}
+                                        className={`hover:text-blue-600 cursor-pointer ${isActive(link.href) ? "text-blue-600" : ""
+                                            }`}
                                     >
                                         {link.name}
                                     </Link>

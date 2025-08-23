@@ -5,169 +5,31 @@
 @tailwind components; */
 @tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
-
-/* ===============================
-   GLOBAL THEME VARIABLES
-   =============================== */
 :root {
-	/* Brand Colors */
-	--color-primary: #2563eb; /* Blue-600 */
-	--color-primary-hover: #1d4ed8; /* Darker blue */
-	--color-accent: #f59e0b; /* Amber-500 */
-	--color-accent-hover: #d97706; /* Darker amber */
-
-	/* Neutral Colors */
-	--color-muted: #6b7280; /* Gray-500 */
-	--color-border: #e5e7eb; /* Gray-200 */
-
-	/* States */
-	--color-success: #22c55e; /* Green-500 */
-	--color-error: #ef4444; /* Red-500 */
-	--color-warning: #f97316; /* Orange-500 */
-	--color-info: #3b82f6; /* Blue-500 */
-
-	/* Fonts */
-	--font-sans: var(--font-geist-sans, "Inter", sans-serif);
-	--font-mono: var(--font-geist-mono, monospace);
-	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
+	--color-primary: #3b82f6; /* blue-500 */
+	--color-primary-hover: #2563eb; /* blue-600 */
+	--color-secondary: #10b981; /* green-500 */
+	--color-secondary-hover: #059669; /* green-600 */
+	--color-accent: #f59e0b; /* amber-500 */
+	--color-bg-light: #ffffff;
+	--color-bg-dark: #1f2937;
+	--color-text-light: #111827;
+	--color-text-dark: #f9fafb;
 }
 
-@theme inline {
-	/* Use global variables inside Tailwind tokens */
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--color-primary: var(--color-primary);
-	--color-primary-hover: var(--color-primary-hover);
-	--color-accent: var(--color-accent);
-	--color-accent-hover: var(--color-accent-hover);
-	--color-muted: var(--color-muted);
-	--color-border: var(--color-border);
-	--color-success: var(--color-success);
-	--color-error: var(--color-error);
-	--color-warning: var(--color-warning);
-	--color-info: var(--color-info);
-
-	--font-sans: var(--font-sans);
-	--font-mono: var(--font-mono);
-	--color-sidebar-ring: var(--sidebar-ring);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar: var(--sidebar);
-	--color-chart-5: var(--chart-5);
-	--color-chart-4: var(--chart-4);
-	--color-chart-3: var(--chart-3);
-	--color-chart-2: var(--chart-2);
-	--color-chart-1: var(--chart-1);
-	--color-ring: var(--ring);
-	--color-input: var(--input);
-	--color-destructive: var(--destructive);
-	--color-accent-foreground: var(--accent-foreground);
-	--color-muted-foreground: var(--muted-foreground);
-	--color-secondary-foreground: var(--secondary-foreground);
-	--color-secondary: var(--secondary);
-	--color-primary-foreground: var(--primary-foreground);
-	--color-popover-foreground: var(--popover-foreground);
-	--color-popover: var(--popover);
-	--color-card-foreground: var(--card-foreground);
-	--color-card: var(--card);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
-}
-
-/* ===============================
-   DARK MODE THEME VARIABLES
-   =============================== */
-@media (prefers-color-scheme: dark) {
-	:root {
-		--color-border: #2d2d2d;
-		--color-muted: #9ca3af;
-	}
-}
-
-/* ===============================
-   BASE STYLES
-   =============================== */
-body {
-	font-family: var(--font-sans);
-}
-
+/* Dark mode overrides (optional, can also be done via Tailwind 'dark:' classes) */
 .dark {
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.205 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.205 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.205 0 0);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.556 0 0);
+	--color-bg-light: #1f2937;
+	--color-bg-dark: #111827;
+	--color-text-light: #f9fafb;
+	--color-text-dark: #e5e7eb;
 }
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
+/* in globals.css or component CSS */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }
