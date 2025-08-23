@@ -1,8 +1,11 @@
 "use client";
 import React from "react";
 import Link from "next/link";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 // Mock Data - Replace with API integration
 const categories = ["Defence", "State Exams", "Banking", "SSC"];
@@ -18,6 +21,19 @@ const performance = [
 
 export default function StudentDashboard() {
     const colors = ["#0000D3", "#FF6B6B", "#4CAF50"];
+
+    const { isLoggedIn } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoggedIn) {
+            router.push("/login");
+        }
+    }, [isLoggedIn, router]);
+
+    if (!isLoggedIn) {
+        return <p>Checking authentication...</p>;
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 pt-32">

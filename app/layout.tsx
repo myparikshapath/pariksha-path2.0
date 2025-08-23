@@ -5,6 +5,7 @@ import ScrollToTop from "../components/ScrollToTop"
 import Navbar from "../components/Navbar"
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,8 +34,9 @@ export default function RootLayout({
       >
         <>
           <ScrollToTop />
-          <Navbar />
-          {children}
+          <AuthProvider>
+            <Navbar />
+            {children}</AuthProvider>
           <Footer />
           <FloatingContact />
         </>

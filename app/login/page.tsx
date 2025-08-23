@@ -4,12 +4,14 @@ import api from "@/utils/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AxiosError } from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
     const router = useRouter();
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const { login } = useAuth();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,7 +24,7 @@ export default function Login() {
 
         try {
             const res = await api.post("/auth/login", form);
-            localStorage.setItem("access_token", res.data.tokens.access_token);
+            login(res.data.tokens.access_token);
             localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
             router.push("/student/dashboard");
         } catch (err) {
@@ -67,7 +69,7 @@ export default function Login() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             required
                         />
-                        <Link href="/student/forgot-password" className="text-sm text-[#0000D3] mt-1 hover:underline self-end">
+                        <Link href="/forgot-password" className="text-sm text-[#0000D3] mt-1 hover:underline self-end">
                             Forgot Password?
                         </Link>
                     </div>

@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Menu, X, Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext"; // ✅ use context
 
 const navLinks = [
     { name: "Home", href: "/" },
@@ -22,30 +23,14 @@ const navLinks = [
 
 export default function Navbar() {
     const pathname = usePathname();
-    const router = useRouter();
+    const { isLoggedIn, logout } = useAuth(); // ✅ comes from context
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState<Record<string, boolean>>({});
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         setMenuOpen(false);
     }, [pathname]);
-
-    // ✅ check localStorage for tokens
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            const token = localStorage.getItem("access_token");
-            setIsLoggedIn(!!token);
-        }
-    }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        setIsLoggedIn(false);
-        router.push("/"); // redirect to home
-    };
 
     const isActive = (href: string) => pathname === href;
 
@@ -121,12 +106,13 @@ export default function Navbar() {
                     )}
 
                     {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
+                        <Link
+                            onClick={logout}
+                            href="/"
                             className="bg-red-600 text-white px-8 py-2 rounded-xs font-bold text-md shadow-md hover:bg-red-700 transition-colors"
                         >
                             Logout
-                        </button>
+                        </Link>
                     ) : (
                         <Link
                             href="/login"
@@ -223,12 +209,13 @@ export default function Navbar() {
                         )}
 
                         {isLoggedIn ? (
-                            <button
-                                onClick={handleLogout}
+                            <Link
+                                onClick={logout}
+                                href="/"
                                 className="block w-full bg-red-600 text-white text-center py-2 rounded-sm font-semibold hover:bg-red-700 transition-colors"
                             >
                                 Logout
-                            </button>
+                            </Link>
                         ) : (
                             <Link
                                 href="/login"
