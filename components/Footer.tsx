@@ -66,9 +66,9 @@ export default function Footer() {
                     </p>
 
                     <div className="flex space-x-4 mt-4">
-                        <Link href="#" className="hover:text-blue-500"><Facebook size={24} /></Link>
+                        <Link href="#" className="hover:text-[#0000D3]"><Facebook size={24} /></Link>
                         <Link href="#" className="hover:text-blue-500"><Twitter size={24} /></Link>
-                        <Link href="#" className="hover:text-blue-500"><Instagram size={24} /></Link>
+                        <Link href="#" className="hover:text-red-500"><Instagram size={24} /></Link>
                         <Link href="#" className="hover:text-blue-500"><Linkedin size={24} /></Link>
                     </div>
                 </div>

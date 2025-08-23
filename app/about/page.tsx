@@ -59,7 +59,7 @@ export default function About() {
                 <h2 className="text-3xl font-bold text-center mb-12">Our Journey</h2>
                 <div className="relative ml-6 md:ml-16">
                     {/* Vertical arrow line */}
-                    <div className="absolute top-5 left-1 w-1 h-full bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 rounded"></div>
+                    <div className="absolute top-5 left-1 w-1 h-full bg-gradient-to-b from-blue-400 via-blue-500 to-[#0000D3] rounded"></div>
 
                     {[2020, 2021, 2022, 2023].map((year, idx) => (
                         <motion.div

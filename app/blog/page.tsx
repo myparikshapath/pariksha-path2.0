@@ -30,8 +30,8 @@ export default function ArticlesPage() {
     );
 
     return (
-        <main className="pt-28 max-w-7xl mx-auto px-6">
-            <h1 className="text-4xl font-bold mb-8 text-gray-800">Articles</h1>
+        <main className="pt-30 max-w-7xl mx-auto px-6">
+            <h1 className="text-4xl font-bold mb-8 text-[#002856]">Articles</h1>
 
             {/* Categories */}
             <div className="flex overflow-x-auto space-x-3 mb-8 pb-2 no-scrollbar">

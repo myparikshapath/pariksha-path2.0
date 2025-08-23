@@ -19,7 +19,7 @@ export default function MockPage() {
         <>
             <Navbar />
 
-            <main className="pt-24 max-w-7xl mx-auto px-6 space-y-16">
+            <main className="pt-30 max-w-7xl mx-auto px-6 space-y-16">
                 {/* ===== Page Title ===== */}
                 <section className="text-center">
                     <h1 className="text-4xl font-bold mb-4">Mock Tests</h1>
