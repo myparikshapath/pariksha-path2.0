@@ -89,7 +89,7 @@ export default function About() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="bg-blue-600 text-white rounded-2xl shadow-lg p-10 flex flex-col md:flex-row items-center justify-between"
+                    className="bg-gradient-to-r from-[#0000D3] to-[#4a4ae4] text-white rounded-2xl shadow-lg p-10 flex flex-col md:flex-row items-center justify-between"
                 >
                     <h3 className="text-2xl font-bold mb-4 md:mb-0 text-center md:text-left">
                         Our Mission

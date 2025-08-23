@@ -24,7 +24,7 @@ export default function Login() {
             const res = await api.post("/auth/login", form);
             localStorage.setItem("access_token", res.data.tokens.access_token);
             localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
-            router.push("/dashboard");
+            router.push("/student/dashboard");
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
             setError(axiosError.response?.data?.detail || "Login failed");

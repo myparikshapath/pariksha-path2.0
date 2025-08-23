@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AxiosError } from "axios";
 
-
 export default function Register() {
     const router = useRouter();
     const [form, setForm] = useState({
@@ -13,7 +12,7 @@ export default function Register() {
         email: "",
         phone: "",
         password: "",
-        preferred_exam_categories: [],
+        preferred_exam_categories: [] as string[],
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -28,21 +27,24 @@ export default function Register() {
         setError("");
 
         try {
-            await api.post("/register", form);
+            await api.post("/auth/register", form);
             alert("Registered successfully! Please verify your email.");
             router.push("/login");
-        } catch (err) {
-            const axiosError = err as AxiosError<{ detail?: string }>;
-            setError(axiosError.response?.data?.detail || "Registration failed");
+        } catch (err: any) {
+            // FastAPI sends error as { detail: "...error text..." }
+            const errorMsg = err.response?.data?.detail || "Registration failed";
+            setError(errorMsg);
+        }
 
-        } finally {
+
+        finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 mt-12">
-            <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden">
+        <div className="min-h-screen bg-gray-100 px-4 flex justify-center items-start pt-36 pb-10">
+            <div className="w-full max-w-lg bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden">
                 {/* Decorative gradient shape */}
                 <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
 
@@ -98,6 +100,63 @@ export default function Register() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             required
                         />
+                    </div>
+
+                    {/* ✅ Fixed Exam Categories */}
+                    <div className="flex flex-col">
+                        <label className="mb-2 font-medium text-gray-700">
+                            Preferred Exam Categories
+                        </label>
+
+                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                            {[
+                                { label: "Medical", value: "medical" },
+                                { label: "Engineering", value: "engineering" },
+                                { label: "Teaching", value: "teaching" },
+                                { label: "Govt Exams", value: "govt_exams" },
+                                { label: "Banking", value: "banking" },
+                                { label: "Defence", value: "defence" },
+                                { label: "State Exams", value: "state_exams" },
+                            ].map((category) => {
+                                const selected = form.preferred_exam_categories.includes(category.value);
+
+                                return (
+                                    <button
+                                        type="button"
+                                        key={category.value}
+                                        onClick={() => {
+                                            if (selected) {
+                                                setForm({
+                                                    ...form,
+                                                    preferred_exam_categories:
+                                                        form.preferred_exam_categories.filter(
+                                                            (c) => c !== category.value
+                                                        ),
+                                                });
+                                            } else {
+                                                setForm({
+                                                    ...form,
+                                                    preferred_exam_categories: [
+                                                        ...form.preferred_exam_categories,
+                                                        category.value,
+                                                    ],
+                                                });
+                                            }
+                                        }}
+                                        className={`px-4 py-2 rounded-full border flex-shrink-0 transition ${selected
+                                            ? "bg-blue-600 text-white border-blue-600"
+                                            : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                                            }`}
+                                    >
+                                        {category.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <small className="text-gray-500 mt-2">
+                            Tap to select one or more categories
+                        </small>
                     </div>
 
                     <button
