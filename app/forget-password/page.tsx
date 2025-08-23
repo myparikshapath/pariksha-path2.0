@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import api from "@/utils/api";
+import { AxiosError } from "axios";
+
+
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
@@ -11,9 +14,11 @@ export default function ForgotPassword() {
         try {
             const res = await api.post("/auth/forgot-password", { email });
             setMessage(res.data.message);
-        } catch (err: any) {
-            setMessage(err.response?.data?.detail || "Failed to send reset link");
+        } catch (err) {
+            const axiosError = err as AxiosError<{ detail?: string }>;
+            setMessage(axiosError.response?.data?.detail || "Failed to send reset link");
         }
+
     };
 
     return (

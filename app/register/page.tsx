@@ -3,6 +3,8 @@ import { useState } from "react";
 import api from "@/utils/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AxiosError } from "axios";
+
 
 export default function Register() {
     const router = useRouter();
@@ -26,11 +28,13 @@ export default function Register() {
         setError("");
 
         try {
-            const res = await api.post("/register", form);
+            await api.post("/register", form);
             alert("Registered successfully! Please verify your email.");
             router.push("/login");
-        } catch (err: any) {
-            setError(err.response?.data?.detail || "Registration failed");
+        } catch (err) {
+            const axiosError = err as AxiosError<{ detail?: string }>;
+            setError(axiosError.response?.data?.detail || "Registration failed");
+
         } finally {
             setLoading(false);
         }

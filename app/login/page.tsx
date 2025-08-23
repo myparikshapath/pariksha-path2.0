@@ -3,6 +3,7 @@ import { useState } from "react";
 import api from "@/utils/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AxiosError } from "axios";
 
 export default function Login() {
     const router = useRouter();
@@ -23,9 +24,10 @@ export default function Login() {
             const res = await api.post("/auth/login", form);
             localStorage.setItem("access_token", res.data.tokens.access_token);
             localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
-            router.push("/dashboard"); // redirect to dashboard
-        } catch (err: any) {
-            setError(err.response?.data?.detail || "Login failed");
+            router.push("/dashboard");
+        } catch (err) {
+            const axiosError = err as AxiosError<{ detail?: string }>;
+            setError(axiosError.response?.data?.detail || "Login failed");
         } finally {
             setLoading(false);
         }
