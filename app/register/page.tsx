@@ -30,13 +30,10 @@ export default function Register() {
             await api.post("/auth/register", form);
             alert("Registered successfully! Please verify your email.");
             router.push("/login");
-        } catch (err: any) {
-            // FastAPI sends error as { detail: "...error text..." }
-            const errorMsg = err.response?.data?.detail || "Registration failed";
-            setError(errorMsg);
+        } catch (err) {
+            const axiosError = err as AxiosError<{ detail?: string }>;
+            setError(axiosError.response?.data?.detail || "Login failed");
         }
-
-
         finally {
             setLoading(false);
         }
