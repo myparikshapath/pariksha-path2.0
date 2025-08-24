@@ -47,8 +47,8 @@ export default function ArticlesPage() {
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        className={`flex-shrink-0 px-5 py-2 rounded-full font-medium transition-all ${currentCategory === cat
-                            ? "bg-blue-600 text-white shadow-md"
+                        className={`flex-shrink-0 px-5 py-2 rounded-full hover:cursor-pointer font-medium transition-all ${currentCategory === cat
+                            ? "bg-[#0000D3] text-white shadow-md"
                             : "bg-gray-200 hover:bg-blue-100"
                             }`}
                         onClick={() => setCurrentCategory(cat)}

@@ -94,7 +94,7 @@ export default function Navbar() {
                             {/* Mega Dropdown */}
                             {link.dropdown && (
                                 <div className="absolute top-full left-0 hidden group-hover:block bg-white shadow-xl rounded-md mt-2 p-6 min-w-[700px] z-50 border border-gray-200">
-                                    <div className="grid grid-cols-2 divide-x divide-gray-200 gap-6">
+                                    <div className="grid grid-cols-2 divide-x divide-gray-400 gap-12">
                                         {link.dropdown.map((group, idx) => (
                                             <div key={idx} className="px-6">
                                                 <h4 className="font-bold text-[#002856] mb-3 text-lg">
