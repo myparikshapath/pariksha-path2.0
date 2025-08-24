@@ -155,16 +155,17 @@ export default function Navbar() {
                                             {dropdownOpen[link.name] ? <Minus size={18} /> : <Plus size={18} />}
                                         </div>
 
-                                        <AnimatePresence>
+                                        <AnimatePresence initial={false}>
                                             {dropdownOpen[link.name] && (
                                                 <motion.div
                                                     initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    animate={{ height: "fit-content", opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
-                                                    className="pl-3 mt-2 space-y-3 border-l-2 border-blue-600 overflow-hidden"
+                                                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                                                    className="pl-3 mt-2 overflow-hidden border-l-2 border-blue-600"
                                                 >
                                                     {link.dropdown.map((group, idx) => (
-                                                        <div key={idx}>
+                                                        <div key={idx} className="mb-3">
                                                             <h4 className="font-bold text-[#002856] text-sm uppercase tracking-wide">
                                                                 {group.category}
                                                             </h4>
@@ -185,6 +186,7 @@ export default function Navbar() {
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
+
                                     </div>
                                 ) : (
                                     <Link
