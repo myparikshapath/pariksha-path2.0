@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Plus, Minus } from "lucide-react";
@@ -20,6 +20,33 @@ const navLinks = [
     { name: "Blog", href: "/blog" },
     { name: "Contact", href: "/contact" },
 ];
+
+function SmoothDropdown({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [height, setHeight] = useState(0);
+
+    useEffect(() => {
+        if (ref.current) {
+            setHeight(ref.current.scrollHeight);
+        }
+    }, [children, isOpen]);
+
+    return (
+        <AnimatePresence initial={false}>
+            {isOpen && (
+                <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height, opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                >
+                    <div ref={ref}>{children}</div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+}
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -155,37 +182,29 @@ export default function Navbar() {
                                             {dropdownOpen[link.name] ? <Minus size={18} /> : <Plus size={18} />}
                                         </div>
 
-                                        <AnimatePresence initial={false}>
-                                            {dropdownOpen[link.name] && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: "fit-content", opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    transition={{ duration: 0.35, ease: "easeInOut" }}
-                                                    className="pl-3 mt-2 overflow-hidden border-l-2 border-blue-600"
-                                                >
-                                                    {link.dropdown.map((group, idx) => (
-                                                        <div key={idx} className="mb-3">
-                                                            <h4 className="font-bold text-[#002856] text-sm uppercase tracking-wide">
-                                                                {group.category}
-                                                            </h4>
-                                                            <ul className="mt-1 space-y-1">
-                                                                {group.items.map((item, idx) => (
-                                                                    <li key={idx}>
-                                                                        <Link
-                                                                            href={`/${item.toLowerCase().replace(/\s/g, "-")}`}
-                                                                            className="block text-gray-600 hover:text-[#0000D3] transition-colors py-1"
-                                                                        >
-                                                                            {item}
-                                                                        </Link>
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    ))}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                        <SmoothDropdown isOpen={dropdownOpen[link.name]}>
+                                            {link.dropdown.map((group, idx) => (
+                                                <div key={idx} className="pl-3 mt-2 space-y-2 border-l-2 border-blue-600">
+                                                    <h4 className="font-bold text-[#002856] text-sm uppercase tracking-wide">
+                                                        {group.category}
+                                                    </h4>
+                                                    <ul className="mt-1 space-y-1">
+                                                        {group.items.map((item, idx) => (
+                                                            <li key={idx}>
+                                                                <Link
+                                                                    href={`/${item.toLowerCase().replace(/\s/g, "-")}`}
+                                                                    className="block text-gray-600 hover:text-[#0000D3] py-1 transition-colors"
+                                                                >
+                                                                    {item}
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                        </SmoothDropdown>
+
+
 
                                     </div>
                                 ) : (
