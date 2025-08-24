@@ -9,7 +9,7 @@ export default function Footer() {
 
     return (
         <footer className="w-full bg-gray-900 text-gray-200 pt-16 pb-8">
-            <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-y-12 md:gap-y-0 md:gap-x-12 h-auto md:h-[50vh]">
+            <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-y-12 md:gap-y-0 md:gap-x-60 h-auto md:h-[50vh]">
 
                 {/* About Section */}
                 <div className="md:flex-1">
@@ -19,11 +19,11 @@ export default function Footer() {
                     </p>
                 </div>
 
-                {/* Quick Links */}
+                {/* Quick Links
                 <div className="md:flex-1">
                     <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
                     <ul className="space-y-2">
-                        {["Home", "About", "Courses", "Mock Tests", "Contact"].map((link) => (
+                        {["Home", "About", "Courses", "Mock", "Contact"].map((link) => (
                             <li key={link}>
                                 <Link href={`/${link.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-blue-500 transition-colors block">
                                     {link}
@@ -31,7 +31,7 @@ export default function Footer() {
                             </li>
                         ))}
                     </ul>
-                </div>
+                </div> */}
 
                 {/* Popular Courses */}
                 <div className="md:flex-1">
