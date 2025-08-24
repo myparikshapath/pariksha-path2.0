@@ -25,7 +25,7 @@ export default function ContactPage() {
                 <div className="space-y-6">
                     <div className="w-full h-80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7004.505951216757!2d77.30098639113308!3d28.622179270460087!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce4b7aefba75d%3A0xc69fcbb19f87ffbf!2sVinod%20Nagar%20East%2C%20Delhi%2C%20110091!5e0!3m2!1sen!2sin!4v1755949033869!5m2!1sen!2sin"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28017.30822899254!2d77.1966518537286!3d28.624860613313185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce2b43a255341%3A0x2b687f3210cdd91d!2sNew%20Delhi%2C%20Delhi%20110001!5e0!3m2!1sen!2sin!4v1756055434163!5m2!1sen!2sin"
                             width="100%"
                             height="100%"
                             allowFullScreen
