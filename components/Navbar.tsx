@@ -155,7 +155,7 @@ export default function Navbar() {
 
                                                             {group.items.map((sub, si) => (
                                                                 <section key={si}>
-                                                                    <h4 className="text-xl font-bold text-gray-800 mb-4">
+                                                                    <h4 className="text-xl font-bold text-[#002856] mb-4">
                                                                         {sub.subCategory}
                                                                     </h4>
 
@@ -181,7 +181,7 @@ export default function Navbar() {
                                                                             {(sub.exams as ExamStateGroup[]).map(
                                                                                 (subState, sti) => (
                                                                                     <div key={sti}>
-                                                                                        <div className="text-lg font-semibold text-gray-700 mb-3">
+                                                                                        <div className="text-lg font-bold text-black mb-3">
                                                                                             {subState.state}
                                                                                         </div>
                                                                                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
