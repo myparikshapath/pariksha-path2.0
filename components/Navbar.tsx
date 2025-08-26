@@ -1,166 +1,266 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Plus, Minus } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext"; // ✅ use context
+import { useAuth } from "@/context/AuthContext";
+import {
+    Accordion,
+    AccordionItem,
+    AccordionTrigger,
+    AccordionContent,
+} from "@/components/ui/accordion";
 
-const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    {
-        name: "Courses / Programs",
-        dropdown: [
-            { category: "Defence", items: ["NDA", "CDS", "Airforce X/Y", "Navy", "Agniveer"] },
-            { category: "State Exams", items: ["HSSC", "HCS", "Patwari", "Police", "Teachers"] },
-        ],
-    },
-    { name: "Mock", href: "/mock" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contact", href: "/contact" },
-];
+import examData from "@/data/exams.json";
 
-function SmoothDropdown({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) {
-    const ref = useRef<HTMLDivElement>(null);
-    const [height, setHeight] = useState(0);
-
-    useEffect(() => {
-        if (ref.current) {
-            setHeight(ref.current.scrollHeight);
-        }
-    }, [children, isOpen]);
-
-    return (
-        <AnimatePresence initial={false}>
-            {isOpen && (
-                <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height, opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.35, ease: "easeInOut" }}
-                    className="overflow-hidden"
-                >
-                    <div ref={ref}>{children}</div>
-                </motion.div>
-            )}
-        </AnimatePresence>
-    );
+// ---------- Types ----------
+interface ExamStateGroup {
+    state: string;
+    exams: string[];
 }
+
+interface ExamSubGroup {
+    subCategory?: string;
+    state?: string;
+    exams: string[] | ExamStateGroup[];
+}
+
+interface DropdownGroup {
+    category: string;
+    items: ExamSubGroup[];
+}
+
+// ---------- Helpers ----------
+const slugify = (val: string): string =>
+    val
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, "");
 
 export default function Navbar() {
     const pathname = usePathname();
-    const { isLoggedIn, logout } = useAuth(); // ✅ comes from context
+    const { isLoggedIn, logout } = useAuth();
 
     const [menuOpen, setMenuOpen] = useState(false);
-    const [dropdownOpen, setDropdownOpen] = useState<Record<string, boolean>>({});
+    const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-    useEffect(() => {
-        setMenuOpen(false);
-    }, [pathname]);
+    useEffect(() => setMenuOpen(false), [pathname]);
 
     const isActive = (href: string) => pathname === href;
 
-    const toggleDropdown = (name: string) => {
-        setDropdownOpen((prev) => ({ ...prev, [name]: !prev[name] }));
-    };
+    const navLinks = [
+        { name: "Home", href: "/" },
+        { name: "About", href: "/about" },
+        {
+            name: "Exams",
+            dropdown: Object.entries(examData).map(([category, sub]) => ({
+                category,
+                items: Object.entries(sub).map(([subCat, exams]) => {
+                    if (Array.isArray(exams)) return { subCategory: subCat, exams };
+                    return {
+                        subCategory: subCat,
+                        exams: Object.entries(exams).map(([state, examsArr]) => ({
+                            state,
+                            exams: examsArr as string[],
+                        })),
+                    };
+                }),
+            })),
+        },
+        { name: "Mock", href: "/mock" },
+        { name: "Blog", href: "/blog" },
+        { name: "Contact", href: "/contact" },
+    ];
 
     return (
         <nav className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md shadow-md z-50">
-            <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-8">
+            <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
                 {/* Logo */}
-                <Link href="/" className="text-3xl font-extrabold text-[#002856] tracking-tight">
+                <Link
+                    href="/"
+                    className="text-3xl font-extrabold text-[#002856] tracking-tight"
+                >
                     Pariksha Path
                 </Link>
 
-                {/* Desktop Menu */}
-                <ul className="hidden lg:flex flex-1 justify-center items-center space-x-6 font-semibold">
+                {/* ---------- DESKTOP MENU ---------- */}
+                <ul className="hidden lg:flex flex-1 justify-center items-start space-x-6 font-semibold">
                     {navLinks.map((link, idx) => (
-                        <li key={idx} className="relative group">
+                        <li
+                            key={idx}
+                            className="relative group"
+                            onMouseEnter={() => {
+                                setHoveredDropdown(link.name);
+                                if (link.dropdown)
+                                    setActiveCategory(link.dropdown[0]?.category || null);
+                            }}
+                            onMouseLeave={() => setHoveredDropdown(null)}
+                        >
                             {link.dropdown ? (
-                                <div className="cursor-pointer flex items-center space-x-1 hover:text-blue-700 transition-colors">
-                                    <span>{link.name}</span>
-                                </div>
+                                <button
+                                    type="button"
+                                    className="cursor-pointer flex items-center space-x-1 hover:text-blue-700 transition-colors text-md font-semibold"
+                                >
+                                    {link.name}
+                                </button>
                             ) : (
                                 <Link
                                     href={link.href!}
                                     className={`hover:text-[#0000D3] transition-colors ${isActive(link.href!) ? "text-[#0000D3]" : ""
-                                        }`}
+                                        } text-[16px]`}
                                 >
                                     {link.name}
                                 </Link>
                             )}
 
-                            {/* Mega Dropdown */}
+
+                            {/* --- DESKTOP MEGA DROPDOWN --- */}
                             {link.dropdown && (
-                                <div className="absolute top-full left-0 hidden group-hover:block bg-white shadow-xl rounded-md mt-2 p-6 min-w-[700px] z-50 border border-gray-200">
-                                    <div className="grid grid-cols-2 divide-x divide-gray-400 gap-12">
-                                        {link.dropdown.map((group, idx) => (
-                                            <div key={idx} className="px-6">
-                                                <h4 className="font-bold text-[#002856] mb-3 text-lg">
-                                                    {group.category}
-                                                </h4>
-                                                <ul className="space-y-2">
-                                                    {group.items.map((item, idx) => (
-                                                        <li key={idx}>
-                                                            <Link
-                                                                href={`/${item.toLowerCase().replace(/\s/g, "-")}`}
-                                                                className="text-gray-600 hover:text-[#0000D3] block transition-colors"
-                                                            >
-                                                                {item}
-                                                            </Link>
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                <AnimatePresence>
+                                    {hoveredDropdown === link.name && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.25 }}
+                                            className="absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm  mt-4 w-[95vw] max-w-[1600px] h-[85vh] z-50 border border-gray-200 flex"
+                                        >
+                                            {/* LEFT panel - categories */}
+                                            <div className="w-[28%] max-w-[360px] border-r border-gray-200 overflow-y-auto">
+                                                {link.dropdown.map((group: DropdownGroup, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onMouseEnter={() => setActiveCategory(group.category)}
+                                                        className={`w-full text-left px-5 py-3 text-lg font-bold ${activeCategory === group.category
+                                                            ? "bg-blue-50 text-blue-700"
+                                                            : "text-[#002856] hover:bg-blue-50"
+                                                            }`}
+                                                    >
+                                                        {group.category}
+                                                    </button>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
+
+                                            {/* RIGHT panel - exams */}
+                                            <div className="flex-1 p-7 overflow-y-auto">
+                                                {link.dropdown
+                                                    .filter((g) => g.category === activeCategory)
+                                                    .map((group, gi) => (
+                                                        <div key={gi} className="space-y-8">
+                                                            <h3 className="text-2xl font-extrabold text-[#002856]">
+                                                                {group.category}
+                                                            </h3>
+
+                                                            {group.items.map((sub, si) => (
+                                                                <section key={si}>
+                                                                    <h4 className="text-xl font-bold text-gray-800 mb-4">
+                                                                        {sub.subCategory}
+                                                                    </h4>
+
+                                                                    {/* direct exams */}
+                                                                    {Array.isArray(sub.exams) &&
+                                                                        typeof sub.exams[0] === "string" ? (
+                                                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                                                                            {sub.exams.map((ex, i) => (
+                                                                                <Link
+                                                                                    key={i}
+                                                                                    href={`/${slugify(ex)}`}
+                                                                                    className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 
+             hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 
+             shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg"
+                                                                                >
+                                                                                    {ex}
+                                                                                </Link>
+                                                                            ))}
+                                                                        </div>
+                                                                    ) : (
+                                                                        // state-level exams
+                                                                        <div className="space-y-6">
+                                                                            {(sub.exams as ExamStateGroup[]).map(
+                                                                                (subState, sti) => (
+                                                                                    <div key={sti}>
+                                                                                        <div className="text-lg font-semibold text-gray-700 mb-3">
+                                                                                            {subState.state}
+                                                                                        </div>
+                                                                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                                                                                            {subState.exams.map((ex, ei) => (
+                                                                                                <Link
+                                                                                                    key={ei}
+                                                                                                    href={`/${slugify(ex)}`}
+                                                                                                    className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 
+             hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 
+             shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg"
+                                                                                                >
+                                                                                                    {ex}
+                                                                                                </Link>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </section>
+                                                            ))}
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             )}
                         </li>
                     ))}
                 </ul>
 
-                {/* Desktop Right Section (Dashboard + Login/Logout) */}
+                {/* ---------- DESKTOP RIGHT SECTION ---------- */}
                 <div className="hidden lg:flex items-center space-x-4">
                     {isLoggedIn && (
                         <Link
                             href="/student/dashboard"
-                            className="bg-gray-200 text-[#002856] px-6 py-2 rounded-xs font-bold text-md shadow-sm hover:bg-gray-300 transition-colors"
+                            className="bg-gray-200 text-[#002856] px-6 py-2 rounded font-bold shadow-sm hover:bg-gray-300 transition"
                         >
                             Dashboard
                         </Link>
                     )}
-
                     {isLoggedIn ? (
-                        <Link
+                        <button
                             onClick={logout}
-                            href="/"
-                            className="bg-red-600 text-white px-8 py-2 rounded-xs font-bold text-md shadow-md hover:bg-red-700 transition-colors"
+                            className="bg-red-600 text-white px-8 py-2 rounded font-bold shadow-md hover:bg-red-700 transition"
                         >
                             Logout
-                        </Link>
+                        </button>
                     ) : (
                         <Link
                             href="/login"
-                            className="bg-[#0000D3] text-white px-8 py-2 rounded-xs font-bold text-md shadow-md hover:bg-[#030397] transition-colors"
+                            className="bg-[#0000D3] text-white px-8 py-2 rounded font-bold shadow-md hover:bg-[#030397] transition"
                         >
                             Login
                         </Link>
                     )}
                 </div>
 
-                {/* Mobile Menu Toggle */}
+                {/* ---------- MOBILE TOGGLE ---------- */}
                 <div className="lg:hidden">
                     {menuOpen ? (
-                        <X size={28} className="cursor-pointer" onClick={() => setMenuOpen(false)} />
+                        <X
+                            size={28}
+                            className="cursor-pointer"
+                            onClick={() => setMenuOpen(false)}
+                        />
                     ) : (
-                        <Menu size={28} className="cursor-pointer" onClick={() => setMenuOpen(true)} />
+                        <Menu
+                            size={28}
+                            className="cursor-pointer"
+                            onClick={() => setMenuOpen(true)}
+                        />
                     )}
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* ---------- MOBILE MENU ---------- */}
             <AnimatePresence>
                 {menuOpen && (
                     <motion.div
@@ -168,79 +268,144 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.3 }}
-                        className="lg:hidden bg-white/95 backdrop-blur-md shadow-lg px-4 py-6 space-y-4"
+                        className="lg:hidden bg-white/95 backdrop-blur-md shadow-lg px-4 py-6 space-y-4 max-h-[80vh] overflow-y-auto"
                     >
-                        {navLinks.map((link, idx) => (
-                            <div key={idx}>
-                                {link.dropdown ? (
-                                    <div>
-                                        <div
-                                            className="flex justify-between items-center py-2 cursor-pointer text-gray-900 font-semibold hover:text-[#0000D3] transition-colors"
-                                            onClick={() => toggleDropdown(link.name)}
-                                        >
-                                            <span>{link.name}</span>
-                                            {dropdownOpen[link.name] ? <Minus size={18} /> : <Plus size={18} />}
-                                        </div>
-
-                                        <SmoothDropdown isOpen={dropdownOpen[link.name]}>
-                                            {link.dropdown.map((group, idx) => (
-                                                <div key={idx} className="pl-3 mt-2 space-y-2 border-l-2 border-blue-600">
-                                                    <h4 className="font-bold text-[#002856] text-sm uppercase tracking-wide">
-                                                        {group.category}
-                                                    </h4>
-                                                    <ul className="mt-1 space-y-1">
-                                                        {group.items.map((item, idx) => (
-                                                            <li key={idx}>
-                                                                <Link
-                                                                    href={`/${item.toLowerCase().replace(/\s/g, "-")}`}
-                                                                    className="block text-gray-600 hover:text-[#0000D3] py-1 transition-colors"
-                                                                >
-                                                                    {item}
-                                                                </Link>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ))}
-                                        </SmoothDropdown>
-
-
-
-                                    </div>
-                                ) : (
+                        <Accordion type="multiple" className="w-full space-y-2">
+                            {navLinks.map((link, idx) =>
+                                !link.dropdown ? (
                                     <Link
+                                        key={idx}
                                         href={link.href!}
-                                        className={`block py-2 font-semibold text-gray-900 hover:text-[#0000D3] transition-colors ${isActive(link.href!) ? "text-[#0000D3]" : ""
+                                        className={`block py-2 font-semibold hover:text-[#0000D3] ${isActive(link.href!) ? "text-[#0000D3]" : "text-gray-900"
                                             }`}
                                     >
                                         {link.name}
                                     </Link>
-                                )}
-                            </div>
-                        ))}
+                                ) : (
+                                    <AccordionItem
+                                        key={idx}
+                                        value={`item-${idx}`}
+                                        className="rounded-xl shadow-sm border border-gray-200"
+                                    >
+                                        <AccordionTrigger className="text-lg font-bold px-4 py-3 hover:bg-blue-50 data-[state=open]:bg-blue-100">
+                                            {link.name}
+                                        </AccordionTrigger>
+                                        <AccordionContent className="px-4 pb-3 space-y-2">
+                                            {link.dropdown.map((group, gIdx) => (
+                                                <Accordion
+                                                    key={gIdx}
+                                                    type="multiple"
+                                                    className="space-y-2"
+                                                >
+                                                    <AccordionItem
+                                                        value={`cat-${gIdx}`}
+                                                        className="rounded-lg border border-gray-200"
+                                                    >
+                                                        <AccordionTrigger className="text-base font-semibold px-3 py-2 hover:bg-gray-50 data-[state=open]:bg-blue-50">
+                                                            {group.category}
+                                                        </AccordionTrigger>
+                                                        <AccordionContent className="px-3 pb-2">
+                                                            {group.items.map((sub, sIdx) => {
+                                                                const subName = sub.subCategory;
+                                                                return (
+                                                                    <Accordion
+                                                                        key={sIdx}
+                                                                        type="multiple"
+                                                                        className="space-y-1"
+                                                                    >
+                                                                        <AccordionItem
+                                                                            value={`sub-${sIdx}`}
+                                                                            className="rounded-md border border-gray-100"
+                                                                        >
+                                                                            <AccordionTrigger className="text-sm font-medium px-3 py-2 hover:bg-gray-50 data-[state=open]:bg-blue-50">
+                                                                                {subName}
+                                                                            </AccordionTrigger>
+                                                                            <AccordionContent className="pl-4 pb-2 space-y-1">
+                                                                                {/* exams */}
+                                                                                {Array.isArray(sub.exams) &&
+                                                                                    typeof sub.exams[0] === "string" ? (
+                                                                                    <ul className="space-y-1">
+                                                                                        {sub.exams.map((exam, eIdx) => (
+                                                                                            <li key={eIdx}>
+                                                                                                <Link
+                                                                                                    href={`/${slugify(exam)}`}
+                                                                                                    className="block px-2 py-1 rounded-md text-gray-600 hover:bg-blue-50 hover:text-[#0000D3]"
+                                                                                                >
+                                                                                                    {exam}
+                                                                                                </Link>
+                                                                                            </li>
+                                                                                        ))}
+                                                                                    </ul>
+                                                                                ) : (
+                                                                                    <Accordion type="multiple">
+                                                                                        {(sub.exams as ExamStateGroup[]).map(
+                                                                                            (subState, stIdx) => (
+                                                                                                <AccordionItem
+                                                                                                    key={stIdx}
+                                                                                                    value={`state-${stIdx}`}
+                                                                                                    className="rounded-md border border-gray-100"
+                                                                                                >
+                                                                                                    <AccordionTrigger className="text-sm font-medium px-2 py-1 hover:bg-gray-50 data-[state=open]:bg-blue-50">
+                                                                                                        {subState.state}
+                                                                                                    </AccordionTrigger>
+                                                                                                    <AccordionContent className="pl-3 pb-2">
+                                                                                                        <ul className="space-y-1">
+                                                                                                            {subState.exams.map(
+                                                                                                                (ex, i) => (
+                                                                                                                    <li key={i}>
+                                                                                                                        <Link
+                                                                                                                            href={`/${slugify(
+                                                                                                                                ex
+                                                                                                                            )}`}
+                                                                                                                            className="block px-2 py-1 rounded-md text-gray-600 hover:bg-blue-50 hover:text-[#0000D3]"
+                                                                                                                        >
+                                                                                                                            {ex}
+                                                                                                                        </Link>
+                                                                                                                    </li>
+                                                                                                                )
+                                                                                                            )}
+                                                                                                        </ul>
+                                                                                                    </AccordionContent>
+                                                                                                </AccordionItem>
+                                                                                            )
+                                                                                        )}
+                                                                                    </Accordion>
+                                                                                )}
+                                                                            </AccordionContent>
+                                                                        </AccordionItem>
+                                                                    </Accordion>
+                                                                );
+                                                            })}
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+                                                </Accordion>
+                                            ))}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                )
+                            )}
+                        </Accordion>
 
-                        {/* Mobile Dashboard + Login/Logout */}
+                        {/* mobile buttons */}
                         {isLoggedIn && (
                             <Link
                                 href="/student/dashboard"
-                                className="block w-full bg-gray-200 text-[#002856] text-center py-2 rounded-sm font-semibold hover:bg-gray-300 transition-colors"
+                                className="block w-full bg-gray-200 text-[#002856] text-center py-2 rounded font-semibold hover:bg-gray-300"
                             >
                                 Dashboard
                             </Link>
                         )}
-
                         {isLoggedIn ? (
-                            <Link
+                            <button
                                 onClick={logout}
-                                href="/"
-                                className="block w-full bg-red-600 text-white text-center py-2 rounded-sm font-semibold hover:bg-red-700 transition-colors"
+                                className="block w-full bg-red-600 text-white text-center py-2 rounded font-semibold hover:bg-red-700"
                             >
                                 Logout
-                            </Link>
+                            </button>
                         ) : (
                             <Link
                                 href="/login"
-                                className="block w-full bg-[#0000D3] text-white text-center py-2 rounded-sm font-semibold hover:bg-blue-800 transition-colors"
+                                className="block w-full bg-[#0000D3] text-white text-center py-2 rounded font-semibold hover:bg-blue-800"
                             >
                                 Login
                             </Link>

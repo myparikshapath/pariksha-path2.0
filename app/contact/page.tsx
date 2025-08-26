@@ -17,7 +17,7 @@ export default function ContactPage() {
 
     return (
         <main className="max-w-7xl mx-auto px-6 py-16 space-y-16">
-            <h1 className="text-4xl font-bold text-center text-gray-800 mb-12">Contact Us</h1>
+            <h1 className="text-4xl font-bold text-center text-gray-800 mt-12">Contact Us</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
