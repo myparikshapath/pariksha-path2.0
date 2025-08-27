@@ -75,7 +75,7 @@ export default function VerifyOtp() {
                 otpType === "login"
                     ? "/auth/resend-login-otp" // you need to add this backend route
                     : "/auth/resend-verification-email";
-            const res = await api.post("/auth/resend-verification-email", { email });
+            const res = await api.post(endpoint, { email });
             setMessage(res.data.message || "OTP resent successfully");
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
@@ -145,7 +145,7 @@ export default function VerifyOtp() {
 
                 {/* Resend OTP */}
                 <p className="mt-6 text-center text-gray-600 relative z-10 text-sm">
-                    Didn't get the code?{" "}
+                    Didn&apos;t get the code?{" "}
                     <button
                         type="button"
                         onClick={handleResend}

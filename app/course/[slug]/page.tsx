@@ -1,5 +1,5 @@
 // app/courses/[slug]/page.tsx
-import { notFound } from "next/navigation";
+// import { notFound } from "next/navigation";
 import Link from "next/link";
 import slugify from "slugify";
 
@@ -9,10 +9,10 @@ type ExamStateGroup = {
   exams: string[];
 };
 
-type Course = {
-  name: string;
-  exams: string[] | ExamStateGroup[];
-};
+// type Course = {
+//   name: string;
+//   exams: string[] | ExamStateGroup[];
+// };
 
 // ---------- Mock Data (replace with your API/DB) ----------
 const courses = {
@@ -30,12 +30,12 @@ const courses = {
 // }
 
 // ---------- Page Component (Server Component) ----------
-interface PageProps {
-  params: { slug: string };
-}
+// interface PageProps {
+//   params: { slug: string };
+// }
 
-export default async function CoursePage({ params }: PageProps) {
-  const { slug } = params; // ✅ no await needed
+export default async function CoursePage() {
+  // const { slug } = params; // ✅ no await needed
   // const course = await getCourse(slug);
 
   // if (!course) return notFound();
