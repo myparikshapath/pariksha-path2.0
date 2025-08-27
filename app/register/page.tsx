@@ -27,17 +27,25 @@ export default function Register() {
         setError("");
 
         try {
-            await api.post("/auth/register", form);
-            alert("Registered successfully! Please verify your email.");
-            router.push("/login");
+            const res = await api.post("/auth/register", form);
+            const email = res.data.user?.email;
+
+            alert("Registered successfully! Verify your email with the OTP sent.");
+
+            // Redirect to verify-otp page with the user's email
+            if (email) {
+                router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=email`);
+            } else {
+                router.push("/login");
+            }
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
-            setError(axiosError.response?.data?.detail || "Login failed");
-        }
-        finally {
+            setError(axiosError.response?.data?.detail || "Registration failed");
+        } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gray-100 px-4 flex justify-center items-start pt-36 pb-10">
@@ -56,6 +64,7 @@ export default function Register() {
                             value={form.name}
                             onChange={handleChange}
                             placeholder="Your full name"
+                            autoComplete="name"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
@@ -69,6 +78,7 @@ export default function Register() {
                             value={form.email}
                             onChange={handleChange}
                             placeholder="you@example.com"
+                            autoComplete="email"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
@@ -81,6 +91,7 @@ export default function Register() {
                             value={form.phone}
                             onChange={handleChange}
                             placeholder="+91 9876543210"
+                            autoComplete="tel"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />
@@ -94,6 +105,7 @@ export default function Register() {
                             value={form.password}
                             onChange={handleChange}
                             placeholder="Create a password"
+                            autoComplete="new-password"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
                             required
                         />

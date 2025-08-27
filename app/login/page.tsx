@@ -24,9 +24,16 @@ export default function Login() {
 
         try {
             const res = await api.post("/auth/login", form);
-            login(res.data.tokens.access_token);
-            localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
-            router.push("/student/dashboard");
+
+            if (res.data.requires_verification) {
+                // Redirect to OTP verification page
+                router.push(`/verify-otp?email=${form.email}&type=login`);
+            } else {
+                // Normal login flow
+                login(res.data.tokens.access_token);
+                localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
+                router.push(res.data.dashboard_url || "/student/dashboard");
+            }
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
             setError(axiosError.response?.data?.detail || "Login failed");
@@ -34,6 +41,7 @@ export default function Login() {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -53,9 +61,11 @@ export default function Login() {
                             value={form.email}
                             onChange={handleChange}
                             placeholder="your@email.com"
+                            autoComplete="username"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             required
                         />
+
                     </div>
 
                     <div className="flex flex-col">
@@ -66,9 +76,11 @@ export default function Login() {
                             value={form.password}
                             onChange={handleChange}
                             placeholder="Enter your password"
+                            autoComplete="current-password"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             required
                         />
+
                         <Link href="/forgot-password" className="text-sm text-[#0000D3] mt-1 hover:underline self-end">
                             Forgot Password?
                         </Link>
