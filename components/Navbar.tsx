@@ -166,7 +166,7 @@ export default function Navbar() {
                                       {sub.exams.map((ex, i) => (
                                         <Link
                                           key={i}
-                                          href={`/${slugify(ex)}`}
+                                          href={`/course/${slugify(ex)}`}
                                           className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg"
                                         >
                                           {ex}
@@ -186,7 +186,7 @@ export default function Navbar() {
                                               {subState.exams.map((ex, ei) => (
                                                 <Link
                                                   key={ei}
-                                                  href={`/${slugify(ex)}`}
+                                                  href={`/course/${slugify(ex)}`}
                                                   className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg"
                                                 >
                                                   {ex}
@@ -324,7 +324,7 @@ export default function Navbar() {
                                             {sub.exams.map((exam, eIdx) => (
                                               <li key={eIdx}>
                                                 <Link
-                                                  href={`/${slugify(exam)}`}
+                                                  href={`/course/${slugify(exam)}`}
                                                   className="block px-2 py-1 rounded-md text-gray-600 hover:bg-blue-50 hover:text-[#0000D3]"
                                                 >
                                                   {exam}
@@ -350,7 +350,7 @@ export default function Navbar() {
                                                         (ex, i) => (
                                                           <li key={i}>
                                                             <Link
-                                                              href={`/${slugify(
+                                                              href={`/course/${slugify(
                                                                 ex
                                                               )}`}
                                                               className="block px-2 py-1 rounded-md text-gray-600 hover:bg-blue-50 hover:text-[#0000D3]"
