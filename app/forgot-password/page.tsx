@@ -5,11 +5,14 @@ import { AxiosError } from "axios";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
+import { useCursorGlow } from "@/hooks/useCursorGlow"; // 👈 import glow hook
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const { ref, cursorPos } = useCursorGlow(); // 👈 glow hook
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,13 +35,14 @@ export default function ForgotPassword() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"
+                ref={ref} // 👈 attach glow
+                style={{
+                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,211,0.15), transparent 80%)`
+                }}
+                className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden transition-all"
             >
                 {/* Decorative gradient pulse shape */}
-                <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+                <div className="absolute top-0 -right-16 w-48 h-48"></div>
 
                 {/* Header */}
                 <div className="text-center mb-6 relative z-10">

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { KeyRound } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useCursorGlow } from "@/hooks/useCursorGlow"; // 👈 import glow hook
 
 export default function VerifyOtp() {
     const router = useRouter();
@@ -16,25 +17,16 @@ export default function VerifyOtp() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-
     const [otpType, setOtpType] = useState<"login" | "email">("email");
+
+    const { ref, cursorPos } = useCursorGlow(); // 👈 glow hook
 
     useEffect(() => {
         const emailParam = searchParams.get("email");
-        const typeParam = searchParams.get("type"); // "login" or "email"
-        console.log(emailParam, "hahaahah", typeParam);
+        const typeParam = searchParams.get("type");
         if (emailParam) setEmail(emailParam);
-        if (typeParam === "login" || typeParam === "email") setOtpType(typeParam)
-        console.log(typeParam);
+        if (typeParam === "login" || typeParam === "email") setOtpType(typeParam);
     }, [searchParams]);
-
-    // Get email from query params
-    // useEffect(() => {
-    //     const emailParam = searchParams.get("email");
-    //     if (emailParam) {
-    //         setEmail(emailParam);
-    //     }
-    // }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,18 +34,14 @@ export default function VerifyOtp() {
         setMessage("");
 
         try {
-            const endpoint = otpType === 'login' ? "/auth/verify-login" : "/auth/verify-registration";
-
-
+            const endpoint = otpType === "login" ? "/auth/verify-login" : "/auth/verify-registration";
             const res = await api.post(endpoint, { email, otp });
 
             if (res.data.tokens) {
-                // Login OTP flow
                 login(res.data.tokens.access_token);
                 localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
                 router.push("/student/dashboard");
             } else {
-                // Email verification flow
                 setMessage("Email verified successfully! Please login.");
                 router.push("/login");
             }
@@ -67,13 +55,12 @@ export default function VerifyOtp() {
         }
     };
 
-
     const handleResend = async () => {
         try {
             setLoading(true);
             const endpoint =
                 otpType === "login"
-                    ? "/auth/resend-login-otp" // you need to add this backend route
+                    ? "/auth/resend-login-otp"
                     : "/auth/resend-verification-email";
             const res = await api.post(endpoint, { email });
             setMessage(res.data.message || "OTP resent successfully");
@@ -90,13 +77,14 @@ export default function VerifyOtp() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"
+                ref={ref} // 👈 attach glow
+                style={{
+                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,211,0.15), transparent 80%)`
+                }}
+                className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden transition-all"
             >
                 {/* Decorative gradient pulse shape */}
-                <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+                <div className="absolute top-0 -right-16 w-48 h-48 "></div>
 
                 {/* Header */}
                 <div className="text-center mb-6 relative z-10">
@@ -110,7 +98,7 @@ export default function VerifyOtp() {
                 {/* Message */}
                 {message && (
                     <div
-                        className={`mb-4 text-center text-sm font-medium relative z-10 ${message.includes("Failed") || message.includes("failed")
+                        className={`mb-4 text-center text-sm font-medium relative z-10 ${message.toLowerCase().includes("failed")
                             ? "text-red-500"
                             : "text-green-600"
                             }`}

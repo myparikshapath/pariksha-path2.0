@@ -4,9 +4,12 @@ import api from "@/utils/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AxiosError } from "axios";
+import { useCursorGlow } from "@/hooks/useCursorGlow";
 
 export default function Register() {
     const router = useRouter();
+    const { ref, cursorPos } = useCursorGlow();
+
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -32,7 +35,6 @@ export default function Register() {
 
             alert("Registered successfully! Verify your email with the OTP sent.");
 
-            // Redirect to verify-otp page with the user's email
             if (email) {
                 router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=email`);
             } else {
@@ -46,17 +48,26 @@ export default function Register() {
         }
     };
 
-
     return (
         <div className="min-h-screen bg-gray-100 px-4 flex justify-center items-start pt-36 pb-10">
-            <div className="w-full max-w-lg bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden">
-                {/* Decorative gradient shape */}
-                <div className="absolute top-0 -right-16 w-48 h-48 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+            <div
+                ref={ref}
+                className="w-full max-w-lg bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"
+            >
+                {/* Glow effect */}
+                <div
+                    className="absolute inset-0 pointer-events-none transition-all duration-300"
+                    style={{
+                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,255,0.12), transparent 80%)`,
+                    }}
+                />
 
-                <h2 className="text-3xl font-bold mb-6 text-center text-[#002856]">Register</h2>
+                <h2 className="text-3xl font-bold mb-6 text-center text-[#002856]">
+                    Register
+                </h2>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
                     <div className="flex flex-col">
                         <label className="mb-1 font-medium text-gray-700">Full Name</label>
                         <input
@@ -111,12 +122,10 @@ export default function Register() {
                         />
                     </div>
 
-                    {/* ✅ Fixed Exam Categories */}
                     <div className="flex flex-col">
                         <label className="mb-2 font-medium text-gray-700">
                             Preferred Exam Categories
                         </label>
-
                         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                             {[
                                 { label: "Medical", value: "medical" },
@@ -127,7 +136,8 @@ export default function Register() {
                                 { label: "Defence", value: "defence" },
                                 { label: "State Exams", value: "state_exams" },
                             ].map((category) => {
-                                const selected = form.preferred_exam_categories.includes(category.value);
+                                const selected =
+                                    form.preferred_exam_categories.includes(category.value);
 
                                 return (
                                     <button
@@ -162,10 +172,6 @@ export default function Register() {
                                 );
                             })}
                         </div>
-
-                        <small className="text-gray-500 mt-2">
-                            Tap to select one or more categories
-                        </small>
                     </div>
 
                     <button
@@ -177,9 +183,12 @@ export default function Register() {
                     </button>
                 </form>
 
-                <p className="mt-6 text-center text-gray-600">
+                <p className="mt-6 text-center text-gray-600 relative z-10">
                     Already have an account?{" "}
-                    <Link href="/login" className="text-[#0000D3] font-medium hover:underline">
+                    <Link
+                        href="/login"
+                        className="text-[#0000D3] font-medium hover:underline"
+                    >
                         Login
                     </Link>
                 </p>
