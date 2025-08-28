@@ -256,7 +256,7 @@ export default function Home() {
       </section>
 
       {/* APP DOWNLOAD */}
-      <section className="max-w-6xl mx-auto p-8 sm:p-12 mt-16 mb-16 text-center bg-gray-200 rounded-md">
+      {/* <section className="max-w-6xl mx-auto p-8 sm:p-12 mt-16 mb-16 text-center bg-gray-200 rounded-md">
         <h3 className="text-lg sm:text-xl font-bold text-[#002856] mb-4">Download the App</h3>
         <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
           <Link
@@ -274,7 +274,7 @@ export default function Home() {
             <Download className="w-5 h-5" /> App Store
           </Link>
         </div>
-      </section>
+      </section> */}
     </main>
   );
 }

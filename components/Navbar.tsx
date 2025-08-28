@@ -125,7 +125,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.25 }}
-                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[95vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-10` : `ml - 5`}`}
+                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-10` : `ml - 5`}`}
                     >
                       {/* LEFT panel - categories */}
                       <div className="w-[28%] max-w-[360px] border-r border-gray-200 overflow-y-auto">
