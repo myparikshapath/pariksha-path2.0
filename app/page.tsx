@@ -122,6 +122,7 @@ export default function Home() {
       {/* HERO SECTION */}
       <section className="relative w-full bg-gradient-to-r from-[#2E4A3C] via-[#4F7F52] to-[#9BCB77] text-white py-16 sm:py-20 md:py-28">
         <div className="w-full flex flex-col-reverse md:flex-row items-center justify-between gap-10 px-6 sm:px-12 md:px-20 max-w-none">
+
           {/* Text Content */}
           <div className="flex-1 text-center md:text-left">
             <motion.h1
@@ -152,15 +153,17 @@ export default function Home() {
           </div>
 
           {/* Illustration */}
-          <div className="flex-1 flex justify-center md:justify-end">
-            <Image
-              src="/ilust.png"
-              alt="Hero Illustration"
-              className="w-64 sm:w-80 md:w-[30rem] drop-shadow-xl"
-              width={480}
-              height={480}
-              priority
-            />
+          <div className="flex-1 flex justify-center md:justify-end relative">
+            <div className="rounded-full overflow-hidden shadow-2xl border-4 border-white/20 bg-white/10 backdrop-blur-md">
+              <Image
+                src="/illustration.png"
+                alt="Hero Illustration"
+                className="w-64 sm:w-80 md:w-[30rem] object-contain drop-shadow-2xl"
+                width={480}
+                height={480}
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>
