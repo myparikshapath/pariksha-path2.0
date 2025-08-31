@@ -82,15 +82,17 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo */}
         <Link href="/" className="block">
-          <Image
-            src="/webLogo.png"
-            alt="ParikshaPath Logo"
-            className="w-32 sm:w-40 md:w-48 lg:w-56"
-            width={200}
-            height={80}
-            priority
-          />
+          <div className="relative w-40 h-12 sm:w-[200px] sm:h-[50px]">
+            <Image
+              src="/webLogo.png"
+              alt="ParikshaPath Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </Link>
+
 
         {/* ---------- DESKTOP MENU ---------- */}
         <ul className="hidden lg:flex flex-1 justify-center items-start space-x-6 font-bold">
