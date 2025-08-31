@@ -37,13 +37,13 @@ export default function ForgotPassword() {
             <motion.div
                 ref={ref} // 👈 attach glow
                 style={{
-                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,128,0,0.15), transparent 80%)`
+                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,128,0,0.15), transparent 40%)`
                 }}
                 className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden transition-all"
             >
                 {/* Header */}
                 <div className="text-center mb-6 relative z-10">
-                    <Mail className="w-12 h-12 mx-auto text-[#2E4A3C] mb-2" />
+                    <Mail className="w-12 h-12 mx-auto text-yellow-400 mb-2" />
                     <h2 className="text-3xl font-bold text-[#2E4A3C]">Forgot Password</h2>
                     <p className="text-gray-500 mt-1 text-sm">
                         Enter your email to receive a password reset link.

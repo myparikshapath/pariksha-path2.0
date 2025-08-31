@@ -138,7 +138,7 @@ export default function Navbar() {
                       className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-20` : `ml-[-25px]`}`}
                     >
                       {/* LEFT panel - categories */}
-                      <div className="w-[28%] max-w-[360px] border-r border-gray-100 overflow-y-auto bg-gradient-to-b from-green-50 to-white">
+                      <div className="w-[28%] max-w-[360px] border-r border-gray-100 overflow-y-auto bg-gradient-to-b from-green-50 to-green-100">
                         {link.dropdown.map((group: DropdownGroup, i) => (
                           <motion.button
                             key={i}
@@ -271,9 +271,10 @@ export default function Navbar() {
               Logout
             </button>
           ) : (
+            // #869C51
             <Link
               href="/login"
-              className="bg-[#869C51] text-white px-8 py-2 rounded font-bold hover:bg-[#434a34] shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
+              className="bg-yellow-400 text-black px-8 py-2 rounded-lg font-bold hover:bg-yellow-500 shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
             >
               Login
             </Link>
@@ -447,7 +448,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="block w-full bg-[#869C51] text-white text-center py-2 rounded font-semibold hover:bg-[#2E4A3C]"
+                className="block w-full bg-yellow-400 text-black text-center py-2 rounded-lg font-semibold hover:bg-[#2E4A3C]"
               >
                 Login
               </Link>

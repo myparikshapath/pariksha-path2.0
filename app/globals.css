@@ -41,3 +41,9 @@
 /* new colors */
 /* green : #869C51 */
 /* hover-green : #2E4A3C */
+
+::selection {
+	background-color: rgb(83, 161, 83);
+	/* background-color: rgb(226, 226, 76); */
+	color: white;
+}

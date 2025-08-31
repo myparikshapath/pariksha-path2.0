@@ -27,12 +27,12 @@ export default function ContactPage() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h1 className="text-4xl md:text-4xl font-bold text-[#002856]">
+                    <h1 className="text-4xl md:text-4xl font-extrabold text-[#2E4A3C]">
                         Contact Us
                     </h1>
-                    <div className="mt-3 h-1 w-24 mx-auto bg-[#869C51] rounded-full" />
+                    <div className="mt-3 h-1 w-24 mx-auto bg-yellow-400 rounded-full" />
                     <p className="mt-6 text-gray-600 max-w-2xl mx-auto">
-                        Have questions or need support? Get in touch with our team – we’ll be happy to help.
+                        Have questions or need support? Get in touch with our team - we&apos;ll be happy to help.
                     </p>
                 </motion.div>
 

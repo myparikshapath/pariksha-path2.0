@@ -81,7 +81,7 @@ export default function VerifyOtp() {
             >
                 {/* Header */}
                 <div className="text-center mb-6 relative z-10">
-                    <KeyRound className="w-12 h-12 mx-auto text-[#2E4A3C] mb-2" />
+                    <KeyRound className="w-12 h-12 mx-auto text-yellow-400 mb-2" />
                     <h2 className="text-3xl font-bold text-[#2E4A3C]">Verify OTP</h2>
                     <p className="text-gray-500 mt-1 text-sm">
                         Enter the OTP sent to your email{" "}

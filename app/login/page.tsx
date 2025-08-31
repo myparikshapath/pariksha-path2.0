@@ -59,13 +59,14 @@ export default function Login() {
                 <div
                     className="absolute inset-0 pointer-events-none transition-all duration-300"
                     style={{
-                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(50,150,50,0.15), transparent 80%)`,
+                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(50,150,50,0.15), transparent 40%)`,
                     }}
                 />
 
-                <h2 className="text-3xl font-bold mb-6 text-center text-green-800">
+                <h2 className="text-3xl font-bold mb-6 text-center text-[#2E4A3C]">
                     Login
                 </h2>
+                <div className="mt-[-10px] h-1 w-24 mx-auto bg-yellow-400 rounded-full" />
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-5 relative z-10">

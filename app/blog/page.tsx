@@ -31,9 +31,10 @@ export default function ArticlesPage() {
 
     return (
         <main className="pt-32 max-w-7xl mx-auto px-6 space-y-12">
-            <h1 className="text-4xl font-bold mb-6 text-center text-[#2E4A3C]">
+            <h1 className="text-4xl font-extrabold mb-6 text-center text-[#2E4A3C]">
                 Articles
             </h1>
+            <div className="h-1 w-24 mx-auto mt-[-10px] bg-yellow-400 rounded-full" />
             <p className="text-center text-gray-600 max-w-2xl mx-auto">
                 Stay updated with the latest notifications, strategies, and motivational articles.
             </p>
