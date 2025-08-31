@@ -33,21 +33,18 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-white px-4">
             <motion.div
                 ref={ref} // 👈 attach glow
                 style={{
-                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,211,0.15), transparent 80%)`
+                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,128,0,0.15), transparent 80%)`
                 }}
                 className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden transition-all"
             >
-                {/* Decorative gradient pulse shape */}
-                <div className="absolute top-0 -right-16 w-48 h-48"></div>
-
                 {/* Header */}
                 <div className="text-center mb-6 relative z-10">
-                    <Mail className="w-12 h-12 mx-auto text-[#0000D3] mb-2" />
-                    <h2 className="text-3xl font-bold text-[#002856]">Forgot Password</h2>
+                    <Mail className="w-12 h-12 mx-auto text-[#2E4A3C] mb-2" />
+                    <h2 className="text-3xl font-bold text-[#2E4A3C]">Forgot Password</h2>
                     <p className="text-gray-500 mt-1 text-sm">
                         Enter your email to receive a password reset link.
                     </p>
@@ -72,7 +69,7 @@ export default function ForgotPassword() {
                             placeholder="your@email.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition"
                             required
                         />
                     </div>
@@ -80,7 +77,7 @@ export default function ForgotPassword() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`w-full bg-[#0000D3] text-white py-3 rounded-sm shadow-lg font-semibold transition-transform hover:scale-105 hover:bg-[#030397] ${loading && "bg-blue-300 cursor-not-allowed hover:scale-100"
+                        className={`w-full bg-[#2E4A3C] text-white py-3 rounded-md shadow-lg font-semibold transition-transform hover:scale-105 hover:bg-[#1d3328] ${loading && "bg-green-300 cursor-not-allowed hover:scale-100"
                             }`}
                     >
                         {loading ? "Sending..." : "Send Reset Link"}
@@ -92,7 +89,7 @@ export default function ForgotPassword() {
                     Remembered your password?{" "}
                     <Link
                         href="/login"
-                        className="text-[#0000D3] font-medium hover:underline"
+                        className="text-[#2E4A3C] font-medium hover:underline"
                     >
                         Go back to Login
                     </Link>

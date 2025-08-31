@@ -31,12 +31,15 @@ export default function Login() {
             if (res.data.requires_verification) {
                 router.push(`/verify-otp?email=${form.email}&type=login`);
             } else {
-                login(res.data.tokens.access_token);
-                localStorage.setItem(
-                    "refresh_token",
-                    res.data.tokens.refresh_token
-                );
-                router.push(res.data.dashboard_url || "/student/dashboard");
+                const userRole = res.data.user?.role === "admin" ? "admin" : "student";
+                login(res.data.tokens.access_token, userRole);
+                localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
+
+                if (res.data.user.role === "admin") {
+                    router.push("/admin/dashboard");
+                } else {
+                    router.push("/student/dashboard");
+                }
             }
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
@@ -47,7 +50,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
             <div
                 ref={ref}
                 className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"
@@ -56,11 +59,11 @@ export default function Login() {
                 <div
                     className="absolute inset-0 pointer-events-none transition-all duration-300"
                     style={{
-                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,255,0.12), transparent 80%)`,
+                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(50,150,50,0.15), transparent 80%)`,
                     }}
                 />
 
-                <h2 className="text-3xl font-bold mb-6 text-center text-[#002856]">
+                <h2 className="text-3xl font-bold mb-6 text-center text-green-800">
                     Login
                 </h2>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
@@ -75,7 +78,7 @@ export default function Login() {
                             onChange={handleChange}
                             placeholder="your@email.com"
                             autoComplete="username"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                             required
                         />
                     </div>
@@ -89,12 +92,12 @@ export default function Login() {
                             onChange={handleChange}
                             placeholder="Enter your password"
                             autoComplete="current-password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                             required
                         />
                         <Link
                             href="/forgot-password"
-                            className="text-sm text-[#0000D3] mt-1 hover:underline self-end"
+                            className="text-sm text-green-700 mt-1 hover:underline self-end"
                         >
                             Forgot Password?
                         </Link>
@@ -103,7 +106,7 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-[#0000D3] text-white py-3 rounded-sm shadow-lg hover:bg-[#030397] transition-transform hover:scale-105 font-semibold"
+                        className="w-full bg-[#2E4A3C] text-white py-3 rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105 font-semibold"
                     >
                         {loading ? "Logging in..." : "Login"}
                     </button>
@@ -113,7 +116,7 @@ export default function Login() {
                     Not a user?{" "}
                     <Link
                         href="/register"
-                        className="text-[#0000D3] font-medium hover:underline"
+                        className="text-[#2E4A3C] font-medium hover:underline"
                     >
                         Register
                     </Link>

@@ -20,7 +20,7 @@ export default function FloatingContact() {
             {/* Email Button */}
             <a
                 href={`mailto:${email}`}
-                className="fixed bottom-24 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#0000D3] text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+                className="fixed bottom-24 right-6 z-50 flex items-center justify-center w-14 h-14 bg-yellow-400 text-black rounded-full shadow-lg hover:bg-yellow-500 transition-colors"
             >
                 <Mail size={28} />
             </a>

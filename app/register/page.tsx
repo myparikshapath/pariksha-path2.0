@@ -49,7 +49,7 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 px-4 flex justify-center items-start pt-36 pb-10">
+        <div className="min-h-screen bg-white px-4 flex justify-center items-start pt-36 pb-10">
             <div
                 ref={ref}
                 className="w-full max-w-lg bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"
@@ -58,11 +58,11 @@ export default function Register() {
                 <div
                     className="absolute inset-0 pointer-events-none transition-all duration-300"
                     style={{
-                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,255,0.12), transparent 80%)`,
+                        background: `radial-gradient(200px circle at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,128,0,0.12), transparent 80%)`,
                     }}
                 />
 
-                <h2 className="text-3xl font-bold mb-6 text-center text-[#002856]">
+                <h2 className="text-3xl font-bold mb-6 text-center text-[#2E4A3C]">
                     Register
                 </h2>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
@@ -76,7 +76,7 @@ export default function Register() {
                             onChange={handleChange}
                             placeholder="Your full name"
                             autoComplete="name"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition"
                             required
                         />
                     </div>
@@ -90,7 +90,7 @@ export default function Register() {
                             onChange={handleChange}
                             placeholder="you@example.com"
                             autoComplete="email"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition"
                             required
                         />
                     </div>
@@ -103,7 +103,7 @@ export default function Register() {
                             onChange={handleChange}
                             placeholder="+91 9876543210"
                             autoComplete="tel"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition"
                             required
                         />
                     </div>
@@ -117,7 +117,7 @@ export default function Register() {
                             onChange={handleChange}
                             placeholder="Create a password"
                             autoComplete="new-password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#030397] transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition"
                             required
                         />
                     </div>
@@ -163,7 +163,7 @@ export default function Register() {
                                             }
                                         }}
                                         className={`px-4 py-2 rounded-full hover:cursor-pointer border flex-shrink-0 transition ${selected
-                                            ? "bg-[#0000D3] text-white border-blue-600"
+                                            ? "bg-[#2E4A3C] text-white border-green-700"
                                             : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                                             }`}
                                     >
@@ -177,7 +177,7 @@ export default function Register() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-[#0000D3] text-white py-3 rounded-sm shadow-lg hover:bg-[#030397] hover:cursor-pointer transition-transform hover:scale-105 font-semibold"
+                        className="w-full bg-[#2E4A3C] text-white py-3 rounded-md shadow-lg hover:bg-[#1d3328] hover:cursor-pointer transition-transform hover:scale-105 font-semibold"
                     >
                         {loading ? "Registering..." : "Register"}
                     </button>
@@ -187,7 +187,7 @@ export default function Register() {
                     Already have an account?{" "}
                     <Link
                         href="/login"
-                        className="text-[#0000D3] font-medium hover:underline"
+                        className="text-[#2E4A3C] font-medium hover:underline"
                     >
                         Login
                     </Link>

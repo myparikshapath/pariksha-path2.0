@@ -30,15 +30,20 @@ export default function ArticlesPage() {
     );
 
     return (
-        <main className="pt-30 max-w-7xl mx-auto px-6">
-            <h1 className="text-4xl font-bold mb-8 text-[#002856]">Articles</h1>
+        <main className="pt-32 max-w-7xl mx-auto px-6 space-y-12">
+            <h1 className="text-4xl font-bold mb-6 text-center text-[#2E4A3C]">
+                Articles
+            </h1>
+            <p className="text-center text-gray-600 max-w-2xl mx-auto">
+                Stay updated with the latest notifications, strategies, and motivational articles.
+            </p>
 
             {/* Categories */}
-            <div className="flex overflow-x-auto space-x-3 mb-8 pb-2 no-scrollbar">
+            <div className="flex overflow-x-auto space-x-3 mb-10 pb-2 no-scrollbar justify-center">
                 <button
                     className={`flex-shrink-0 px-5 py-2 rounded-full font-medium transition-all ${!currentCategory
-                        ? "bg-[#0000D3] text-white shadow-md"
-                        : "bg-gray-200 hover:bg-blue-100"
+                        ? "bg-[#869C51] text-white shadow-md"
+                        : "bg-gray-200 hover:bg-green-100"
                         }`}
                     onClick={() => setCurrentCategory(null)}
                 >
@@ -47,9 +52,9 @@ export default function ArticlesPage() {
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        className={`flex-shrink-0 px-5 py-2 rounded-full hover:cursor-pointer font-medium transition-all ${currentCategory === cat
-                            ? "bg-[#0000D3] text-white shadow-md"
-                            : "bg-gray-200 hover:bg-blue-100"
+                        className={`flex-shrink-0 px-5 py-2 rounded-full font-medium transition-all ${currentCategory === cat
+                            ? "bg-[#869C51] text-white shadow-md"
+                            : "bg-gray-200 hover:bg-green-100"
                             }`}
                         onClick={() => setCurrentCategory(cat)}
                     >
@@ -58,13 +63,12 @@ export default function ArticlesPage() {
                 ))}
             </div>
 
-
             {/* Search */}
-            <div className="relative mb-10 max-w-md">
+            <div className="relative mb-12 max-w-md mx-auto">
                 <input
                     type="text"
                     placeholder="Search articles..."
-                    className="w-full rounded-full border border-gray-300 px-4 py-2 pl-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full rounded-full border border-gray-300 px-4 py-2 pl-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#869C51] focus:border-transparent transition"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -76,14 +80,14 @@ export default function ArticlesPage() {
                 {displayedArticles.map((article) => (
                     <motion.div
                         key={article.id}
-                        className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow cursor-pointer"
+                        className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all cursor-pointer flex flex-col"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <div className="h-40 bg-gray-200 rounded-md mb-4"></div>
-                        <h2 className="font-semibold text-xl mb-2 text-gray-800">{article.title}</h2>
-                        <p className="text-gray-600 mb-3">{article.body}</p>
-                        <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-[#0000D3] font-medium">
+                        <div className="h-40 bg-gray-100 rounded-lg mb-4"></div>
+                        <h2 className="font-semibold text-xl mb-2 text-[#2E4A3C]">{article.title}</h2>
+                        <p className="text-gray-600 mb-4 flex-grow">{article.body}</p>
+                        <span className="inline-block px-3 py-1 text-sm rounded-full bg-green-100 text-[#2E4A3C] font-medium self-start">
                             {article.category}
                         </span>
                     </motion.div>
@@ -93,7 +97,7 @@ export default function ArticlesPage() {
             {/* Pagination */}
             <div className="flex justify-center mt-12 mb-8 gap-3 flex-wrap">
                 <button
-                    className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition"
+                    className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-green-100 hover:text-[#2E4A3C] transition"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                 >
@@ -104,8 +108,8 @@ export default function ArticlesPage() {
                     <button
                         key={i}
                         className={`px-4 py-2 rounded-full border font-medium transition ${currentPage === i + 1
-                            ? "bg-[#0000D3] text-white border-blue-600 shadow-md"
-                            : "bg-white text-gray-600 border-gray-300 hover:bg-blue-100 hover:text-blue-600"
+                            ? "bg-[#869C51] text-white border-green-600 shadow-md"
+                            : "bg-white text-gray-600 border-gray-300 hover:bg-green-100 hover:text-[#2E4A3C]"
                             }`}
                         onClick={() => setCurrentPage(i + 1)}
                     >
@@ -114,7 +118,7 @@ export default function ArticlesPage() {
                 ))}
 
                 <button
-                    className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition"
+                    className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-green-100 hover:text-[#2E4A3C] transition"
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                 >

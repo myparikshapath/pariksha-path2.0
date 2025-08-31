@@ -80,6 +80,7 @@
 //     </>
 //   );
 // }
+
 "use client";
 import { motion, useAnimationFrame } from "framer-motion";
 import { useRef, useState } from "react";
@@ -114,53 +115,56 @@ export default function Home() {
   });
 
   const hoverButtonClasses =
-    "hover:bg-[#030397] shadow-xl transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer";
+    "shadow-xl transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer";
 
   return (
     <main className="pt-16 md:pt-28 px-4 sm:px-6 lg:px-8">
       {/* HERO SECTION */}
-      <section className="relative bg-gray-100 rounded-lg max-w-6xl mx-auto mt-8 p-6 sm:p-12 flex flex-col-reverse md:flex-row items-center justify-between gap-6">
-        {/* Text Content */}
-        <div className="flex-1 text-center md:text-left">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#002856] leading-tight"
-          >
-            India&apos;s Smartest Learning Platform for <br />
-            <span className="text-[#002856]">Govt Exams & Boards</span>
-          </motion.h1>
-          <p className="text-gray-600 mt-4 text-sm sm:text-base">
-            Live Classes | Mock Tests | Notes | Doubt Solving
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start mt-6">
-            <Link
-              href="#"
-              className={`bg-[#0000D3] text-white px-6 py-3 rounded-xl ${hoverButtonClasses} text-center`}
+      <section className="relative w-full bg-gradient-to-r from-[#2E4A3C] via-[#4F7F52] to-[#9BCB77] text-white py-16 sm:py-20 md:py-28">
+        <div className="w-full flex flex-col-reverse md:flex-row items-center justify-between gap-10 px-6 sm:px-12 md:px-20 max-w-none">
+          {/* Text Content */}
+          <div className="flex-1 text-center md:text-left">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight"
             >
-              Start Learning Free
-            </Link>
-            <Link
-              href="#"
-              className={`bg-gray-200 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-300 shadow-xl transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer text-center`}
-            >
-              Explore Courses
-            </Link>
+              India&apos;s Smartest Learning Platform for <br />
+              <span className="text-yellow-300">Govt Exams & Boards</span>
+            </motion.h1>
+            <p className="mt-4 text-sm sm:text-base text-green-100 font-medium">
+              Live Classes | Mock Tests | Notes | Doubt Solving
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start mt-6">
+              <Link
+                href="#"
+                className={`bg-yellow-400 text-[#2E4A3C] font-bold px-6 py-3 rounded-xl ${hoverButtonClasses} text-center`}
+              >
+                Start Learning Free
+              </Link>
+              <Link
+                href="#"
+                className="bg-white text-[#2E4A3C] font-bold px-6 py-3 rounded-xl hover:bg-gray-100 shadow-xl transition text-center"
+              >
+                Explore Courses
+              </Link>
+            </div>
+          </div>
+
+          {/* Illustration */}
+          <div className="flex-1 flex justify-center md:justify-end">
+            <Image
+              src="/ilust.png"
+              alt="Hero Illustration"
+              className="w-64 sm:w-80 md:w-[30rem] drop-shadow-xl"
+              width={480}
+              height={480}
+              priority
+            />
           </div>
         </div>
-
-        {/* Illustration */}
-        <div className="flex-1 flex justify-center md:justify-end">
-          <Image
-            src="/ilust.png" // Replace with your illustration path
-            alt="Hero Illustration"
-            className="w-64 sm:w-80 md:w-96"
-            width={92}
-            height={92}
-            priority
-          />
-        </div>
       </section>
+
 
       {/* KEY FEATURES */}
       <section className="max-w-6xl mx-auto mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center px-2 sm:px-0">
@@ -170,10 +174,13 @@ export default function Home() {
           { icon: Globe, title: "Teaching Exams CTET" },
           { icon: Download, title: "Bilingual (Hindi + English)" },
         ].map((feature, idx) => (
-          <Card key={idx} className="shadow-md rounded-xl">
+          <Card
+            key={idx}
+            className="shadow-md rounded-xl bg-gradient-to-b from-green-50 to-white hover:shadow-xl"
+          >
             <CardContent className="flex flex-col items-center p-6">
-              <feature.icon className="w-10 h-10 text-[#002856] mb-4" />
-              <p className="font-semibold text-gray-700 text-sm">{feature.title}</p>
+              <feature.icon className="w-10 h-10 text-[#2E4A3C] mb-4" />
+              <p className="font-semibold text-gray-800 text-sm">{feature.title}</p>
             </CardContent>
           </Card>
         ))}
@@ -181,21 +188,25 @@ export default function Home() {
 
       {/* POPULAR COURSES */}
       <section className="max-w-6xl mx-auto mt-16">
-        <h2 className="text-xl sm:text-2xl font-extrabold mb-6 text-[#002856] text-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C] text-center">
           Popular Courses
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 px-2 sm:px-0">
+        <div className="w-16 h-1 bg-yellow-400 mx-auto mb-8 mt-2"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-2 sm:px-0">
           {[
             { name: "Banking Exams", button: "Explore Now" },
             { name: "SSC & Railways", button: "Explore Now" },
             { name: "Boards (9-12th)", button: "Start Test Free" },
           ].map((course, idx) => (
-            <Card key={idx} className="shadow-md rounded-xl">
+            <Card
+              key={idx}
+              className="shadow-md rounded-xl hover:shadow-xl transition"
+            >
               <CardContent className="p-6 text-center">
-                <p className="font-semibold text-[#002856]">{course.name}</p>
+                <p className="font-semibold text-[#2E4A3C]">{course.name}</p>
                 <Link
                   href="#"
-                  className={`mt-4 inline-block bg-gray-200 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-300 shadow-xl transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer`}
+                  className="mt-4 inline-block bg-yellow-400 text-[#2E4A3C] font-bold px-4 py-2 rounded-xl hover:bg-yellow-500 shadow-md transition"
                 >
                   {course.button}
                 </Link>
@@ -206,29 +217,40 @@ export default function Home() {
       </section>
 
       {/* WHY CHOOSE US */}
-      <h2 className="text-xl sm:text-2xl mt-8 font-extrabold mb-6 text-[#002856] text-center">
-        Why Choose My ParikshaPath ?
-      </h2>
-      <section className="max-w-6xl mx-auto font-bold grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center px-2 sm:px-0">
-        {[
-          { number: "10,000+", label: "Students Enrolled" },
-          { number: "1,000+", label: "Tests Daily" },
-          { number: "Free", label: "Resources" },
-        ].map((stat, idx) => (
-          <Card key={idx} className="shadow-md rounded-xl">
-            <CardContent className="p-6">
-              <p className="text-2xl sm:text-3xl font-bold text-[#002856]">{stat.number}</p>
-              <p className="text-gray-600 text-sm sm:text-base">{stat.label}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <section className="max-w-6xl mx-auto mt-16 text-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C]">
+          Why Choose My ParikshaPath ?
+        </h2>
+        <div className="w-16 h-1 bg-yellow-400 mx-auto mb-8 mt-2"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {[
+            { number: "10,000+", label: "Students Enrolled" },
+            { number: "1,000+", label: "Tests Daily" },
+            { number: "Free", label: "Resources" },
+          ].map((stat, idx) => (
+            <Card
+              key={idx}
+              className="shadow-md rounded-xl hover:shadow-xl transition"
+            >
+              <CardContent className="p-6">
+                <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-[#2E4A3C] to-[#9BCB77] bg-clip-text text-transparent">
+                  {stat.number}
+                </p>
+                <p className="text-gray-700 text-sm sm:text-base font-medium">
+                  {stat.label}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </section>
 
       {/* SUCCESS STORIES MARQUEE */}
-      <section className="max-w-6xl mx-auto mt-16 px-2 sm:px-0 no-scrollbar">
-        <h2 className="text-xl sm:text-2xl font-extrabold mb-6 text-center text-[#002856]">
+      <section className="max-w-6xl mx-auto mt-16 px-2 sm:px-0 no-scrollbar mb-8">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C] text-center">
           Success Stories - Our Students, Our Pride
         </h2>
+        <div className="w-40 h-1 bg-yellow-400 mx-auto mb-8 mt-2"></div>
         <div
           className="relative overflow-x-auto w-full cursor-pointer no-scrollbar"
           onMouseEnter={() => setPaused(true)}
@@ -242,39 +264,18 @@ export default function Home() {
             {[...testimonials, ...testimonials].map((item, idx) => (
               <Card
                 key={idx}
-                className="shadow-md rounded-xl min-w-[200px] sm:min-w-[250px] hover:shadow-lg transition-shadow duration-300 flex-shrink-0"
+                className="shadow-md rounded-xl min-w-[220px] bg-gradient-to-b from-white to-green-50 hover:shadow-lg transition flex-shrink-0"
               >
                 <CardContent className="p-4 sm:p-6 text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
-                  <p className="text-[#002856] font-semibold">{item.name}</p>
-                  <p className="text-gray-600 text-sm mt-2">{item.text}</p>
+                  <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4"></div>
+                  <p className="text-[#2E4A3C] font-semibold">{item.name}</p>
+                  <p className="text-gray-700 text-sm mt-2">{item.text}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
       </section>
-
-      {/* APP DOWNLOAD */}
-      {/* <section className="max-w-6xl mx-auto p-8 sm:p-12 mt-16 mb-16 text-center bg-gray-200 rounded-md">
-        <h3 className="text-lg sm:text-xl font-bold text-[#002856] mb-4">Download the App</h3>
-        <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-          <Link
-            href="https://play.google.com/store/apps/details?id=com.example.app"
-            target="_blank"
-            className={`bg-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 ${hoverButtonClasses}`}
-          >
-            <Download className="w-5 h-5" /> Play Store
-          </Link>
-          <Link
-            href="https://apps.apple.com/us/app/example-app/id123456789"
-            target="_blank"
-            className={`bg-black text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 ${hoverButtonClasses}`}
-          >
-            <Download className="w-5 h-5" /> App Store
-          </Link>
-        </div>
-      </section> */}
     </main>
   );
 }

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { KeyRound } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useCursorGlow } from "@/hooks/useCursorGlow"; // 👈 import glow hook
+import { useCursorGlow } from "@/hooks/useCursorGlow";
 
 export default function VerifyOtp() {
     const router = useRouter();
@@ -19,7 +19,7 @@ export default function VerifyOtp() {
     const [loading, setLoading] = useState(false);
     const [otpType, setOtpType] = useState<"login" | "email">("email");
 
-    const { ref, cursorPos } = useCursorGlow(); // 👈 glow hook
+    const { ref, cursorPos } = useCursorGlow();
 
     useEffect(() => {
         const emailParam = searchParams.get("email");
@@ -38,18 +38,19 @@ export default function VerifyOtp() {
             const res = await api.post(endpoint, { email, otp });
 
             if (res.data.tokens) {
-                login(res.data.tokens.access_token);
+                const userRole = res.data.user?.role === "admin" ? "admin" : "student";
+
+                login(res.data.tokens.access_token, userRole);
                 localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
-                router.push("/student/dashboard");
+
+                router.push(userRole === "admin" ? "/admin/dashboard" : "/student/dashboard");
             } else {
                 setMessage("Email verified successfully! Please login.");
                 router.push("/login");
             }
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
-            setMessage(
-                axiosError.response?.data?.detail || "Failed to verify OTP"
-            );
+            setMessage(axiosError.response?.data?.detail || "Failed to verify OTP");
         } finally {
             setLoading(false);
         }
@@ -58,17 +59,12 @@ export default function VerifyOtp() {
     const handleResend = async () => {
         try {
             setLoading(true);
-            const endpoint =
-                otpType === "login"
-                    ? "/auth/resend-login-otp"
-                    : "/auth/resend-verification-email";
+            const endpoint = otpType === "login" ? "/auth/resend-login-otp" : "/auth/resend-verification-email";
             const res = await api.post(endpoint, { email });
             setMessage(res.data.message || "OTP resent successfully");
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
-            setMessage(
-                axiosError.response?.data?.detail || "Failed to resend OTP"
-            );
+            setMessage(axiosError.response?.data?.detail || "Failed to resend OTP");
         } finally {
             setLoading(false);
         }
@@ -77,21 +73,19 @@ export default function VerifyOtp() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
             <motion.div
-                ref={ref} // 👈 attach glow
+                ref={ref}
                 style={{
-                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(0,0,211,0.15), transparent 80%)`
+                    background: `radial-gradient(circle 150px at ${cursorPos.x}px ${cursorPos.y}px, rgba(46,74,60,0.15), transparent 80%)`
                 }}
                 className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden transition-all"
             >
-                {/* Decorative gradient pulse shape */}
-                <div className="absolute top-0 -right-16 w-48 h-48 "></div>
-
                 {/* Header */}
                 <div className="text-center mb-6 relative z-10">
-                    <KeyRound className="w-12 h-12 mx-auto text-[#0000D3] mb-2" />
-                    <h2 className="text-3xl font-bold text-[#002856]">Verify OTP</h2>
+                    <KeyRound className="w-12 h-12 mx-auto text-[#2E4A3C] mb-2" />
+                    <h2 className="text-3xl font-bold text-[#2E4A3C]">Verify OTP</h2>
                     <p className="text-gray-500 mt-1 text-sm">
-                        Enter the OTP sent to your email <span className="font-medium text-[#0000D3]">{email}</span>.
+                        Enter the OTP sent to your email{" "}
+                        <span className="font-medium text-green-700">{email}</span>.
                     </p>
                 </div>
 
@@ -116,7 +110,7 @@ export default function VerifyOtp() {
                             placeholder="Enter 6-digit OTP"
                             value={otp}
                             onChange={(e) => setOtp(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition tracking-widest text-center font-semibold text-lg"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition tracking-widest text-center font-semibold text-lg"
                             required
                         />
                     </div>
@@ -124,7 +118,7 @@ export default function VerifyOtp() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`w-full bg-[#0000D3] text-white py-3 rounded-sm shadow-lg font-semibold transition-transform hover:scale-105 hover:bg-[#030397] ${loading && "bg-blue-300 cursor-not-allowed hover:scale-100"
+                        className={`w-full bg-[#2E4A3C] text-white py-3 rounded-lg shadow-lg font-semibold transition-transform hover:scale-105 hover:bg-green-800 ${loading && "bg-green-300 cursor-not-allowed hover:scale-100"
                             }`}
                     >
                         {loading ? "Verifying..." : "Verify OTP"}
@@ -138,7 +132,7 @@ export default function VerifyOtp() {
                         type="button"
                         onClick={handleResend}
                         disabled={loading}
-                        className="text-[#0000D3] font-medium hover:underline disabled:opacity-50"
+                        className="text-green-700 font-medium hover:underline disabled:opacity-50"
                     >
                         Resend OTP
                     </button>
@@ -147,10 +141,7 @@ export default function VerifyOtp() {
                 {/* Back to Login */}
                 <p className="mt-4 text-center text-gray-600 relative z-10 text-sm">
                     Entered wrong email?{" "}
-                    <a
-                        href="/login"
-                        className="text-[#0000D3] font-medium hover:underline"
-                    >
+                    <a href="/login" className="text-green-700 font-medium hover:underline">
                         Go back to Login
                     </a>
                 </p>

@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Book, User, GraduationCap, Clipboard } from "lucide-react";
+import { Book, User, GraduationCap, Clipboard, FileText } from "lucide-react";
 
 const mockCategories = [
     { name: "Medical", icon: <Book size={28} /> },
@@ -23,22 +23,25 @@ export default function MockPage() {
     return (
         <>
             <Navbar />
-            <main className="pt-32 max-w-7xl mx-auto px-6 space-y-16">
-                {/* ===== Page Title ===== */}
+            <main className="pt-28 max-w-7xl mx-auto px-6 space-y-20">
+                {/* ===== Hero Section ===== */}
                 <motion.section
-                    variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
-                    transition={{ duration: 0.6 }}
-                    className="text-center"
+                    variants={fadeInUp}
+                    transition={{ duration: 0.7 }}
+                    className="rounded-3xl bg-gradient-to-r from-[#2E4A3C] to-[#869C51] text-white py-20 px-6 text-center shadow-lg"
                 >
-                    <h1 className="text-4xl font-bold text-[#002856] mb-3">
-                        Mock Tests
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                        Boost Your Prep with Mock Tests 🚀
                     </h1>
-                    <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-                        Prepare for your exams with categorized mock tests, free demos, and
-                        detailed score tracking.
+                    <p className="max-w-2xl mx-auto text-lg opacity-90 mb-8">
+                        Attempt free demos, unlock full-length test series, and track your
+                        progress with detailed insights.
                     </p>
+                    <Button className="bg-yellow-400 text-[#2E4A3C] font-semibold px-8 py-6 rounded-xl shadow hover:bg-yellow-300 transition">
+                        Start Practicing
+                    </Button>
                 </motion.section>
 
                 {/* ===== Categories Section ===== */}
@@ -47,22 +50,29 @@ export default function MockPage() {
                     initial="hidden"
                     animate="visible"
                     transition={{ duration: 0.6, delay: 0.1 }}
+                    className="relative"
                 >
-                    <h2 className="text-2xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-bold mb-14 text-center text-[#2E4A3C]">
                         Test Categories
                     </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
                         {mockCategories.map((cat, idx) => (
                             <motion.div
                                 key={idx}
-                                whileHover={{
-                                    scale: 1.05,
-                                    boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-                                }}
-                                className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50 transition"
+                                whileHover={{ scale: 1.05 }}
+                                className="relative flex flex-col items-center text-center p-8 bg-white rounded-2xl shadow-md hover:shadow-xl border border-gray-100 transition"
                             >
-                                <div className="text-[#0000D3] mb-3">{cat.icon}</div>
-                                <h3 className="font-semibold text-lg">{cat.name}</h3>
+                                <div className="bg-yellow-400 p-4 rounded-full mb-4 shadow">
+                                    {cat.icon}
+                                </div>
+                                <h3 className="font-semibold text-lg text-[#2E4A3C]">
+                                    {cat.name}
+                                </h3>
+
+                                {/* timeline connector */}
+                                {idx < mockCategories.length - 1 && (
+                                    <span className="hidden md:block absolute right-[-20px] top-1/2 w-10 h-1 bg-yellow-400"></span>
+                                )}
                             </motion.div>
                         ))}
                     </div>
@@ -74,24 +84,25 @@ export default function MockPage() {
                     initial="hidden"
                     animate="visible"
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="bg-gray-50 rounded-xl shadow p-6"
                 >
-                    <h2 className="text-2xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-bold mb-10 text-center text-[#2E4A3C]">
                         Free Demo Tests
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[1, 2, 3].map((demo) => (
                             <motion.div
                                 key={demo}
-                                whileHover={{ scale: 1.02 }}
-                                className="bg-white p-6 rounded-sm shadow hover:shadow-lg flex flex-col justify-between"
+                                whileHover={{ scale: 1.03 }}
+                                className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between"
                             >
-                                <h3 className="font-semibold mb-2">Demo Test {demo}</h3>
+                                <h3 className="font-semibold mb-2 text-[#2E4A3C]">
+                                    Demo Test {demo}
+                                </h3>
                                 <p className="text-gray-600 text-sm mb-4">
                                     Try a restricted set of questions for free and experience the
                                     test interface.
                                 </p>
-                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full rounded-sm">
+                                <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
                                     Attempt
                                 </Button>
                             </motion.div>
@@ -106,23 +117,23 @@ export default function MockPage() {
                     animate="visible"
                     transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                    <h2 className="text-2xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-bold mb-10 text-center text-[#2E4A3C]">
                         Paid Test Series
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {[1, 2].map((series) => (
                             <motion.div
                                 key={series}
-                                whileHover={{ scale: 1.02 }}
-                                className="bg-white p-6 rounded-sm shadow-md hover:shadow-lg flex flex-col justify-between"
+                                whileHover={{ scale: 1.03 }}
+                                className="bg-white rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between"
                             >
-                                <h3 className="font-semibold mb-2">
+                                <h3 className="font-semibold mb-2 text-[#2E4A3C]">
                                     Full-Length Test Series {series}
                                 </h3>
                                 <p className="text-gray-600 mb-4">
                                     Sectional and full-length tests with detailed solutions.
                                 </p>
-                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full rounded-sm">
+                                <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
                                     Buy Now
                                 </Button>
                             </motion.div>
@@ -136,21 +147,21 @@ export default function MockPage() {
                     initial="hidden"
                     animate="visible"
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    className="bg-gray-50 rounded-xl shadow p-6"
+                    className="bg-gray-50 rounded-3xl shadow p-10"
                 >
-                    <h2 className="text-2xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-bold mb-10 text-center text-[#2E4A3C]">
                         Downloadable PDFs
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[1, 2, 3].map((pdf) => (
                             <motion.div
                                 key={pdf}
-                                whileHover={{ scale: 1.02 }}
-                                className="bg-white p-6 rounded-sm shadow-md flex flex-col items-center justify-center"
+                                whileHover={{ scale: 1.03 }}
+                                className="bg-white p-6 rounded-2xl shadow flex flex-col items-center justify-center hover:shadow-lg transition"
                             >
-                                <div className="w-16 h-20 bg-gray-200 rounded mb-4" />
+                                <FileText size={40} className="text-[#869C51] mb-4" />
                                 <h3 className="font-semibold mb-2">Study Notes {pdf}</h3>
-                                <Button className="bg-[#0000D3] hover:bg-blue-700 text-white w-full mt-2 rounded-sm">
+                                <Button className="bg-[#2E4A3C] hover:bg-[#22382d] text-white w-full mt-2 rounded-lg">
                                     Download
                                 </Button>
                             </motion.div>
@@ -164,14 +175,14 @@ export default function MockPage() {
                     initial="hidden"
                     animate="visible"
                     transition={{ duration: 0.6, delay: 0.5 }}
-                    className="bg-white rounded-xl shadow-md p-6"
+                    className="bg-white rounded-3xl shadow-md p-10"
                 >
-                    <h2 className="text-2xl font-semibold mb-6 text-center">
+                    <h2 className="text-3xl font-bold mb-6 text-center text-[#2E4A3C]">
                         Your Attempt History
                     </h2>
                     <div className="overflow-x-auto rounded-lg border border-gray-200">
-                        <table className="w-full border-collapse">
-                            <thead className="bg-gray-100">
+                        <table className="w-full border-collapse text-sm">
+                            <thead className="bg-[#f7f9f7]">
                                 <tr className="text-left text-gray-700">
                                     <th className="px-6 py-3 font-semibold">Test Name</th>
                                     <th className="px-6 py-3 font-semibold">Score</th>
@@ -183,10 +194,10 @@ export default function MockPage() {
                                     <tr
                                         key={row}
                                         className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                                            } hover:bg-blue-50 transition`}
+                                            } hover:bg-green-50 transition`}
                                     >
                                         <td className="px-6 py-3">Test {row}</td>
-                                        <td className="px-6 py-3 font-semibold text-[#0000D3]">
+                                        <td className="px-6 py-3 font-semibold text-[#869C51]">
                                             80%
                                         </td>
                                         <td className="px-6 py-3">2025-08-22</td>
@@ -195,6 +206,26 @@ export default function MockPage() {
                             </tbody>
                         </table>
                     </div>
+                </motion.section>
+
+                {/* ===== CTA Banner ===== */}
+                <motion.section
+                    initial="hidden"
+                    animate="visible"
+                    variants={fadeInUp}
+                    transition={{ duration: 0.7, delay: 0.6 }}
+                    className="rounded-3xl bg-gradient-to-r from-[#869C51] to-[#2E4A3C] py-16 px-6 text-center text-white shadow-lg mb-10"
+                >
+                    <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                        Ready to Ace Your Exams?
+                    </h2>
+                    <p className="max-w-2xl mx-auto mb-8 opacity-90">
+                        Join thousands of learners, attempt unlimited mock tests, and track
+                        your progress like never before.
+                    </p>
+                    <Button className="bg-yellow-400 text-[#2E4A3C] font-semibold px-10 py-6 rounded-xl shadow hover:bg-yellow-300 transition">
+                        Get Started
+                    </Button>
                 </motion.section>
             </main>
         </>

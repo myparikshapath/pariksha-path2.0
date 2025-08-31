@@ -1,5 +1,8 @@
+/* --------- GREEN THEME NAVBAR (UPDATED) --------- */
+
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -40,7 +43,7 @@ const slugify = (val: string): string =>
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, role, logout } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
@@ -75,14 +78,18 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md shadow-md z-50">
+    <nav className="fixed top-0 left-0 w-full bg-white/65 backdrop-blur-2xl shadow-md z-50">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-3xl font-extrabold text-[#002856] tracking-tight"
-        >
-          Pariksha Path
+        <Link href="/" className="block">
+          <Image
+            src="/webLogo.png"
+            alt="ParikshaPath Logo"
+            className="w-32 sm:w-40 md:w-48 lg:w-56"
+            width={200}
+            height={80}
+            priority
+          />
         </Link>
 
         {/* ---------- DESKTOP MENU ---------- */}
@@ -101,61 +108,71 @@ export default function Navbar() {
               {link.dropdown ? (
                 <button
                   type="button"
-                  className="cursor-pointer flex items-center space-x-1 hover:text-blue-700 transition-colors text-md font-bold"
+                  className="cursor-pointer flex items-center space-x-1 hover:text-[#2E4A3C] transition-colors text-md font-bold"
                 >
                   {link.name}
                 </button>
               ) : (
                 <Link
                   href={link.href!}
-                  className={`hover:text-[#0000D3] transition-colors ${isActive(link.href!) ? "text-[#0000D3]" : ""
+                  className={`hover:text-[#2E4A3C] transition-colors ${isActive(link.href!)
+                    ? "text-[#869C51]"
+                    : "text-gray-900"
                     } text-[16px]`}
                 >
                   {link.name}
                 </Link>
               )}
 
-
               {/* --- DESKTOP MEGA DROPDOWN --- */}
               {link.dropdown && (
                 <AnimatePresence>
                   {hoveredDropdown === link.name && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.25 }}
-                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-10` : `ml - 5`}`}
+                      initial={{ opacity: 0, y: -15, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-20` : `ml-[-25px]`}`}
                     >
                       {/* LEFT panel - categories */}
-                      <div className="w-[28%] max-w-[360px] border-r border-gray-200 overflow-y-auto">
+                      <div className="w-[28%] max-w-[360px] border-r border-gray-100 overflow-y-auto bg-gradient-to-b from-green-50 to-white">
                         {link.dropdown.map((group: DropdownGroup, i) => (
-                          <button
+                          <motion.button
                             key={i}
                             onMouseEnter={() => setActiveCategory(group.category)}
-                            className={`w-full text-left px-5 py-3 text-lg font-bold ${activeCategory === group.category
-                              ? "bg-blue-50 text-blue-700"
-                              : "text-[#002856] hover:bg-blue-50"
+                            className={`w-full text-left px-5 py-3 text-lg font-bold transition-all duration-300 rounded-r-full
+                ${activeCategory === group.category
+                                ? "bg-green-100 text-green-800 shadow-inner"
+                                : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                               }`}
+                            whileHover={{ x: 4 }}
                           >
                             {group.category}
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
 
                       {/* RIGHT panel - exams */}
-                      <div className="flex-1 p-7 overflow-y-auto">
+                      <motion.div
+                        key={activeCategory}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex-1 p-7 overflow-y-auto"
+                      >
                         {link.dropdown
                           .filter((g) => g.category === activeCategory)
                           .map((group, gi) => (
                             <div key={gi} className="space-y-8">
-                              <h3 className="text-2xl font-extrabold text-[#002856]">
+                              <h3 className="text-2xl font-extrabold text-green-900">
                                 {group.category}
                               </h3>
 
                               {group.items.map((sub, si) => (
                                 <section key={si}>
-                                  <h4 className="text-xl font-bold text-[#002856] mb-4">
+                                  <h4 className="text-xl font-semibold text-green-800 mb-4">
                                     {sub.subCategory}
                                   </h4>
 
@@ -164,13 +181,21 @@ export default function Navbar() {
                                     typeof sub.exams[0] === "string" ? (
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                                       {sub.exams.map((ex, i) => (
-                                        <Link
+                                        <motion.div
                                           key={i}
-                                          href={`/course/${slugify(ex)}`}
-                                          className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg"
+                                          whileHover={{ scale: 1.05, y: -4 }}
+                                          transition={{
+                                            type: "spring",
+                                            stiffness: 250,
+                                          }}
                                         >
-                                          {ex}
-                                        </Link>
+                                          <Link
+                                            href={`/course/${slugify(ex)}`}
+                                            className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
+                                          >
+                                            {ex}
+                                          </Link>
+                                        </motion.div>
                                       ))}
                                     </div>
                                   ) : (
@@ -179,19 +204,34 @@ export default function Navbar() {
                                       {(sub.exams as ExamStateGroup[]).map(
                                         (subState, sti) => (
                                           <div key={sti}>
-                                            <div className="text-lg font-bold text-black mb-3">
+                                            <div className="text-lg font-bold text-gray-900 mb-3">
                                               {subState.state}
                                             </div>
                                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                                              {subState.exams.map((ex, ei) => (
-                                                <Link
-                                                  key={ei}
-                                                  href={`/course/${slugify(ex)}`}
-                                                  className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-800 shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg"
-                                                >
-                                                  {ex}
-                                                </Link>
-                                              ))}
+                                              {subState.exams.map(
+                                                (ex, ei) => (
+                                                  <motion.div
+                                                    key={ei}
+                                                    whileHover={{
+                                                      scale: 1.05,
+                                                      y: -4,
+                                                    }}
+                                                    transition={{
+                                                      type: "spring",
+                                                      stiffness: 250,
+                                                    }}
+                                                  >
+                                                    <Link
+                                                      href={`/course/${slugify(
+                                                        ex
+                                                      )}`}
+                                                      className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
+                                                    >
+                                                      {ex}
+                                                    </Link>
+                                                  </motion.div>
+                                                )
+                                              )}
                                             </div>
                                           </div>
                                         )
@@ -202,7 +242,7 @@ export default function Navbar() {
                               ))}
                             </div>
                           ))}
-                      </div>
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -215,23 +255,23 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center space-x-4">
           {isLoggedIn && (
             <Link
-              href="/student/dashboard"
-              className="bg-gray-200 text-[#002856] px-6 py-2 rounded font-bold shadow-sm hover:bg-gray-300 transition"
+              href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
+              className="bg-gray-200 text-[#2E4A3C] px-6 py-2 rounded font-bold hover:bg-gray-300 shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
             >
-              Dashboard
+              {role === "admin" ? "Admin Dashboard" : "Dashboard"}
             </Link>
           )}
           {isLoggedIn ? (
             <button
               onClick={logout}
-              className="bg-red-600 text-white px-8 py-2 rounded font-bold shadow-md hover:bg-red-700 transition"
+              className="bg-red-600 text-white px-8 py-2 rounded font-bold hover:bg-red-700 transition shadow-xl transform hover:-translate-y-1 hover:scale-100 cursor-pointer"
             >
               Logout
             </button>
           ) : (
             <Link
               href="/login"
-              className="bg-[#0000D3] text-white px-8 py-2 rounded font-bold hover:bg-[#030397] shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
+              className="bg-[#869C51] text-white px-8 py-2 rounded font-bold hover:bg-[#434a34] shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
             >
               Login
             </Link>
@@ -272,7 +312,9 @@ export default function Navbar() {
                   <Link
                     key={idx}
                     href={link.href!}
-                    className={`block py-2 font-extrabold hover:text-[#0000D3] ${isActive(link.href!) ? "text-[#0000D3]" : "text-gray-900"
+                    className={`block py-2 font-extrabold hover:text-[#2E4A3C] ${isActive(link.href!)
+                      ? "text-[#869C51]"
+                      : "text-gray-900"
                       }`}
                   >
                     {link.name}
@@ -283,7 +325,7 @@ export default function Navbar() {
                     value={`item-${idx}`}
                     className="rounded-xl shadow-sm border border-gray-200"
                   >
-                    <AccordionTrigger className="text-lg font-bold px-4 py-3 hover:bg-blue-50 data-[state=open]:bg-blue-100">
+                    <AccordionTrigger className="text-lg font-bold px-4 py-3 hover:bg-green-50 data-[state=open]:bg-green-100">
                       {link.name}
                     </AccordionTrigger>
                     <AccordionContent className="px-4 pb-3 space-y-2">
@@ -297,7 +339,7 @@ export default function Navbar() {
                             value={`cat-${gIdx}`}
                             className="rounded-lg border border-gray-200"
                           >
-                            <AccordionTrigger className="text-base font-semibold px-3 py-2 hover:bg-gray-50 data-[state=open]:bg-blue-50">
+                            <AccordionTrigger className="text-base font-semibold px-3 py-2 hover:bg-gray-50 data-[state=open]:bg-green-50">
                               {group.category}
                             </AccordionTrigger>
                             <AccordionContent className="px-3 pb-2">
@@ -313,7 +355,7 @@ export default function Navbar() {
                                       value={`sub-${sIdx}`}
                                       className="rounded-md border border-gray-100"
                                     >
-                                      <AccordionTrigger className="text-sm font-medium px-3 py-2 hover:bg-gray-50 data-[state=open]:bg-blue-50">
+                                      <AccordionTrigger className="text-sm font-medium px-3 py-2 hover:bg-gray-50 data-[state=open]:bg-green-50">
                                         {subName}
                                       </AccordionTrigger>
                                       <AccordionContent className="pl-4 pb-2 space-y-1">
@@ -324,8 +366,10 @@ export default function Navbar() {
                                             {sub.exams.map((exam, eIdx) => (
                                               <li key={eIdx}>
                                                 <Link
-                                                  href={`/course/${slugify(exam)}`}
-                                                  className="block px-2 py-1 rounded-md text-gray-600 hover:bg-blue-50 hover:text-[#0000D3]"
+                                                  href={`/course/${slugify(
+                                                    exam
+                                                  )}`}
+                                                  className="block px-2 py-1 rounded-md text-gray-600 hover:bg-green-50 hover:text-[#2E4A3C]"
                                                 >
                                                   {exam}
                                                 </Link>
@@ -341,7 +385,7 @@ export default function Navbar() {
                                                   value={`state-${stIdx}`}
                                                   className="rounded-md border border-gray-100"
                                                 >
-                                                  <AccordionTrigger className="text-sm font-medium px-2 py-1 hover:bg-gray-50 data-[state=open]:bg-blue-50">
+                                                  <AccordionTrigger className="text-sm font-medium px-2 py-1 hover:bg-gray-50 data-[state=open]:bg-green-50">
                                                     {subState.state}
                                                   </AccordionTrigger>
                                                   <AccordionContent className="pl-3 pb-2">
@@ -353,7 +397,7 @@ export default function Navbar() {
                                                               href={`/course/${slugify(
                                                                 ex
                                                               )}`}
-                                                              className="block px-2 py-1 rounded-md text-gray-600 hover:bg-blue-50 hover:text-[#0000D3]"
+                                                              className="block px-2 py-1 rounded-md text-gray-600 hover:bg-green-50 hover:text-[#2E4A3C]"
                                                             >
                                                               {ex}
                                                             </Link>
@@ -385,26 +429,27 @@ export default function Navbar() {
             {/* mobile buttons */}
             {isLoggedIn && (
               <Link
-                href="/student/dashboard"
-                className="block w-full bg-gray-200 text-[#002856] text-center py-2 rounded font-semibold hover:bg-gray-300"
+                href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
+                className="block w-full bg-gray-200 text-[#2E4A3C] text-center py-2 rounded font-semibold hover:bg-gray-300"
               >
-                Dashboard
+                {role === "admin" ? "Admin Dashboard" : "Dashboard"}
               </Link>
             )}
             {isLoggedIn ? (
               <button
                 onClick={logout}
-                className="block w-full bg-red-600 text-white text-center py-2 rounded font-semibold hover:bg-red-700"
+                className="block w-full bg-red-600 text-white text-center py-2 rounded font-semibold hover:bg-red-700 "
               >
                 Logout
               </button>
             ) : (
               <Link
                 href="/login"
-                className="block w-full bg-[#0000D3] text-white text-center py-2 rounded font-semibold hover:bg-blue-800"
+                className="block w-full bg-[#869C51] text-white text-center py-2 rounded font-semibold hover:bg-[#2E4A3C]"
               >
                 Login
               </Link>
+
             )}
           </motion.div>
         )}
