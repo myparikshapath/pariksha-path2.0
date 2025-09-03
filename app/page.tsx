@@ -81,6 +81,7 @@
 //   );
 // }
 
+
 "use client";
 import { motion, useAnimationFrame } from "framer-motion";
 import { useRef, useState } from "react";
@@ -88,6 +89,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Download, Book, BarChart2, Globe } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import CountUp from "react-countup";
+import { useInView } from "react-intersection-observer";
 
 export default function Home() {
   const marqueeRef = useRef<HTMLDivElement>(null);
@@ -102,9 +105,21 @@ export default function Home() {
     { name: "Ankit Mehra", text: "AI analysis helped me identify weak areas." },
   ];
 
+  // For stats animation
+  const { ref: statsRef, inView: statsInView } = useInView({
+    triggerOnce: true,
+    threshold: 0.3,
+  });
+
+  // For marquee animation
+  const { ref: marqueeSectionRef, inView: marqueeInView } = useInView({
+    triggerOnce: false,
+    threshold: 0.3,
+  });
+
   useAnimationFrame((_, delta) => {
     const el = marqueeRef.current;
-    if (!paused && el) {
+    if (!paused && el && marqueeInView) {
       const width = el.scrollWidth;
       setOffset((prev) => {
         let next = prev - delta * 0.05;
@@ -118,11 +133,10 @@ export default function Home() {
     "shadow-xl transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer";
 
   return (
-    <main className="pt-16 md:pt-28 px-4 sm:px-6 lg:px-8">
+    <main className="pt-16">
       {/* HERO SECTION */}
       <section className="relative w-full bg-gradient-to-r from-[#2E4A3C] via-[#4F7F52] to-[#9BCB77] text-white py-16 sm:py-20 md:py-28">
         <div className="w-full flex flex-col-reverse md:flex-row items-center justify-between gap-10 px-6 sm:px-12 md:px-20 max-w-none">
-
           {/* Text Content */}
           <div className="flex-1 text-center md:text-left">
             <motion.h1
@@ -168,7 +182,6 @@ export default function Home() {
         </div>
       </section>
 
-
       {/* KEY FEATURES */}
       <section className="max-w-6xl mx-auto mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center px-2 sm:px-0">
         {[
@@ -195,17 +208,18 @@ export default function Home() {
           Popular Courses
         </h2>
         <div className="w-16 h-1 bg-yellow-400 mx-auto mb-8 mt-2"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-2 sm:px-0">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2 sm:px-0">
           {[
             { name: "Banking Exams", button: "Explore Now" },
             { name: "SSC & Railways", button: "Explore Now" },
             { name: "Boards (9-12th)", button: "Start Test Free" },
+            { name: "CTET", button: "Explore Now" },
           ].map((course, idx) => (
             <Card
               key={idx}
-              className="shadow-md rounded-xl hover:shadow-xl transition"
+              className="shadow-md rounded-xl hover:shadow-xl transition h-full flex flex-col"
             >
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-6 text-center flex flex-col flex-grow justify-between">
                 <p className="font-semibold text-[#2E4A3C]">{course.name}</p>
                 <Link
                   href="#"
@@ -220,16 +234,16 @@ export default function Home() {
       </section>
 
       {/* WHY CHOOSE US */}
-      <section className="max-w-6xl mx-auto mt-16 text-center">
+      <section ref={statsRef} className="max-w-6xl mx-auto mt-16 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C]">
           Why Choose My ParikshaPath ?
         </h2>
         <div className="w-16 h-1 bg-yellow-400 mx-auto mb-8 mt-2"></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[
-            { number: "10,000+", label: "Students Enrolled" },
-            { number: "1,000+", label: "Tests Daily" },
-            { number: "Free", label: "Resources" },
+            { number: 10000, suffix: "+", label: "Students Enrolled" },
+            { number: 1000, suffix: "+", label: "Tests Daily" },
+            { number: 100, suffix: "%", label: "Free Resources" },
           ].map((stat, idx) => (
             <Card
               key={idx}
@@ -237,7 +251,16 @@ export default function Home() {
             >
               <CardContent className="p-6">
                 <p className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-[#2E4A3C] to-[#9BCB77] bg-clip-text text-transparent">
-                  {stat.number}
+                  {statsInView ? (
+                    <CountUp
+                      end={stat.number}
+                      duration={2.5}
+                      separator=","
+                      suffix={stat.suffix}
+                    />
+                  ) : (
+                    "0"
+                  )}
                 </p>
                 <p className="text-gray-700 text-sm sm:text-base font-medium">
                   {stat.label}
@@ -249,7 +272,10 @@ export default function Home() {
       </section>
 
       {/* SUCCESS STORIES MARQUEE */}
-      <section className="max-w-6xl mx-auto mt-16 px-2 sm:px-0 no-scrollbar mb-8">
+      <section
+        ref={marqueeSectionRef}
+        className="max-w-6xl mx-auto mt-16 px-2 sm:px-0 no-scrollbar mb-8"
+      >
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C] text-center">
           Success Stories - Our Students, Our Pride
         </h2>
