@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
 import dynamic from "next/dynamic";
+import { AxiosError } from "axios";
 
 // Dynamically import the CoursesSection component with no SSR
 const CoursesSection = dynamic(
@@ -29,11 +30,11 @@ interface UserData {
   last_login?: string;
 }
 
-interface ApiResponse<T> {
-  data: T;
-}
+// interface ApiResponse<T> {
+//   data: T;
+// }
 
-interface UserResponse extends UserData {}
+// interface UserResponse extends UserData { }
 
 export default function StudentDashboard() {
   const params = useParams();
@@ -46,12 +47,10 @@ export default function StudentDashboard() {
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
 
   useEffect(() => {
-    // Redirect to login if not authenticated
     if (!isLoggedIn) {
       router.push("/login");
       return;
     }
-
     fetchUserData();
   }, [isLoggedIn, router]);
 
@@ -60,19 +59,24 @@ export default function StudentDashboard() {
       setLoading(true);
       setError(null);
 
-      const response = await api.get<UserResponse>("/auth/me");
+      const response = await api.get<UserData>("/auth/me");
 
       if (response.data) {
         setUserData(response.data);
       } else {
         throw new Error("No user data received");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching user data:", err);
-      setError(
-        err.response?.data?.message ||
+
+      if (err instanceof AxiosError) {
+        setError(
+          err.response?.data?.message ||
           "Failed to load user data. Please try again later."
-      );
+        );
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -230,9 +234,8 @@ export default function StudentDashboard() {
               </p>
               <div className="flex items-center">
                 <span
-                  className={`inline-block w-2 h-2 rounded-full ${
-                    userData?.is_active ? "bg-green-500" : "bg-red-500"
-                  } mr-2`}
+                  className={`inline-block w-2 h-2 rounded-full ${userData?.is_active ? "bg-green-500" : "bg-red-500"
+                    } mr-2`}
                 ></span>
                 <span className="text-2xl font-bold text-gray-800">
                   {userData?.is_active ? "Active" : "Inactive"}

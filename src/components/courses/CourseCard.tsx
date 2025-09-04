@@ -1,6 +1,7 @@
 import React from "react";
 import { Course } from "@/src/services/courseService";
 import Link from "next/link";
+import Image from "next/image";
 
 interface CourseCardProps {
   course: Course;
@@ -22,7 +23,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
         {course.thumbnailUrl ? (
-          <img
+          <Image
             src={course.thumbnailUrl}
             alt={course.title}
             className="w-full h-48 object-cover"

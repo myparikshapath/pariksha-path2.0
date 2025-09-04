@@ -86,7 +86,9 @@ export default function Navbar() {
             <Image
               src="/webLogo.png"
               alt="ParikshaPath Logo"
-              fill
+              // fill
+              height={800}
+              width={200}
               className="object-contain"
               priority
             />

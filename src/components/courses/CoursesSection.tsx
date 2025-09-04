@@ -14,7 +14,7 @@ const CoursesSection: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         if (activeTab === 'enrolled') {
           const courses = await fetchEnrolledCourses();
           setEnrolledCourses(courses);
@@ -57,21 +57,19 @@ const CoursesSection: React.FC = () => {
         <div className="flex space-x-2 bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('enrolled')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              activeTab === 'enrolled'
-                ? 'bg-white shadow-sm text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${activeTab === 'enrolled'
+              ? 'bg-white shadow-sm text-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+              }`}
           >
             My Courses
           </button>
           <button
             onClick={() => setActiveTab('available')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              activeTab === 'available'
-                ? 'bg-white shadow-sm text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${activeTab === 'available'
+              ? 'bg-white shadow-sm text-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+              }`}
           >
             Browse Courses
           </button>
@@ -138,7 +136,7 @@ const CoursesSection: React.FC = () => {
                 No courses yet
               </h3>
               <p className="mt-1 text-sm text-gray-500">
-                You haven't enrolled in any courses yet. Browse our available courses to get started.
+                You haven&apos;t enrolled in any courses yet. Browse our available courses to get started.
               </p>
               <div className="mt-6">
                 <button
