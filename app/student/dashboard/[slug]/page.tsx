@@ -1,134 +1,104 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
 
 // Types
-interface DashboardData {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    preferred_exam_categories: string[];
-    enrolled_courses: any[];
-    purchased_test_series: any[];
-  };
-  analytics: {
-    performance: Array<{ subject: string; accuracy: number }>;
-    total_tests: number;
-    avg_score: number;
-    study_time: number;
-  };
-  recent_activity: any[];
-  exam_categories: string[];
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  is_active: boolean;
+  is_verified: boolean;
+  enrolled_courses: string[];
+  preferred_exam_categories: string[];
+  purchased_test_series: string[];
+  has_premium_access: boolean;
+  created_at: string;
+  last_login?: string;
 }
 
-export default function DynamicStudentDashboard() {
-  const { slug } = useParams();
+interface ApiResponse<T> {
+  data: T;
+}
+
+interface UserResponse extends UserData {}
+
+export default function StudentDashboard() {
+  const params = useParams();
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const { isLoggedIn } = useAuth() as { isLoggedIn: boolean };
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const colors = ["#0000D3", "#FF6B6B", "#4CAF50"];
+  const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
 
   useEffect(() => {
+    // Redirect to login if not authenticated
     if (!isLoggedIn) {
       router.push("/login");
       return;
     }
-    fetchDashboardData();
-  }, [isLoggedIn, slug]);
 
-  const fetchDashboardData = async () => {
+    fetchUserData();
+  }, [isLoggedIn, router]);
+
+  const fetchUserData = async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      // Fetch multiple data sources in parallel
-      const [userResponse, analyticsResponse, coursesResponse, testsResponse, categoriesResponse] = await Promise.all([
-        api.get('/auth/me'),
-        api.get('/analytics/user'),
-        api.get('/courses/enrolled'),
-        api.get('/tests/attempts?limit=5'),
-        api.get('/exam-categories/')
-      ]);
+      const response = await api.get<UserResponse>("/auth/me");
 
-      const [userData, analyticsData, coursesData, testsData, categoriesData] = await Promise.all([
-        userResponse.data,
-        analyticsResponse.data,
-        coursesResponse.data,
-        testsResponse.data,
-        categoriesResponse.data
-      ]);
-
-      // Transform data for dashboard
-      const transformedData: DashboardData = {
-        user: userData.user,
-        analytics: {
-          performance: analyticsData.analytics?.subject_performance ?
-            Object.entries(analyticsData.analytics.subject_performance).map(([subject, data]: [string, any]) => ({
-              subject,
-              accuracy: Math.round(data.accuracy * 100)
-            })) : [
-              { subject: "Maths", accuracy: 75 },
-              { subject: "English", accuracy: 60 },
-              { subject: "Reasoning", accuracy: 85 }
-            ],
-          total_tests: analyticsData.analytics?.tests_taken || 0,
-          avg_score: analyticsData.analytics?.avg_test_score || 0,
-          study_time: analyticsData.analytics?.total_study_time_minutes || 0
-        },
-        recent_activity: testsData.attempts || [],
-        exam_categories: categoriesData.structure ?
-          Object.keys(categoriesData.structure) :
-          ["Defence", "State Exams", "Banking", "SSC"]
-      };
-
-      setDashboardData(transformedData);
-    } catch (err: any) {
-      console.error('Dashboard data fetch error:', err);
-      
-      // Handle specific error types
-      if (err.response?.status === 401) {
-        setError('Session expired. Please login again.');
-        // The API interceptor will handle redirect
-      } else if (err.response?.status === 500) {
-        setError('Server error. Please try again later.');
+      if (response.data) {
+        setUserData(response.data);
       } else {
-        setError('Failed to load dashboard data. Please check your connection.');
+        throw new Error("No user data received");
       }
+    } catch (err: any) {
+      console.error("Error fetching user data:", err);
+      setError(
+        err.response?.data?.message ||
+          "Failed to load user data. Please try again later."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   if (!isLoggedIn) {
-    return <p>Checking authentication...</p>;
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-10 pt-32">
+        <p>Redirecting to login...</p>
+      </div>
+    );
   }
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-10 pt-32">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#0000D3]"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0000D3]"></div>
         </div>
       </div>
     );
   }
 
-  if (error || !dashboardData) {
+  if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-10 pt-32">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Dashboard</h2>
-          <p className="text-gray-600 mb-4">{error || 'Unable to load dashboard data'}</p>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Error Loading User Data
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={fetchDashboardData}
+            onClick={fetchUserData}
             className="px-6 py-2 bg-[#0000D3] text-white rounded-lg hover:bg-blue-900 transition"
           >
             Retry
@@ -139,187 +109,137 @@ export default function DynamicStudentDashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 pt-32">
-      {/* Welcome Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between bg-gradient-to-r from-[#0000D3] to-[#4a4ae4] p-6 rounded-xl shadow-lg text-white"
-      >
-        <div>
-          <h1 className="text-3xl font-extrabold">
-            Welcome, {dashboardData.user.name}! 🎉
-          </h1>
-          <p className="mt-1 text-sm text-blue-100">
-            Track your progress and continue learning.
-          </p>
-          {slug && (
-            <p className="mt-2 text-xs text-blue-200">
-              Dashboard View: {slug}
+    <div className="max-w-7xl mx-auto px-4 py-10 pt-32">
+      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome, {userData?.name || "Student"}! 👋
+              {userData?.has_premium_access && (
+                <span className="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                  Premium
+                </span>
+              )}
+            </h1>
+            <p className="text-gray-600">{userData?.email}</p>
+            <p className="text-gray-500 text-sm">
+              Member since{" "}
+              {userData?.created_at
+                ? new Date(userData.created_at).toLocaleDateString()
+                : "N/A"}
             </p>
-          )}
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">
+              {userData?.is_verified ? (
+                <span className="text-green-600">✓ Verified Account</span>
+              ) : (
+                <span className="text-yellow-600">Unverified Account</span>
+              )}
+            </p>
+            {userData?.last_login && (
+              <p className="text-xs text-gray-400">
+                Last login: {new Date(userData.last_login).toLocaleString()}
+              </p>
+            )}
+          </div>
         </div>
-        <Link href="/student/profile">
-          <button className="mt-4 md:mt-0 px-6 py-2 bg-white text-[#0000D3] font-semibold rounded-lg shadow hover:shadow-md transition">
-            View Profile
-          </button>
-        </Link>
-      </motion.div>
 
-      {/* Stats Overview */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Your Progress</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <h3 className="text-sm font-medium text-gray-500">Tests Taken</h3>
-            <p className="text-3xl font-bold text-[#0000D3]">{dashboardData.analytics.total_tests}</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <h3 className="text-sm font-medium text-gray-500">Average Score</h3>
-            <p className="text-3xl font-bold text-green-600">{Math.round(dashboardData.analytics.avg_score)}%</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <h3 className="text-sm font-medium text-gray-500">Study Time</h3>
-            <p className="text-3xl font-bold text-purple-600">{Math.round(dashboardData.analytics.study_time / 60)}h</p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <h3 className="text-sm font-medium text-gray-500">Courses Enrolled</h3>
-            <p className="text-3xl font-bold text-orange-600">{dashboardData.user.enrolled_courses.length}</p>
-          </motion.div>
-        </div>
-      </section>
+        {slug && (
+          <div className="mt-4">
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+              Viewing: {slug}
+            </span>
+          </div>
+        )}
+      </div>
 
-      {/* Exam Categories */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          Explore Exam Categories
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {dashboardData.exam_categories.map((cat, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.05, y: -4 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="p-6 rounded-xl shadow-md bg-white border border-gray-100 text-center font-semibold text-gray-800 hover:shadow-lg hover:bg-blue-50 cursor-pointer"
-            >
-              {cat}
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Account Details */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Account Details</h2>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">User ID</h3>
+              <p className="text-gray-800 font-mono text-sm">
+                {userData?.id || "N/A"}
+              </p>
+            </div>
 
-      {/* Enrolled Courses & Recent Tests */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          Your Courses & Recent Tests
-        </h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {dashboardData.user.enrolled_courses.slice(0, 4).map((course, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-xl shadow-md border border-gray-100 p-5 flex justify-between items-center hover:shadow-lg transition"
-            >
-              <div>
-                <p className="font-semibold text-gray-800">{course.title || course.name}</p>
-                <p className="text-sm text-gray-500">Course</p>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Phone</h3>
+              <p className="text-gray-800">
+                {userData?.phone || "Not provided"}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">
+                Account Status
+              </h3>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-block w-2 h-2 rounded-full ${
+                    userData?.is_active ? "bg-green-500" : "bg-red-500"
+                  }`}
+                ></span>
+                <span>{userData?.is_active ? "Active" : "Inactive"}</span>
               </div>
-              <Link href={`/student/courses/${course.id || course.code}`}>
-                <button className="px-4 py-2 bg-[#0000D3] text-white rounded-sm shadow hover:bg-blue-900 transition">
-                  Continue
-                </button>
-              </Link>
-            </motion.div>
-          ))}
+            </div>
+          </div>
         </div>
-      </section>
 
-      {/* Performance Analytics */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          Performance Analytics
-        </h2>
-        <div className="bg-white shadow-md rounded-sm p-6 w-full h-80 md:h-96">
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={dashboardData.analytics.performance}
-                dataKey="accuracy"
-                nameKey="subject"
-                outerRadius={120}
-                innerRadius={50}
-                label
-              >
-                {dashboardData.analytics.performance.map((_, index) => (
-                  <Cell
+        {/* Exam Categories */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-xl font-semibold mb-4">Exam Categories</h2>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-2">
+              Preferred Categories
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {userData?.preferred_exam_categories?.length ? (
+                userData.preferred_exam_categories.map((category, index) => (
+                  <span
                     key={index}
-                    fill={colors[index % colors.length]}
-                    stroke="#fff"
-                    strokeWidth={2}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    {category}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  No preferred categories selected
+                </p>
+              )}
+            </div>
 
-      {/* Quick Actions */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          Quick Actions
-        </h2>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/student/tests">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="px-6 py-3 bg-[#0000D3] text-white font-semibold rounded-sm shadow hover:bg-blue-900 transition"
-            >
-              Attempt a Test
-            </motion.button>
-          </Link>
-          <Link href="/student/analysis">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="px-6 py-3 border border-[#0000D3] text-[#0000D3] font-semibold rounded-sm hover:bg-blue-50 transition"
-            >
-              View Detailed Analysis
-            </motion.button>
-          </Link>
-          <Link href="/student/materials">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              className="px-6 py-3 border border-[#0000D3] text-[#0000D3] font-semibold rounded-sm hover:bg-blue-50 transition"
-            >
-              Study Materials
-            </motion.button>
-          </Link>
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Enrolled Courses
+              </h3>
+              {userData?.enrolled_courses?.length ? (
+                <div className="space-y-2">
+                  {userData.enrolled_courses
+                    .slice(0, 3)
+                    .map((courseId, index) => (
+                      <div key={index} className="flex items-center text-sm">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        <span className="truncate">Course ID: {courseId}</span>
+                      </div>
+                    ))}
+                  {userData.enrolled_courses.length > 3 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      +{userData.enrolled_courses.length - 3} more courses
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No courses enrolled yet</p>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
