@@ -32,8 +32,14 @@ export default function Login() {
                 router.push(`/verify-otp?email=${form.email}&type=login`);
             } else {
                 const userRole = res.data.user?.role === "admin" ? "admin" : "student";
-                login(res.data.tokens.access_token, userRole);
-                localStorage.setItem("refresh_token", res.data.tokens.refresh_token);
+                const { access_token, refresh_token } = res.data.tokens;
+                
+                // Store tokens in localStorage
+                localStorage.setItem("access_token", access_token);
+                localStorage.setItem("refresh_token", refresh_token);
+                
+                // Update auth context
+                login(access_token, userRole);
 
                 if (res.data.user.role === "admin") {
                     router.push("/admin/dashboard");
