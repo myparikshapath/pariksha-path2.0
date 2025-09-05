@@ -34,7 +34,10 @@ const CoursesSection: React.FC = () => {
     };
 
     loadCourses();
-  }, [activeTab, enrolledCourses.length]);
+    // We're intentionally not including enrolledCourses in the dependency array
+    // to prevent infinite loops, as we only care about its length for the initial fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const handleEnroll = async (courseId: string) => {
     try {

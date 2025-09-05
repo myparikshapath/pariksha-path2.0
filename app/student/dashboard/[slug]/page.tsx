@@ -30,11 +30,7 @@ interface UserData {
   last_login?: string;
 }
 
-// interface ApiResponse<T> {
-//   data: T;
-// }
-
-// interface UserResponse extends UserData { }
+// Remove empty interface
 
 export default function StudentDashboard() {
   const params = useParams();
@@ -66,17 +62,10 @@ export default function StudentDashboard() {
       } else {
         throw new Error("No user data received");
       }
-    } catch (err: unknown) {
-      console.error("Error fetching user data:", err);
-
-      if (err instanceof AxiosError) {
-        setError(
-          err.response?.data?.message ||
-          "Failed to load user data. Please try again later."
-        );
-      } else {
-        setError("An unexpected error occurred.");
-      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to load user data. Please try again later.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
