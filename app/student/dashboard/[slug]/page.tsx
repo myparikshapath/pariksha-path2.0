@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
 import dynamic from "next/dynamic";
+import { AxiosError } from "axios";
 
 // Dynamically import the CoursesSection component with no SSR
 const CoursesSection = dynamic(
@@ -42,12 +43,10 @@ export default function StudentDashboard() {
   const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
 
   useEffect(() => {
-    // Redirect to login if not authenticated
     if (!isLoggedIn) {
       router.push("/login");
       return;
     }
-
     fetchUserData();
   }, [isLoggedIn, router]);
 
@@ -224,9 +223,8 @@ export default function StudentDashboard() {
               </p>
               <div className="flex items-center">
                 <span
-                  className={`inline-block w-2 h-2 rounded-full ${
-                    userData?.is_active ? "bg-green-500" : "bg-red-500"
-                  } mr-2`}
+                  className={`inline-block w-2 h-2 rounded-full ${userData?.is_active ? "bg-green-500" : "bg-red-500"
+                    } mr-2`}
                 ></span>
                 <span className="text-2xl font-bold text-gray-800">
                   {userData?.is_active ? "Active" : "Inactive"}
