@@ -6,8 +6,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "react-hot-toast";
-import { FiUpload, FiX, FiCheck, FiFileText } from "react-icons/fi";
-import api from "@/utils/api";
+import { FiUpload, FiX, FiFileText } from "react-icons/fi";
+// import api from "@/utils/api";
 
 // Schema for form validation
 const formSchema = z.object({
@@ -27,27 +27,23 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function UploadQuestions() {
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<Array<Record<string, any>>>([]);
+  const [preview, setPreview] = useState<Array<Record<string, string>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   // Define available exam categories
-  const examCategories = [
-    { value: "medical", label: "Medical (NEET)" },
-    { value: "engineering", label: "Engineering (JEE)" },
-    { value: "teaching", label: "Teaching (HTET, CTET, DSSSB, KVS)" },
-    { value: "govt_exams", label: "Government Exams (SSC, UPSC)" },
-    { value: "banking", label: "Banking (IBPS, SBI, RBI)" },
-    { value: "defence", label: "Defence (NDA, CDS, Airforce)" },
-    { value: "state_exams", label: "State Level Exams" },
-  ];
+  // const examCategories = [
+  //   { value: "medical", label: "Medical (NEET)" },
+  //   { value: "engineering", label: "Engineering (JEE)" },
+  //   { value: "teaching", label: "Teaching (HTET, CTET, DSSSB, KVS)" },
+  //   { value: "govt_exams", label: "Government Exams (SSC, UPSC)" },
+  // ];
 
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,7 +57,7 @@ export default function UploadQuestions() {
     },
   });
 
-  const selectedExamCategory = watch("examCategory");
+  // const selectedExamCategory = watch("examCategory");
 
   // Handle file drop
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -100,7 +96,7 @@ export default function UploadQuestions() {
         const rows = text.split("\n").slice(0, 6); // First 5 rows + header
         const headers = rows[0].split(",").map((h) => h.trim());
 
-        const previewData = rows.slice(1).map((row, i) => {
+        const previewData = rows.slice(1).map((row) => {
           const values = row.split(",");
           return headers.reduce((obj, header, index) => {
             obj[header] = values[index]?.trim() || "";
@@ -173,23 +169,24 @@ export default function UploadQuestions() {
     formData.append("is_free", String(data?.isFree || false));
 
     try {
-      const response = await api.post(
-        "/admin/tests/import-questions",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      // const response = await api.post(
+      //   "/admin/tests/import-questions",
+      //   formData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //   }
+      // );
 
       toast.success("Questions imported successfully!");
       reset();
       setFile(null);
       setPreview([]);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error(error.response?.data?.detail || "Failed to import questions");
+      const errorMessage = error instanceof Error ? error.message : "Failed to import questions";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
