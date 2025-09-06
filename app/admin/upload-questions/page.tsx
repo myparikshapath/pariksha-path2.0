@@ -1,43 +1,39 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import Papa from "papaparse";
 import { toast } from "react-hot-toast";
 import { FiUpload, FiX, FiFileText } from "react-icons/fi";
-// import api from "@/utils/api";
+import api from "@/utils/api";
 
-// Schema for form validation
+/**
+ * Validation schema
+ * - z.enum requires `as const` for literal tuple typing
+ */
 const formSchema = z.object({
   testTitle: z.string().min(3, "Test title is required").max(100),
   examCategory: z.string().min(1, "Exam category is required"),
   subject: z.string().min(1, "Subject is required"),
   topic: z.string().optional(),
-  difficulty: z.string().min(1, "Difficulty is required"),
+  difficulty: z.enum(["easy", "medium", "hard"] as const),
   durationMinutes: z
     .number()
     .int()
-    .positive("Duration must be a positive number"),
-  isFree: z.boolean().default(false).optional(),
+    .positive("Duration must be a positive integer"),
+  isFree: z.boolean(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function UploadQuestions() {
+const UploadQuestions = () => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<Array<Record<string, string>>>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-
-  // Define available exam categories
-  // const examCategories = [
-  //   { value: "medical", label: "Medical (NEET)" },
-  //   { value: "engineering", label: "Engineering (JEE)" },
-  //   { value: "teaching", label: "Teaching (HTET, CTET, DSSSB, KVS)" },
-  //   { value: "govt_exams", label: "Government Exams (SSC, UPSC)" },
-  // ];
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
@@ -51,142 +47,96 @@ export default function UploadQuestions() {
       examCategory: "",
       subject: "",
       topic: undefined,
-      difficulty: "MEDIUM",
+      difficulty: "medium",
       durationMinutes: 60,
       isFree: false,
     },
   });
 
-  // const selectedExamCategory = watch("examCategory");
-
-  // Handle file drop
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log("Files received:", acceptedFiles);
-    const csvFile = acceptedFiles[0];
-
-    if (!csvFile) {
-      console.log("No file received");
+    const csv = acceptedFiles[0];
+    if (!csv) {
+      setPreviewError("No file selected");
       return;
     }
 
-    console.log("File details:", {
-      name: csvFile.name,
-      type: csvFile.type,
-      size: csvFile.size,
-      lastModified: csvFile.lastModified,
-    });
-
-    // Validate file type by extension
-    if (!csvFile.name.toLowerCase().endsWith(".csv")) {
-      const errorMsg = `Invalid file type: ${csvFile.name}. Please upload a .csv file`;
-      console.error(errorMsg);
-      setPreviewError(errorMsg);
+    if (!csv.name.toLowerCase().endsWith(".csv")) {
+      setPreviewError("Invalid file type. Please upload a .csv file.");
       return;
     }
 
-    console.log("File is valid, setting state...");
-    setFile(csvFile);
+    setFile(csv);
     setPreviewError(null);
 
-    // Preview first 5 rows
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        const rows = text.split("\n").slice(0, 6); // First 5 rows + header
-        const headers = rows[0].split(",").map((h) => h.trim());
-
-        const previewData = rows.slice(1).map((row) => {
-          const values = row.split(",");
-          return headers.reduce((obj, header, index) => {
-            obj[header] = values[index]?.trim() || "";
-            return obj;
-          }, {} as Record<string, string>);
-        });
-
-        setPreview(previewData);
-      } catch (error) {
-        console.error("Error parsing CSV:", error);
-        setPreviewError("Error parsing CSV file. Please check the format.");
-      }
-    };
-    reader.readAsText(csvFile);
+    Papa.parse<Record<string, string>>(csv, {
+      header: true,
+      skipEmptyLines: true,
+      preview: 6, // read small amount for preview (header + 5 rows)
+      complete: (results) => {
+        if (results.errors && results.errors.length > 0) {
+          console.error("CSV parse errors:", results.errors);
+          setPreviewError("Error parsing CSV. Check file format.");
+          setPreview([]);
+          return;
+        }
+        const rows = results.data ?? [];
+        setPreview(rows.slice(0, 5));
+      },
+      error: (err) => {
+        console.error("Papa parse error:", err);
+        setPreviewError("Failed to read CSV file.");
+        setPreview([]);
+      },
+    });
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    // Be more permissive with accepted files
-    accept: {
-      "text/csv": [".csv"],
-      "application/vnd.ms-excel": [".csv"],
-      "application/csv": [".csv"],
-      "text/plain": [".csv"],
-      "application/octet-stream": [".csv"],
-      "": [".csv"], // Fallback for any file type
-    },
+    accept: { "text/csv": [".csv"] },
     maxFiles: 1,
     multiple: false,
-    // Add error handling
-    onError: (err) => {
-      console.error("Dropzone error:", err);
-      setPreviewError("Error processing file. Please try again.");
-    },
-    // Disable click-to-upload to force drag and drop
-    // noClick: true,
-    // Disable keyboard navigation
     noKeyboard: true,
-    // Disable click on the dropzone container
-    noClick: false,
   });
 
   const removeFile = () => {
     setFile(null);
     setPreview([]);
+    setPreviewError(null);
   };
 
   const onSubmit = async (data: FormData) => {
     if (!file) {
-      toast.error("Please select a CSV file");
-      return;
-    }
-
-    // Validate exam category
-    if (!data.examCategory) {
-      toast.error("Please select an exam category");
+      toast.error("Please attach a CSV file");
       return;
     }
 
     setIsLoading(true);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("test_title", data.testTitle);
-    formData.append("exam_category", data.examCategory.toUpperCase());
-    formData.append("exam_subcategory", data.examCategory); // Using same as category for now
+    // backend expects exam_category as lowercase enum values
+    formData.append("exam_category", data.examCategory.toLowerCase());
+    formData.append("exam_subcategory", data.examCategory);
     formData.append("subject", data.subject);
     if (data.topic) formData.append("topic", data.topic);
-    formData.append("difficulty", data.difficulty.toUpperCase());
-    formData.append("duration_minutes", data.durationMinutes.toString());
-    formData.append("is_free", String(data?.isFree || false));
+    formData.append("difficulty", data.difficulty.toLowerCase());
+    formData.append("duration_minutes", String(data.durationMinutes));
+    formData.append("is_free", String(Boolean(data.isFree)).toLowerCase());
 
     try {
-      // const response = await api.post(
-      //   "/admin/tests/import-questions",
-      //   formData,
-      //   {
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   }
-      // );
-
-      toast.success("Questions imported successfully!");
+      const resp = await api.post("/admin/import-questions", formData);
+      console.log("import response:", resp?.data);
+      toast.success("Questions imported successfully");
       reset();
-      setFile(null);
-      setPreview([]);
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to import questions";
-      toast.error(errorMessage);
+      removeFile();
+    } catch (err: any) {
+      console.error("upload error:", err);
+      const message =
+        err?.response?.data?.detail ??
+        err?.message ??
+        "Failed to import questions";
+      toast.error(String(message));
     } finally {
       setIsLoading(false);
     }
@@ -194,15 +144,16 @@ export default function UploadQuestions() {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Upload Questions</h1>
+      <h1 className="text-2xl font-semibold mb-6">Upload Questions</h1>
 
       <div className="bg-white rounded-lg shadow p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* File Upload */}
+          {/* File upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload CSV File
             </label>
+
             <div className="space-y-4">
               <div
                 {...getRootProps()}
@@ -211,23 +162,22 @@ export default function UploadQuestions() {
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 hover:border-blue-400"
                 }`}
+                data-testid="dropzone"
               >
                 <input {...getInputProps()} className="hidden" />
                 <div className="flex flex-col items-center justify-center space-y-2">
                   <FiUpload className="w-8 h-8 text-gray-400" />
-                  {isDragActive ? (
-                    <p className="text-blue-600">Drop the CSV file here</p>
-                  ) : (
-                    <p className="text-gray-600">
-                      Drag and drop a CSV file here
-                    </p>
-                  )}
+                  <p className="text-gray-600">
+                    {isDragActive
+                      ? "Drop CSV here"
+                      : "Drag and drop a CSV file here"}
+                  </p>
                 </div>
               </div>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
+                  <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-gray-500">or</span>
@@ -235,16 +185,15 @@ export default function UploadQuestions() {
               </div>
 
               <div className="flex justify-center">
-                <label className="cursor-pointer bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <label className="cursor-pointer bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
                   Select CSV File
                   <input
                     type="file"
+                    accept=".csv,text/csv"
                     className="sr-only"
-                    accept=".csv,text/csv,application/vnd.ms-excel,application/csv,text/plain"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
                         onDrop(Array.from(e.target.files));
-                        // Reset the input value to allow selecting the same file again
                         e.target.value = "";
                       }
                     }}
@@ -253,7 +202,8 @@ export default function UploadQuestions() {
               </div>
 
               <p className="text-xs text-center text-gray-500">
-                Supports .csv files with question data
+                Supported: CSV with question rows (Question, Option A-D, Correct
+                Answer, etc.)
               </p>
             </div>
 
@@ -265,13 +215,14 @@ export default function UploadQuestions() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {file?.name}
+                      {file.name}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {file ? Math.round(file.size / 1024) : 0} KB
+                      {Math.round(file.size / 1024)} KB
                     </p>
                   </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={removeFile}
@@ -298,23 +249,22 @@ export default function UploadQuestions() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      {Object.keys(preview[0] || {}).map((header) => (
+                      {Object.keys(preview[0] || {}).map((h) => (
                         <th
-                          key={header}
-                          scope="col"
+                          key={h}
                           className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          {header}
+                          {h}
                         </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {preview.map((row, i) => (
-                      <tr key={i}>
-                        {Object.values(row).map((cell, j) => (
+                    {preview.map((row, ri) => (
+                      <tr key={ri}>
+                        {Object.values(row).map((cell, ci) => (
                           <td
-                            key={j}
+                            key={ci}
                             className="px-3 py-2 text-sm text-gray-900 truncate max-w-xs"
                           >
                             {String(cell)}
@@ -328,7 +278,7 @@ export default function UploadQuestions() {
             </div>
           )}
 
-          {/* Test Details Form */}
+          {/* Test details */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Test Details</h3>
 
@@ -344,10 +294,10 @@ export default function UploadQuestions() {
                     <input
                       {...field}
                       type="text"
-                      className={`w-full rounded-md border ${
-                        errors.testTitle ? "border-red-500" : "border-gray-300"
-                      } p-2`}
                       placeholder="Enter test title"
+                      className={`w-full rounded-md border p-2 ${
+                        errors.testTitle ? "border-red-500" : "border-gray-300"
+                      }`}
                     />
                   )}
                 />
@@ -368,11 +318,11 @@ export default function UploadQuestions() {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`w-full rounded-md border ${
+                      className={`w-full rounded-md border p-2 ${
                         errors.examCategory
                           ? "border-red-500"
                           : "border-gray-300"
-                      } p-2`}
+                      }`}
                     >
                       <option value="">Select category</option>
                       <option value="medical">Medical (NEET)</option>
@@ -409,10 +359,10 @@ export default function UploadQuestions() {
                     <input
                       {...field}
                       type="text"
-                      className={`w-full rounded-md border ${
-                        errors.subject ? "border-red-500" : "border-gray-300"
-                      } p-2`}
                       placeholder="e.g., Physics, Mathematics"
+                      className={`w-full rounded-md border p-2 ${
+                        errors.subject ? "border-red-500" : "border-gray-300"
+                      }`}
                     />
                   )}
                 />
@@ -434,8 +384,8 @@ export default function UploadQuestions() {
                     <input
                       {...field}
                       type="text"
-                      className="w-full rounded-md border border-gray-300 p-2"
                       placeholder="e.g., Thermodynamics, Algebra"
+                      className="w-full rounded-md border border-gray-300 p-2"
                     />
                   )}
                 />
@@ -451,23 +401,77 @@ export default function UploadQuestions() {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`w-full rounded-md border `}
+                      className={`w-full rounded-md border p-2 ${
+                        errors.difficulty ? "border-red-500" : "border-gray-300"
+                      }`}
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </select>
+                  )}
+                />
+                {errors.difficulty && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.difficulty.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration (minutes) *
+                </label>
+                <Controller
+                  name="durationMinutes"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      {...field}
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        // prevent NaN assignment; keep controlled as number
+                        field.onChange(Number.isNaN(v) ? undefined : v);
+                      }}
+                      className={`w-full rounded-md border p-2 ${
+                        errors.durationMinutes
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     />
                   )}
                 />
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="isFree"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor="isFree"
-                    className="ml-2 block text-sm text-gray-700"
-                  >
-                    Free Test
-                  </label>
-                </div>
+                {errors.durationMinutes && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.durationMinutes.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center mt-6">
+                <Controller
+                  name="isFree"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                  )}
+                />
+
+                <label className="ml-2 block text-sm text-gray-700">
+                  Free Test
+                </label>
               </div>
             </div>
           </div>
@@ -477,14 +481,14 @@ export default function UploadQuestions() {
               type="button"
               onClick={() => {
                 reset();
-                setFile(null);
-                setPreview([]);
+                removeFile();
               }}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               disabled={isLoading}
             >
               Reset
             </button>
+
             <button
               type="submit"
               disabled={isLoading || !file}
@@ -505,5 +509,6 @@ export default function UploadQuestions() {
       </div>
     </div>
   );
-}
+};
 
+export default UploadQuestions;
