@@ -19,14 +19,16 @@ export default function AdminDashboard() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 cursor-pointer">
-          <div className="bg-[#2E4A3C] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
-            <Link
-              href="/admin/users"
-            >
-              <h2 className="text-lg font-semibold">Users</h2>
-              <p className="text-sm">Manage registered users</p>
-            </Link>
-          </div>
+          {/* <div className="bg-[#2E4A3C] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"> */}
+          <Link
+            href="/admin/users"
+            className="bg-[#2E4A3C] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
+
+          >
+            <h2 className="text-lg font-semibold">Users</h2>
+            <p className="text-sm">Manage registered users</p>
+          </Link>
+          {/* </div> */}
           {/* <div className="bg-[#1d3328] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
             <h2 className="text-lg font-semibold">Reports</h2>
             <p className="text-sm">View system activity reports</p>

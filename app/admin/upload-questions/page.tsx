@@ -130,14 +130,27 @@ const UploadQuestions = () => {
       toast.success("Questions imported successfully");
       reset();
       removeFile();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("upload error:", err);
-      const message =
-        err?.response?.data?.detail ??
-        err?.message ??
-        "Failed to import questions";
-      toast.error(String(message));
-    } finally {
+
+      let message = "Failed to import questions";
+
+      if (typeof err === "object" && err !== null) {
+        if ("response" in err) {
+          message =
+            (err as { response?: { data?: { detail?: string } } }).response?.data
+              ?.detail ?? message;
+        }
+        if ("message" in err) {
+          message =
+            (err as { message?: string }).message ??
+            message;
+        }
+      }
+
+      toast.error(message);
+    }
+    finally {
       setIsLoading(false);
     }
   };
@@ -157,11 +170,10 @@ const UploadQuestions = () => {
             <div className="space-y-4">
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                  isDragActive
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300 hover:border-blue-400"
-                }`}
+                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-300 hover:border-blue-400"
+                  }`}
                 data-testid="dropzone"
               >
                 <input {...getInputProps()} className="hidden" />
@@ -295,9 +307,8 @@ const UploadQuestions = () => {
                       {...field}
                       type="text"
                       placeholder="Enter test title"
-                      className={`w-full rounded-md border p-2 ${
-                        errors.testTitle ? "border-red-500" : "border-gray-300"
-                      }`}
+                      className={`w-full rounded-md border p-2 ${errors.testTitle ? "border-red-500" : "border-gray-300"
+                        }`}
                     />
                   )}
                 />
@@ -318,11 +329,10 @@ const UploadQuestions = () => {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`w-full rounded-md border p-2 ${
-                        errors.examCategory
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-full rounded-md border p-2 ${errors.examCategory
+                        ? "border-red-500"
+                        : "border-gray-300"
+                        }`}
                     >
                       <option value="">Select category</option>
                       <option value="medical">Medical (NEET)</option>
@@ -360,9 +370,8 @@ const UploadQuestions = () => {
                       {...field}
                       type="text"
                       placeholder="e.g., Physics, Mathematics"
-                      className={`w-full rounded-md border p-2 ${
-                        errors.subject ? "border-red-500" : "border-gray-300"
-                      }`}
+                      className={`w-full rounded-md border p-2 ${errors.subject ? "border-red-500" : "border-gray-300"
+                        }`}
                     />
                   )}
                 />
@@ -401,9 +410,8 @@ const UploadQuestions = () => {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`w-full rounded-md border p-2 ${
-                        errors.difficulty ? "border-red-500" : "border-gray-300"
-                      }`}
+                      className={`w-full rounded-md border p-2 ${errors.difficulty ? "border-red-500" : "border-gray-300"
+                        }`}
                     >
                       <option value="easy">Easy</option>
                       <option value="medium">Medium</option>
@@ -437,11 +445,10 @@ const UploadQuestions = () => {
                         // prevent NaN assignment; keep controlled as number
                         field.onChange(Number.isNaN(v) ? undefined : v);
                       }}
-                      className={`w-full rounded-md border p-2 ${
-                        errors.durationMinutes
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
+                      className={`w-full rounded-md border p-2 ${errors.durationMinutes
+                        ? "border-red-500"
+                        : "border-gray-300"
+                        }`}
                     />
                   )}
                 />
@@ -492,17 +499,16 @@ const UploadQuestions = () => {
             <button
               type="submit"
               disabled={isLoading || !file}
-              className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                isLoading || !file
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isLoading || !file
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
               {isLoading
                 ? "Uploading..."
                 : file
-                ? `Upload ${file.name}`
-                : "Upload Questions"}
+                  ? `Upload ${file.name}`
+                  : "Upload Questions"}
             </button>
           </div>
         </form>

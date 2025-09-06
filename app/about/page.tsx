@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function About() {
     return (
@@ -27,8 +28,19 @@ export default function About() {
                     viewport={{ once: true }}
                     className="space-y-4"
                 >
-                    <div className="w-full h-48 md:h-60 bg-gradient-to-r from-green-200 to-green-400 rounded-xl shadow-lg"></div>
-                    <div className="w-full h-48 md:h-60 bg-gradient-to-r from-green-100 to-green-300 rounded-xl shadow-lg"></div>
+                    {/* <div className="w-full h-48 md:h-60 bg-gradient-to-r from-green-200 to-green-400 rounded-xl shadow-lg"></div> */}
+                    <div className="w-full h-48 md:h-60 bg-gradient-to-r from-green-100 to-green-300 rounded-xl shadow-lg relative overflow-hidden transform transition-transform duration-200 hover:scale-102">
+                        <Image
+                            src="/bg1.jpeg"
+                            alt="Pariksha-Path-bg"
+                            fill
+                            className="object-cover rounded-xl"
+                            priority
+                        />
+                    </div>
+
+
+
                 </motion.div>
             </section>
 

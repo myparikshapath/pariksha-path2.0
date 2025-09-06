@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
 import dynamic from "next/dynamic";
-import { AxiosError } from "axios";
+// import { AxiosError } from "axios";
 
 // Dynamically import the CoursesSection component with no SSR
 const CoursesSection = dynamic(

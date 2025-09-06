@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import api from "@/utils/api";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AxiosError } from "axios";
 
 interface Student {
     id: string;
@@ -38,8 +39,9 @@ export default function StudentsPage() {
             setStudents(res.data.data);
             setPagination(res.data.pagination);
             setPage(pageNumber);
-        } catch (err: any) {
-            alert(err.message);
+        } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            alert(err.response?.data?.message || err.message || "Failed to fetch students");
         } finally {
             setLoading(false);
         }
@@ -50,8 +52,9 @@ export default function StudentsPage() {
         try {
             await api.delete(`/admin/students/${id}`);
             fetchStudents(page);
-        } catch (err: any) {
-            alert(err.message);
+        } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            alert(err.response?.data?.message || err.message || "Failed to fetch students");
         }
     };
 
@@ -60,8 +63,9 @@ export default function StudentsPage() {
         try {
             await api.put(`/admin/students/${id}`, { is_active: true });
             fetchStudents(page);
-        } catch (err: any) {
-            alert(err.message);
+        } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            alert(err.response?.data?.message || err.message || "Failed to fetch students");
         }
     };
 
