@@ -20,33 +20,37 @@ export default function AdminDashboard() {
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 cursor-pointer">
           <div className="bg-[#2E4A3C] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
-            <h2 className="text-lg font-semibold">Users</h2>
-            <p className="text-sm">Manage registered users</p>
+            <Link
+              href="/admin/users"
+            >
+              <h2 className="text-lg font-semibold">Users</h2>
+              <p className="text-sm">Manage registered users</p>
+            </Link>
           </div>
-          <div className="bg-[#1d3328] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
+          {/* <div className="bg-[#1d3328] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
             <h2 className="text-lg font-semibold">Reports</h2>
             <p className="text-sm">View system activity reports</p>
-          </div>
-          <div className="bg-green-600 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
+          </div> */}
+          {/* <div className="bg-green-600 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
             <h2 className="text-lg font-semibold">Settings</h2>
             <p className="text-sm">Configure application settings</p>
-          </div>
-          <div className="bg-green-700 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
+          </div> */}
+          {/* <div className="bg-green-700 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
             <h2 className="text-lg font-semibold">Logs</h2>
             <p className="text-sm">Check audit logs</p>
-          </div>
-          <div className="bg-emerald-500 text-white p-6 
+          </div> */}
+          {/* <div className="bg-emerald-500 text-white p-6 
           rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
             <h2 className="text-lg font-semibold">Analytics</h2>
             <p className="text-sm">Track usage & performance</p>
-          </div>
-          <div
+          </div> */}
+          {/* <div
             className="bg-emerald-700 text-white p-6
            rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
             <h2 className="text-lg font-semibold">Support</h2>
             <p className="text-sm">Handle user queries</p>
-          </div>
+          </div> */}
           <Link
             href="/admin/upload-questions"
             className="bg-emerald-900 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"

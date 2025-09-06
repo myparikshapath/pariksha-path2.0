@@ -33,11 +33,11 @@ export default function Login() {
             } else {
                 const userRole = res.data.user?.role === "admin" ? "admin" : "student";
                 const { access_token, refresh_token } = res.data.tokens;
-                
+
                 // Store tokens in localStorage
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("refresh_token", refresh_token);
-                
+
                 // Update auth context
                 login(access_token, userRole);
 
