@@ -2,8 +2,8 @@
 import axios, { AxiosError } from "axios";
 
 const api = axios.create({
-	// baseURL: "http://localhost:8000/api/v1",
-	baseURL: "https://pariksha-path-backend.vercel.app/api/v1",
+	baseURL: "http://localhost:8000/api/v1",
+	// baseURL: "https://pariksha-path-backend.vercel.app/api/v1",
 	// do NOT set a global Content-Type here. Let requests set it.
 	// headers: { "Content-Type": "application/json" },
 });
