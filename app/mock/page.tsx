@@ -33,6 +33,7 @@ export default function MockPage() {
             try {
                 // ✅ free tests
                 const freeRes = await api.get("/tests?is_free=true");
+                console.log(freeRes);
                 setFreeTests(freeRes.data.items || []);
 
                 // ✅ paid tests
@@ -131,7 +132,7 @@ export default function MockPage() {
                                     <p className="text-gray-600 text-sm mb-4">
                                         {test.description || "Try a free demo to experience the test interface."}
                                     </p>
-                                    <Link href={`/mock/${test.id}`}>
+                                    <Link href={`/mock/${test.id}/attempt`}>
                                         <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
                                             Attempt
                                         </Button>
@@ -215,7 +216,7 @@ export default function MockPage() {
                 </motion.section>
 
                 {/* ===== Attempt History ===== */}
-                <motion.section
+                {/* <motion.section
                     variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
@@ -252,6 +253,7 @@ export default function MockPage() {
                         </table>
                     </div>
                 </motion.section>
+                 */}
 
                 {/* ===== CTA Banner ===== */}
                 <motion.section
