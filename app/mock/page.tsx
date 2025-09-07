@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Book, User, GraduationCap, Clipboard, FileText } from "lucide-react";
+import { useState, useEffect } from "react"
+import api from "@/utils/api";
+import Link from "next/link";
 
 const mockCategories = [
     { name: "Medical", icon: <Book size={28} /> },
@@ -19,6 +22,32 @@ export default function MockPage() {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 },
     };
+
+    // 🔥 Free Tests state
+    const [freeTests, setFreeTests] = useState<any[]>([]);
+    const [paidTests, setPaidTests] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTests = async () => {
+            try {
+                // ✅ free tests
+                const freeRes = await api.get("/tests?is_free=true");
+                setFreeTests(freeRes.data.items || []);
+
+                // ✅ paid tests
+                const paidRes = await api.get("/tests?is_free=false");
+                setPaidTests(paidRes.data.items || []);
+            } catch (err) {
+                console.error("Error fetching tests:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTests();
+    }, []);
+
 
     return (
         <>
@@ -89,27 +118,36 @@ export default function MockPage() {
                         Free Demo Tests
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[1, 2, 3].map((demo) => (
-                            <motion.div
-                                key={demo}
-                                whileHover={{ scale: 1.03 }}
-                                className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between"
-                            >
-                                <h3 className="font-semibold mb-2 text-[#2E4A3C]">
-                                    Demo Test {demo}
-                                </h3>
-                                <p className="text-gray-600 text-sm mb-4">
-                                    Try a restricted set of questions for free and experience the
-                                    test interface.
-                                </p>
-                                <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
-                                    Attempt
-                                </Button>
-                            </motion.div>
-                        ))}
+                        {freeTests.length > 0 ? (
+                            freeTests.map((test) => (
+                                <motion.div
+                                    key={test.id}
+                                    whileHover={{ scale: 1.03 }}
+                                    className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between"
+                                >
+                                    <h3 className="font-semibold mb-2 text-[#2E4A3C]">
+                                        {test.title}
+                                    </h3>
+                                    <p className="text-gray-600 text-sm mb-4">
+                                        {test.description || "Try a free demo to experience the test interface."}
+                                    </p>
+                                    <Link href={`/mock/${test.id}`}>
+                                        <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
+                                            Attempt
+                                        </Button>
+                                    </Link>
+                                </motion.div>
+                            ))
+                        ) : (
+                            <p className="text-center col-span-3 text-gray-500">
+                                No free tests available right now.
+                            </p>
+                        )}
                     </div>
                 </motion.section>
 
+
+                {/* ===== Paid Test Series ===== */}
                 {/* ===== Paid Test Series ===== */}
                 <motion.section
                     variants={fadeInUp}
@@ -120,25 +158,32 @@ export default function MockPage() {
                     <h2 className="text-3xl font-bold mb-10 text-center text-[#2E4A3C]">
                         Paid Test Series
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {[1, 2].map((series) => (
-                            <motion.div
-                                key={series}
-                                whileHover={{ scale: 1.03 }}
-                                className="bg-white rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between"
-                            >
-                                <h3 className="font-semibold mb-2 text-[#2E4A3C]">
-                                    Full-Length Test Series {series}
-                                </h3>
-                                <p className="text-gray-600 mb-4">
-                                    Sectional and full-length tests with detailed solutions.
-                                </p>
-                                <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
-                                    Buy Now
-                                </Button>
-                            </motion.div>
-                        ))}
-                    </div>
+
+                    {loading ? (
+                        <p className="text-center text-gray-500">Loading...</p>
+                    ) : paidTests.length === 0 ? (
+                        <p className="text-center text-gray-500">
+                            No paid test series available right now.
+                        </p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {paidTests.map((test) => (
+                                <motion.div
+                                    key={test.id}
+                                    whileHover={{ scale: 1.03 }}
+                                    className="bg-white rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between"
+                                >
+                                    <h3 className="font-semibold mb-2 text-[#2E4A3C]">
+                                        {test.title}
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">{test.description}</p>
+                                    <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
+                                        Buy Now
+                                    </Button>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
                 </motion.section>
 
                 {/* ===== Downloadable PDFs ===== */}
