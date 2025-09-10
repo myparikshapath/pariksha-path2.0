@@ -6,16 +6,13 @@ export interface Course {
   title: string;
   description: string;
   category: string;
-  instructor: string;
-  duration: number; // in hours
+  sub_category?: string;
+  sections?: string[];
   price: number;
-  isEnrolled: boolean;
-  progress: number; // 0-100
-  thumbnailUrl?: string;
-  totalModules: number;
-  completedModules: number;
-  startDate?: string;
-  endDate?: string;
+  is_free: boolean;
+  code?: string;
+  thumbnail_url?: string;
+  discount_percent?: number;
 }
 
 // Fetch enrolled courses
@@ -33,7 +30,10 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
 export const fetchAvailableCourses = async (): Promise<Course[]> => {
   try {
     const response = await api.get('/courses/');
-    return response.data.data || [];
+    console.log('API Response:', response.data);
+    // Handle both response formats
+    const coursesData = response.data.data || response.data.courses || [];
+    return Array.isArray(coursesData) ? coursesData : [];
   } catch (error) {
     console.error('Error fetching available courses:', error);
     throw error;
@@ -57,6 +57,37 @@ export const getCourseDetails = async (courseId: string): Promise<Course> => {
     return response.data.data;
   } catch (error) {
     console.error('Error fetching course details:', error);
+    throw error;
+  }
+};
+
+// Create course request interface
+export interface CreateCourseRequest {
+  title: string;
+  code: string;
+  category: string;
+  sub_category: string;
+  description: string;
+  sections: string[];
+  price: number;
+  is_free: boolean;
+  discount_percent?: number;
+  material_ids?: string[];
+  test_series_ids?: string[];
+  thumbnail_url: string;
+  icon_url?: string;
+  priority_order?: number;
+  banner_url?: string;
+  tagline?: string;
+}
+
+// Create a new course
+export const createCourse = async (courseData: CreateCourseRequest): Promise<{ course_id: string }> => {
+  try {
+    const response = await api.post('/courses/', courseData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating course:', error);
     throw error;
   }
 };
