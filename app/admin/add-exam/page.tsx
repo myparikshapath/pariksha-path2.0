@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { fetchAvailableCourses } from "@/src/services/courseService";
 import {
   Card,
@@ -12,18 +13,19 @@ import { Button } from "@/components/ui/button";
 import {
   AlertCircle,
   Loader2,
-  ChevronDown,
 } from "lucide-react";
 import { Course } from "@/src/services/courseService";
 
 const AddExam = () => {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [expandedCourseId, setExpandedCourseId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleCourseExpansion = (courseId: string) => {
-    setExpandedCourseId(expandedCourseId === courseId ? null : courseId);
+  const handleCourseClick = (course: Course) => {
+    // Navigate to course detail page using course code as slug
+    const slug = course.code?.toLowerCase().replace(/\s+/g, '-') || course.id;
+    router.push(`/admin/course/${slug}`);
   };
 
   useEffect(() => {
@@ -94,19 +96,12 @@ const AddExam = () => {
             {courses.map((course) => (
               <div key={course.id} className="space-y-4">
                 <Card
-                  onClick={() => toggleCourseExpansion(course.id)}
-                  className={`hover:shadow-md transition-all cursor-pointer ${expandedCourseId === course.id ? "ring-2 ring-blue-500" : ""
-                    }`}
+                  onClick={() => handleCourseClick(course)}
+                  className="hover:shadow-md transition-all cursor-pointer hover:ring-2 hover:ring-blue-500"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-lg">{course.title}</CardTitle>
-                      <ChevronDown
-                        className={`h-5 w-5 text-gray-400 transition-transform ${expandedCourseId === course.id
-                            ? "transform rotate-180"
-                            : ""
-                          }`}
-                      />
                     </div>
                     {course.sub_category && (
                       <p className="text-sm text-gray-500">
