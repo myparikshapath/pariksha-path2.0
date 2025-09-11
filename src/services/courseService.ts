@@ -61,6 +61,22 @@ export const getCourseDetails = async (courseId: string): Promise<Course> => {
   }
 };
 
+// Get course by slug
+export const fetchCourseBySlug = async (slug: string): Promise<Course | null> => {
+  try {
+    const courses = await fetchAvailableCourses();
+    // Try to find by code first (slugified)
+    const foundCourse = courses.find(course => {
+      const courseSlug = course.code?.toLowerCase().replace(/\s+/g, '-') || course.id;
+      return courseSlug === slug || course.id === slug;
+    });
+    return foundCourse || null;
+  } catch (error) {
+    console.error('Error fetching course by slug:', error);
+    throw error;
+  }
+};
+
 // Create course request interface
 export interface CreateCourseRequest {
   title: string;

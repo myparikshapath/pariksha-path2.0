@@ -1,24 +1,14 @@
 "use client";
 
+"use client";
+
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { fetchAvailableCourses } from "@/src/services/courseService";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  AlertCircle,
-  Loader2,
-  ArrowLeft,
-  BookOpen,
-  Clock,
-  DollarSign,
-} from "lucide-react";
 import { Course } from "@/src/services/courseService";
+import { Upload, BookOpen, Clock, DollarSign, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 
 const CourseDetailPage = () => {
   const params = useParams();
@@ -26,6 +16,10 @@ const CourseDetailPage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleUploadQuestions = (section: string) => {
+    router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
+  };
 
   useEffect(() => {
     loadCourse();
@@ -35,23 +29,23 @@ const CourseDetailPage = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const courses = await fetchAvailableCourses();
-      console.log('All courses:', courses);
-      
+      console.log("All courses:", courses);
+
       // Find course by slug (code or id)
-      const foundCourse = courses.find(c => {
-        const courseSlug = c.code?.toLowerCase().replace(/\s+/g, '-') || c.id;
+      const foundCourse = courses.find((c) => {
+        const courseSlug = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
         return courseSlug === params.slug;
       });
-      
+
       if (foundCourse) {
         setCourse(foundCourse);
       } else {
         setError("Course not found");
       }
     } catch (e: any) {
-      console.error('Error loading course:', e);
+      console.error("Error loading course:", e);
       setError(e?.message || "Failed to load course");
     } finally {
       setLoading(false);
@@ -86,7 +80,7 @@ const CourseDetailPage = () => {
             Back to Courses
           </Button>
         </div>
-        
+
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -143,17 +137,18 @@ const CourseDetailPage = () => {
               </div>
             </div>
           </div>
-          
+
           {course.description && (
-            <p className="text-gray-700 mb-4">
-              {course.description}
-            </p>
+            <p className="text-gray-700 mb-4">{course.description}</p>
           )}
 
           <div className="flex items-center gap-6 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
-              <span>{Array.isArray(course.sections) ? course.sections.length : 0} Sections</span>
+              <span>
+                {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
+                Sections
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
@@ -165,8 +160,10 @@ const CourseDetailPage = () => {
 
       {/* Sections Grid */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Sections</h2>
-        
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Course Sections
+        </h2>
+
         {!course.sections || course.sections.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -179,7 +176,7 @@ const CourseDetailPage = () => {
             {course.sections.map((section, index) => (
               <Card
                 key={index}
-                className="hover:shadow-md transition-all cursor-pointer hover:ring-2 hover:ring-blue-500"
+                className="hover:shadow-md transition-all"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -194,12 +191,23 @@ const CourseDetailPage = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <div className="text-sm text-gray-600">
-                      Section {index + 1} of {course.sections.length}
+                      Section {index + 1} of {course?.sections?.length}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      Click to view section details
+                    <div className="flex justify-end">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUploadQuestions(section);
+                        }}
+                      >
+                        <Upload className="h-4 w-4" />
+                        Upload Questions
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
