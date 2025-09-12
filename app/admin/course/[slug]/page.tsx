@@ -8,7 +8,7 @@ import { fetchAvailableCourses } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Course } from "@/src/services/courseService";
-import { Upload, BookOpen, Clock, DollarSign, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import { Upload, BookOpen, Clock, DollarSign, ArrowLeft, Loader2, AlertCircle, Eye } from "lucide-react";
 
 const CourseDetailPage = () => {
   const params = useParams();
@@ -19,6 +19,10 @@ const CourseDetailPage = () => {
 
   const handleUploadQuestions = (section: string) => {
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
+  };
+
+  const handleViewQuestions = (section: string) => {
+    router.push(`/course/${params.slug}/${encodeURIComponent(section)}`);
   };
 
   useEffect(() => {
@@ -195,7 +199,19 @@ const CourseDetailPage = () => {
                     <div className="text-sm text-gray-600">
                       Section {index + 1} of {course?.sections?.length}
                     </div>
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewQuestions(section);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Questions
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

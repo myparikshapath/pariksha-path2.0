@@ -107,3 +107,119 @@ export const createCourse = async (courseData: CreateCourseRequest): Promise<{ c
     throw error;
   }
 };
+
+// Types for section questions
+export interface Question {
+  id: string;
+  title: string;
+  question_text: string;
+  question_type: string;
+  difficulty_level: string;
+  options: Array<{
+    text: string;
+    is_correct: boolean;
+  }>;
+  explanation?: string;
+  subject: string;
+  topic: string;
+  tags: string[];
+  marks: number;
+  created_at: string;
+}
+
+export interface SectionQuestionsResponse {
+  message: string;
+  course: {
+    id: string;
+    title: string;
+    code: string;
+  };
+  section: string;
+  questions: Question[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
+  };
+}
+
+export interface SectionDetails {
+  name: string;
+  description?: string;
+  question_count: number;
+  order: number;
+}
+
+export interface SectionDetailsResponse {
+  message: string;
+  course: {
+    id: string;
+    title: string;
+    code: string;
+  };
+  section: SectionDetails;
+}
+
+// Get questions for a specific course section
+export const getSectionQuestions = async (
+  courseId: string,
+  sectionName: string,
+  page: number = 1,
+  limit: number = 10,
+  difficulty?: string,
+  topic?: string
+): Promise<SectionQuestionsResponse> => {
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (difficulty) params.append('difficulty', difficulty);
+    if (topic) params.append('topic', topic);
+
+    const response = await api.get(
+      `/courses/${courseId}/sections/${encodeURIComponent(sectionName)}/questions?${params}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching section questions:', error);
+    throw error;
+  }
+};
+
+// Get section details
+export const getSectionDetails = async (
+  courseId: string,
+  sectionName: string
+): Promise<SectionDetailsResponse> => {
+  try {
+    const response = await api.get(
+      `/courses/${courseId}/sections/${encodeURIComponent(sectionName)}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching section details:', error);
+    throw error;
+  }
+};
+
+// Get all sections for a course
+export const getCourseSections = async (courseId: string): Promise<{
+  message: string;
+  course: {
+    id: string;
+    title: string;
+    code: string;
+  };
+  sections: SectionDetails[];
+}> => {
+  try {
+    const response = await api.get(`/courses/${courseId}/sections`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching course sections:', error);
+    throw error;
+  }
+};
