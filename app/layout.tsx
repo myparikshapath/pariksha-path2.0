@@ -36,7 +36,10 @@ export default function RootLayout({
           <ScrollToTop />
           <AuthProvider>
             <Navbar />
-            {children}</AuthProvider>
+            <div className="mt-24">
+              {children}
+            </div>
+          </AuthProvider>
           <Footer />
           <FloatingContact />
         </>

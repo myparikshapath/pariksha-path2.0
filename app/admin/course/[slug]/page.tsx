@@ -1,64 +1,63 @@
 "use client";
 
+"use client";
+
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchCourseBySlug, getCourseSections } from "@/src/services/courseService";
+import { fetchAvailableCourses } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Course, SectionDetails } from "@/src/services/courseService";
-import { 
-  BookOpen, 
-  Clock, 
-  DollarSign, 
-  ArrowLeft, 
-  Loader2, 
-  AlertCircle,
-  Eye,
-  Users
-} from "lucide-react";
+import { Course } from "@/src/services/courseService";
+import { Upload, BookOpen, Clock, DollarSign, ArrowLeft, Loader2, AlertCircle, Eye } from "lucide-react";
 
-const CoursePage = () => {
+const CourseDetailPage = () => {
   const params = useParams();
   const router = useRouter();
   const [course, setCourse] = useState<Course | null>(null);
-  const [sections, setSections] = useState<SectionDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleUploadQuestions = (section: string) => {
+    router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
+  };
+
+  const handleViewQuestions = (section: string) => {
+    router.push(`/course/${params.slug}/${encodeURIComponent(section)}`);
+  };
+
   useEffect(() => {
-    loadCourseData();
+    loadCourse();
   }, [params.slug]);
 
-  const loadCourseData = async () => {
+  const loadCourse = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Load course details
-      const courseData = await fetchCourseBySlug(params.slug as string);
-      if (!courseData) {
-        throw new Error("Course not found");
-      }
-      setCourse(courseData);
+      const courses = await fetchAvailableCourses();
+      console.log("All courses:", courses);
 
-      // Load sections with question counts
-      const sectionsData = await getCourseSections(courseData.id);
-      setSections(sectionsData.sections);
+      // Find course by slug (code or id)
+      const foundCourse = courses.find((c) => {
+        const courseSlug = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
+        return courseSlug === params.slug;
+      });
+
+      if (foundCourse) {
+        setCourse(foundCourse);
+      } else {
+        setError("Course not found");
+      }
     } catch (e: any) {
-      console.error("Error loading course data:", e);
-      setError(e?.message || "Failed to load course data");
+      console.error("Error loading course:", e);
+      setError(e?.message || "Failed to load course");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSectionClick = (sectionName: string) => {
-    router.push(`/course/${params.slug}/${encodeURIComponent(sectionName)}`);
-  };
-
   const handleBackClick = () => {
-    router.back();
+    router.push("/admin/add-exam");
   };
 
   if (loading) {
@@ -82,7 +81,7 @@ const CoursePage = () => {
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Go Back
+            Back to Courses
           </Button>
         </div>
 
@@ -109,7 +108,7 @@ const CoursePage = () => {
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          Go Back
+          Back to Courses
         </Button>
       </div>
 
@@ -151,16 +150,13 @@ const CoursePage = () => {
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               <span>
-                {sections.length} Sections
+                {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
+                Sections
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               <span>Self-paced</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              {/* <span>Enrolled Students: {course.enrolled_students_count || 0}</span> */}
             </div>
           </div>
         </div>
@@ -172,7 +168,7 @@ const CoursePage = () => {
           Course Sections
         </h2>
 
-        {sections.length === 0 ? (
+        {!course.sections || course.sections.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500">
@@ -181,11 +177,10 @@ const CoursePage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sections.map((section, index) => (
+            {course.sections.map((section, index) => (
               <Card
                 key={index}
-                className="hover:shadow-md transition-all cursor-pointer hover:ring-2 hover:ring-blue-500"
-                onClick={() => handleSectionClick(section.name)}
+                className="hover:shadow-md transition-all"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -195,38 +190,39 @@ const CoursePage = () => {
                           {index + 1}
                         </span>
                       </div>
-                      <CardTitle className="text-lg">{section.name}</CardTitle>
+                      <CardTitle className="text-lg">{section}</CardTitle>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-sm text-gray-600">
-                      Section {index + 1} of {sections.length}
+                      Section {index + 1} of {course?.sections?.length}
                     </div>
-                    
-                    {section.description && (
-                      <p className="text-sm text-gray-700 line-clamp-2">
-                        {section.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {section.question_count} questions
-                        </Badge>
-                      </div>
+                    <div className="flex justify-end gap-2">
                       <Button
                         size="sm"
+                        variant="outline"
                         className="flex items-center gap-2"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleSectionClick(section.name);
+                          handleViewQuestions(section);
                         }}
                       >
                         <Eye className="h-4 w-4" />
                         View Questions
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUploadQuestions(section);
+                        }}
+                      >
+                        <Upload className="h-4 w-4" />
+                        Upload Questions
                       </Button>
                     </div>
                   </div>
@@ -240,4 +236,4 @@ const CoursePage = () => {
   );
 };
 
-export default CoursePage;
+export default CourseDetailPage;

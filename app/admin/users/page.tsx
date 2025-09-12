@@ -7,232 +7,232 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AxiosError } from "axios";
 
 interface Student {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    is_active: boolean;
-    is_verified: boolean;
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  is_active: boolean;
+  is_verified: boolean;
 }
 
 interface Pagination {
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
 }
 
 export default function StudentsPage() {
-    const [students, setStudents] = useState<Student[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
-    const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
 
-    const limit = 8;
+  const limit = 8;
 
-    const fetchStudents = async (pageNumber = 1) => {
-        try {
-            setLoading(true);
-            const res = await api.get("/admin/students", {
-                params: { page: pageNumber, limit },
-            });
-            setStudents(res.data.data);
-            setPagination(res.data.pagination);
-            setPage(pageNumber);
-        } catch (error) {
-            const err = error as AxiosError<{ message?: string }>;
-            alert(err.response?.data?.message || err.message || "Failed to fetch students");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchStudents = async (pageNumber = 1) => {
+    try {
+      setLoading(true);
+      const res = await api.get("/admin/students", {
+        params: { page: pageNumber, limit },
+      });
+      setStudents(res.data.data);
+      setPagination(res.data.pagination);
+      setPage(pageNumber);
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      alert(err.response?.data?.message || err.message || "Failed to fetch students");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const deactivateStudent = async (id: string) => {
-        if (!confirm("Deactivate this student?")) return;
-        try {
-            await api.delete(`/admin/students/${id}`);
-            fetchStudents(page);
-        } catch (error) {
-            const err = error as AxiosError<{ message?: string }>;
-            alert(err.response?.data?.message || err.message || "Failed to fetch students");
-        }
-    };
+  const deactivateStudent = async (id: string) => {
+    if (!confirm("Deactivate this student?")) return;
+    try {
+      await api.delete(`/admin/students/${id}`);
+      fetchStudents(page);
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      alert(err.response?.data?.message || err.message || "Failed to fetch students");
+    }
+  };
 
-    const activateStudent = async (id: string) => {
-        if (!confirm("Activate this student?")) return;
-        try {
-            await api.put(`/admin/students/${id}`, { is_active: true });
-            fetchStudents(page);
-        } catch (error) {
-            const err = error as AxiosError<{ message?: string }>;
-            alert(err.response?.data?.message || err.message || "Failed to fetch students");
-        }
-    };
+  const activateStudent = async (id: string) => {
+    if (!confirm("Activate this student?")) return;
+    try {
+      await api.put(`/admin/students/${id}`, { is_active: true });
+      fetchStudents(page);
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      alert(err.response?.data?.message || err.message || "Failed to fetch students");
+    }
+  };
 
-    useEffect(() => {
-        fetchStudents(1);
-    }, []);
+  useEffect(() => {
+    fetchStudents(1);
+  }, []);
 
-    return (
-        <div className="p-6 md:p-10 mt-16">
-            {/* Heading */}
-            <h1 className="text-3xl font-bold text-center text-[#2E4A3C] mb-2">
-                Students
-            </h1>
-            <div className="h-1 w-24 mx-auto bg-yellow-400 rounded-full mb-8" />
+  return (
+    <div className="p-6 md:p-10 mt-16">
+      {/* Heading */}
+      <h1 className="text-3xl font-bold text-center text-[#2E4A3C] mb-2">
+        Students
+      </h1>
+      <div className="h-1 w-24 mx-auto bg-yellow-400 rounded-full mb-8" />
 
-            {loading ? (
-                <p className="text-gray-600 text-center">Loading...</p>
-            ) : (
-                <>
-                    {/* Mobile Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
-                        {students.map((s, idx) => (
-                            <motion.div
-                                key={s.id}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: idx * 0.05 }}
-                                className="bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all p-6"
-                            >
-                                <h2 className="text-lg font-semibold text-gray-800 mb-1">
-                                    {s.name}
-                                </h2>
-                                <p className="text-sm text-gray-600">{s.email}</p>
-                                <p className="text-sm text-gray-600">{s.phone}</p>
+      {loading ? (
+        <p className="text-gray-600 text-center">Loading...</p>
+      ) : (
+        <>
+          {/* Mobile Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
+            {students.map((s, idx) => (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                className="bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all p-6"
+              >
+                <h2 className="text-lg font-semibold text-gray-800 mb-1">
+                  {s.name}
+                </h2>
+                <p className="text-sm text-gray-600">{s.email}</p>
+                <p className="text-sm text-gray-600">{s.phone}</p>
 
-                                <div className="mt-3">
-                                    {s.is_active ? (
-                                        <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
-                                            Active
-                                        </span>
-                                    ) : (
-                                        <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-600 rounded-full">
-                                            Inactive
-                                        </span>
-                                    )}
-                                </div>
+                <div className="mt-3">
+                  {s.is_active ? (
+                    <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
+                      Active
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-600 rounded-full">
+                      Inactive
+                    </span>
+                  )}
+                </div>
 
-                                <div className="mt-4">
-                                    {s.is_active ? (
-                                        <button
-                                            onClick={() => deactivateStudent(s.id)}
-                                            className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition-transform hover:scale-105"
-                                        >
-                                            Deactivate
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => activateStudent(s.id)}
-                                            className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md transition-transform hover:scale-105"
-                                        >
-                                            Activate
-                                        </button>
-                                    )}
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                <div className="mt-4">
+                  {s.is_active ? (
+                    <button
+                      onClick={() => deactivateStudent(s.id)}
+                      className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition-transform hover:scale-105"
+                    >
+                      Deactivate
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => activateStudent(s.id)}
+                      className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md transition-transform hover:scale-105"
+                    >
+                      Activate
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-                    {/* Desktop Table */}
-                    <div className="hidden md:block overflow-x-auto rounded-xl shadow-lg border border-gray-200">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="bg-[#2E4A3C] text-white text-sm uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-semibold">Name</th>
-                                    <th className="px-6 py-3 text-left font-semibold">Email</th>
-                                    <th className="px-6 py-3 text-left font-semibold">Phone</th>
-                                    <th className="px-6 py-3 text-left font-semibold">Status</th>
-                                    <th className="px-6 py-3 text-center font-semibold">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {students.map((s, idx) => (
-                                    <tr
-                                        key={s.id}
-                                        className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                                            } hover:bg-green-50 transition`}
-                                    >
-                                        <td className="px-6 py-3 font-medium text-gray-800">{s.name}</td>
-                                        <td className="px-6 py-3 text-gray-700">{s.email}</td>
-                                        <td className="px-6 py-3 text-gray-700">{s.phone}</td>
-                                        <td className="px-6 py-3">
-                                            {s.is_active ? (
-                                                <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
-                                                    Active
-                                                </span>
-                                            ) : (
-                                                <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-600 rounded-full">
-                                                    Inactive
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-3 text-center">
-                                            {s.is_active ? (
-                                                <button
-                                                    onClick={() => deactivateStudent(s.id)}
-                                                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition-transform hover:scale-105 text-sm font-medium"
-                                                >
-                                                    Deactivate
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => activateStudent(s.id)}
-                                                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-sm transition-transform hover:scale-105 text-sm font-medium"
-                                                >
-                                                    Activate
-                                                </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto rounded-xl shadow-lg border border-gray-200">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#2E4A3C] text-white text-sm uppercase tracking-wide">
+                  <th className="px-6 py-3 text-left font-semibold">Name</th>
+                  <th className="px-6 py-3 text-left font-semibold">Email</th>
+                  <th className="px-6 py-3 text-left font-semibold">Phone</th>
+                  <th className="px-6 py-3 text-left font-semibold">Status</th>
+                  <th className="px-6 py-3 text-center font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((s, idx) => (
+                  <tr
+                    key={s.id}
+                    className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                      } hover:bg-green-50 transition`}
+                  >
+                    <td className="px-6 py-3 font-medium text-gray-800">{s.name}</td>
+                    <td className="px-6 py-3 text-gray-700">{s.email}</td>
+                    <td className="px-6 py-3 text-gray-700">{s.phone}</td>
+                    <td className="px-6 py-3">
+                      {s.is_active ? (
+                        <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-600 rounded-full">
+                          Inactive
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-3 text-center">
+                      {s.is_active ? (
+                        <button
+                          onClick={() => deactivateStudent(s.id)}
+                          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition-transform hover:scale-105 text-sm font-medium"
+                        >
+                          Deactivate
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => activateStudent(s.id)}
+                          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-sm transition-transform hover:scale-105 text-sm font-medium"
+                        >
+                          Activate
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
 
-                    {/* Pagination */}
-                    {pagination && (
-                        <div className="flex justify-center items-center gap-3 mt-10">
-                            {/* Prev Button */}
-                            <button
-                                disabled={page === 1}
-                                onClick={() => fetchStudents(page - 1)}
-                                className="p-2 rounded-full bg-gray-200 text-gray-700 shadow-sm disabled:opacity-50 
+          {/* Pagination */}
+          {pagination && (
+            <div className="flex justify-center items-center gap-3 mt-10">
+              {/* Prev Button */}
+              <button
+                disabled={page === 1}
+                onClick={() => fetchStudents(page - 1)}
+                className="p-2 rounded-full bg-gray-200 text-gray-700 shadow-sm disabled:opacity-50 
       hover:bg-gray-300 hover:scale-105 transition flex items-center justify-center"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
 
-                            {/* Page Numbers */}
-                            {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((num) => (
-                                <button
-                                    key={num}
-                                    onClick={() => fetchStudents(num)}
-                                    className={`px-4 py-2 rounded-full font-medium shadow-sm transition-transform hover:scale-105 
+              {/* Page Numbers */}
+              {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((num) => (
+                <button
+                  key={num}
+                  onClick={() => fetchStudents(num)}
+                  className={`px-4 py-2 rounded-full font-medium shadow-sm transition-transform hover:scale-105 
           ${page === num
-                                            ? "bg-[#2E4A3C] text-white shadow-md"
-                                            : "bg-gray-100 text-gray-700 hover:bg-green-100"
-                                        }`}
-                                >
-                                    {num}
-                                </button>
-                            ))}
+                      ? "bg-[#2E4A3C] text-white shadow-md"
+                      : "bg-gray-100 text-gray-700 hover:bg-green-100"
+                    }`}
+                >
+                  {num}
+                </button>
+              ))}
 
-                            {/* Next Button */}
-                            <button
-                                disabled={page === pagination.total_pages}
-                                onClick={() => fetchStudents(page + 1)}
-                                className="p-2 rounded-full bg-gray-200 text-gray-700 shadow-sm disabled:opacity-50 
+              {/* Next Button */}
+              <button
+                disabled={page === pagination.total_pages}
+                onClick={() => fetchStudents(page + 1)}
+                className="p-2 rounded-full bg-gray-200 text-gray-700 shadow-sm disabled:opacity-50 
       hover:bg-gray-300 hover:scale-105 transition flex items-center justify-center"
-                            >
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
-                    )}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
 
-                </>
-            )}
-        </div>
-    );
+        </>
+      )}
+    </div>
+  );
 }
