@@ -77,25 +77,6 @@ export const fetchCourseBySlug = async (slug: string): Promise<Course | null> =>
   }
 };
 
-// Create course request interface
-export interface CreateCourseRequest {
-  title: string;
-  code: string;
-  category: string;
-  sub_category: string;
-  description: string;
-  sections: string[];
-  price: number;
-  is_free: boolean;
-  discount_percent?: number;
-  material_ids?: string[];
-  test_series_ids?: string[];
-  thumbnail_url: string;
-  icon_url?: string;
-  priority_order?: number;
-  banner_url?: string;
-  tagline?: string;
-}
 
 // Create a new course
 export const createCourse = async (courseData: CreateCourseRequest): Promise<{ course_id: string }> => {
@@ -107,6 +88,26 @@ export const createCourse = async (courseData: CreateCourseRequest): Promise<{ c
     throw error;
   }
 };
+
+// Update the existing CreateCourseRequest interface
+export interface CreateCourseRequest {
+  title: string;
+  code: string;
+  category: 'medical' | 'engineering' | 'teaching' | 'govt_exams' | 'banking' | 'defence' | 'state_exams';
+  sub_category: string;
+  description: string;
+  price: number;
+  is_free: boolean;
+  discount_percent?: number;
+  material_ids?: string[];
+  test_series_ids?: string[];
+  thumbnail_url: string;
+  icon_url?: string;
+  priority_order?: number;
+  banner_url?: string;
+  tagline?: string;
+  sections: string[];
+}
 
 // Types for section questions
 export interface Question {
