@@ -308,3 +308,67 @@ export const getCourseSections = async (courseId: string): Promise<{
     throw error;
   }
 };
+
+// Question management interfaces
+export interface QuestionUpdateRequest {
+  title?: string;
+  question_text?: string;
+  question_type?: string;
+  difficulty_level?: string;
+  exam_year?: number;
+  options?: Array<{
+    text: string;
+    is_correct: boolean;
+  }>;
+  explanation?: string;
+  subject?: string;
+  topic?: string;
+  tags?: string[];
+  is_active?: boolean;
+}
+
+export interface QuestionResponse {
+  id: string;
+  title: string;
+  question_text: string;
+  question_type: string;
+  difficulty_level: string;
+  exam_year?: number;
+  options: Array<{
+    text: string;
+    is_correct: boolean;
+  }>;
+  explanation?: string;
+  subject: string;
+  topic: string;
+  tags: string[];
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Get question details
+export const getQuestion = async (questionId: string): Promise<QuestionResponse> => {
+  try {
+    const response = await api.get(`/admin/questions/${questionId}`);
+    return response.data.question;
+  } catch (error) {
+    console.error('Error fetching question details:', error);
+    throw error;
+  }
+};
+
+// Update question
+export const updateQuestion = async (
+  questionId: string, 
+  questionData: QuestionUpdateRequest
+): Promise<{ message: string; question_id: string; changes: any }> => {
+  try {
+    const response = await api.put(`/admin/questions/${questionId}`, questionData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating question:', error);
+    throw error;
+  }
+};

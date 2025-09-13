@@ -262,7 +262,8 @@ const CourseDetailPage = () => {
             {course.sections.map((section, index) => (
               <Card
                 key={index}
-                className="hover:shadow-md transition-all"
+                className="hover:shadow-md transition-all cursor-pointer"
+                onClick={() => handleViewQuestions(section)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">

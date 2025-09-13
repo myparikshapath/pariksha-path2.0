@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question } from "@/src/services/courseService";
+import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question, QuestionResponse, updateQuestion } from "@/src/services/courseService";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import QuestionEditor from "@/components/admin/QuestionEditor";
 
 const SectionQuestionsPage = () => {
   const params = useParams();
@@ -38,6 +39,7 @@ const SectionQuestionsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [sectionDetails, setSectionDetails] = useState<any>(null);
   const [courseInfo, setCourseInfo] = useState<any>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -107,6 +109,21 @@ const SectionQuestionsPage = () => {
     setPagination(prev => ({ ...prev, page: newPage }));
   };
 
+  const handleQuestionUpdate = (updatedQuestion: QuestionResponse) => {
+    setQuestions(prev => 
+      prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q)
+    );
+    setEditingQuestionId(null);
+  };
+
+  const handleEditQuestion = (questionId: string) => {
+    setEditingQuestionId(questionId);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingQuestionId(null);
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case "easy":
@@ -120,13 +137,32 @@ const SectionQuestionsPage = () => {
     }
   };
 
-  const renderQuestion = (question: Question, index: number) => (
-    <Card key={question.id} className="mb-6">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">
+  const renderQuestion = (question: Question, index: number) => {
+    // Convert Question to QuestionResponse format for the editor
+    const questionResponse: QuestionResponse = {
+      id: question.id,
+      title: question.title,
+      question_text: question.question_text,
+      question_type: question.question_type,
+      difficulty_level: question.difficulty_level,
+      exam_year: question.exam_year,
+      options: question.options || [],
+      explanation: question.explanation || "",
+      subject: question.subject,
+      topic: question.topic,
+      tags: question.tags || [],
+      is_active: true,
+      created_by: "",
+      created_at: question.created_at,
+      updated_at: question.created_at,
+    };
+
+    return (
+      <div key={question.id} className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-700">
             Question {((pagination.page - 1) * pagination.limit) + index + 1}
-          </CardTitle>
+          </h3>
           <div className="flex gap-2">
             <Badge className={getDifficultyColor(question.difficulty_level)}>
               {question.difficulty_level}
@@ -134,68 +170,17 @@ const SectionQuestionsPage = () => {
             <Badge variant="outline">{question.marks} marks</Badge>
           </div>
         </div>
-        {question.topic && (
-          <p className="text-sm text-gray-600">Topic: {question.topic}</p>
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="prose max-w-none">
-            <p className="text-gray-900 leading-relaxed">
-              {question.question_text}
-            </p>
-          </div>
-
-          {question.options && question.options.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="font-medium text-gray-900">Options:</h4>
-              <div className="grid gap-2">
-                {question.options.map((option, optionIndex) => (
-                  <div
-                    key={optionIndex}
-                    className={`p-3 rounded-lg border ${
-                      option.is_correct
-                        ? "bg-green-50 border-green-200"
-                        : "bg-gray-50 border-gray-200"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-gray-600">
-                        {String.fromCharCode(65 + optionIndex)}.
-                      </span>
-                      <span className="text-gray-900">{option.text}</span>
-                      {option.is_correct && (
-                        <Badge className="bg-green-100 text-green-800 ml-auto">
-                          Correct
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {question.explanation && (
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Explanation:</h4>
-              <p className="text-blue-800">{question.explanation}</p>
-            </div>
-          )}
-
-          {question.tags && question.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {question.tags.map((tag, tagIndex) => (
-                <Badge key={tagIndex} variant="secondary" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        
+        <QuestionEditor
+          question={questionResponse}
+          onSave={handleQuestionUpdate}
+          onCancel={handleCancelEdit}
+          isEditing={editingQuestionId === question.id}
+          onEdit={() => handleEditQuestion(question.id)}
+        />
+      </div>
+    );
+  };
 
   const renderPagination = () => {
     if (pagination.total_pages <= 1) return null;
