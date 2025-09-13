@@ -124,6 +124,11 @@ const SectionQuestionsPage = () => {
     setEditingQuestionId(null);
   };
 
+  const handleDeleteQuestion = (questionId: string) => {
+    setQuestions(prev => prev.filter(q => q.id !== questionId));
+    setEditingQuestionId(null); // Exit editing mode if currently editing
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case "easy":
@@ -175,6 +180,7 @@ const SectionQuestionsPage = () => {
           question={questionResponse}
           onSave={handleQuestionUpdate}
           onCancel={handleCancelEdit}
+          onDelete={handleDeleteQuestion}
           isEditing={editingQuestionId === question.id}
           onEdit={() => handleEditQuestion(question.id)}
         />

@@ -361,7 +361,7 @@ export const getQuestion = async (questionId: string): Promise<QuestionResponse>
 
 // Update question
 export const updateQuestion = async (
-  questionId: string, 
+  questionId: string,
   questionData: QuestionUpdateRequest
 ): Promise<{ message: string; question_id: string; changes: any }> => {
   try {
@@ -369,6 +369,19 @@ export const updateQuestion = async (
     return response.data;
   } catch (error) {
     console.error('Error updating question:', error);
+    throw error;
+  }
+};
+
+// Delete question
+export const deleteQuestion = async (
+  questionId: string
+): Promise<{ message: string; question_id: string; deleted_question: any }> => {
+  try {
+    const response = await api.delete(`/admin/questions/${questionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting question:', error);
     throw error;
   }
 };

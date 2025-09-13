@@ -18,12 +18,14 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
-import { QuestionResponse, QuestionUpdateRequest, updateQuestion } from '@/src/services/courseService';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { QuestionResponse, QuestionUpdateRequest, updateQuestion, deleteQuestion } from '@/src/services/courseService';
 
 interface QuestionEditorProps {
   question: QuestionResponse;
   onSave: (updatedQuestion: QuestionResponse) => void;
   onCancel: () => void;
+  onDelete: (questionId: string) => void;
   isEditing: boolean;
   onEdit: () => void;
 }
@@ -32,6 +34,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
   question,
   onSave,
   onCancel,
+  onDelete,
   isEditing,
   onEdit
 }) => {
@@ -126,6 +129,21 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
     onCancel();
   };
 
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      await deleteQuestion(question.id);
+      onDelete(question.id);
+    } catch (error: any) {
+      console.error('Error deleting question:', error);
+      setError(error.response?.data?.detail || 'Failed to delete question');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isEditing) {
     return (
       <Card className="mb-4">
@@ -143,6 +161,45 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 <Edit3 className="h-3 w-3" />
                 Edit
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Question</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this question? This action cannot be undone.
+                      <br />
+                      <strong>Question:</strong> {question.title}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-red-600 hover:bg-red-700"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Delete Question'
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
           {question.topic && (
