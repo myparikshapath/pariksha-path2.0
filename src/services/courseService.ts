@@ -13,13 +13,22 @@ export interface Course {
   code?: string;
   thumbnail_url?: string;
   discount_percent?: number;
+  material_ids?: string[];
+  test_series_ids?: string[];
+  icon_url?: string;
+  priority_order?: number;
+  banner_url?: string;
+  tagline?: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Fetch enrolled courses
 export const fetchEnrolledCourses = async (): Promise<Course[]> => {
   try {
     const response = await api.get('/courses/enrolled');
-    return response.data.data || [];
+    return response.data.courses || [];
   } catch (error) {
     console.error('Error fetching enrolled courses:', error);
     throw error;
@@ -54,7 +63,7 @@ export const enrollInCourse = async (courseId: string): Promise<void> => {
 export const getCourseDetails = async (courseId: string): Promise<Course> => {
   try {
     const response = await api.get(`/courses/${courseId}`);
-    return response.data.data;
+    return response.data.course;
   } catch (error) {
     console.error('Error fetching course details:', error);
     throw error;
@@ -85,6 +94,81 @@ export const createCourse = async (courseData: CreateCourseRequest): Promise<{ c
     return response.data;
   } catch (error) {
     console.error('Error creating course:', error);
+    throw error;
+  }
+};
+
+// Update course request interface
+export interface UpdateCourseRequest {
+  title?: string;
+  description?: string;
+  sections?: string[];
+  price?: number;
+  is_free?: boolean;
+  discount_percent?: number;
+  material_ids?: string[];
+  test_series_ids?: string[];
+  thumbnail_url?: string;
+  icon_url?: string;
+  priority_order?: number;
+  banner_url?: string;
+  tagline?: string;
+  is_active?: boolean;
+}
+
+// Update course
+export const updateCourse = async (courseId: string, courseData: UpdateCourseRequest): Promise<{ message: string; course_id: string }> => {
+  try {
+    const response = await api.put(`/courses/${courseId}`, courseData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating course:', error);
+    throw error;
+  }
+};
+
+// Delete course (soft delete)
+export const deleteCourse = async (courseId: string): Promise<{ message: string; course_id: string }> => {
+  try {
+    const response = await api.delete(`/courses/${courseId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    throw error;
+  }
+};
+
+// Section management functions
+export const addSectionToCourse = async (courseId: string, sectionName: string): Promise<{ message: string }> => {
+  try {
+    const response = await api.post(`/courses/${courseId}/sections`, {
+      section_name: sectionName
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding section:', error);
+    throw error;
+  }
+};
+
+export const updateSectionInCourse = async (courseId: string, oldSectionName: string, newSectionName: string): Promise<{ message: string }> => {
+  try {
+    const response = await api.put(`/courses/${courseId}/sections/${encodeURIComponent(oldSectionName)}`, {
+      new_section_name: newSectionName
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating section:', error);
+    throw error;
+  }
+};
+
+export const deleteSectionFromCourse = async (courseId: string, sectionName: string): Promise<{ message: string }> => {
+  try {
+    const response = await api.delete(`/courses/${courseId}/sections/${encodeURIComponent(sectionName)}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting section:', error);
     throw error;
   }
 };

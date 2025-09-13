@@ -46,20 +46,20 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold">Analytics</h2>
             <p className="text-sm">Track usage & performance</p>
           </div> */}
-          <Link href = "/admin/add-exam"
+          <Link href="/admin/add-exam"
             className="bg-emerald-700 text-white p-6
            rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
             <h2 className="text-lg font-semibold">Add Exam</h2>
             <p className="text-sm">Add new exam</p>
           </Link>
-          <Link
+          {/* <Link
             href="/admin/upload-questions"
             className="bg-emerald-900 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
             <h2 className="text-lg font-semibold">Upload Questions</h2>
             <p className="text-sm">Upload new questions</p>
-          </Link>
+          </Link> */}
         </div>
 
         {/* Footer */}
