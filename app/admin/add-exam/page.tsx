@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { fetchAvailableCourses } from "@/src/services/courseService";
+import { 
+  fetchAvailableCourses, 
+  updateCourse, 
+  deleteCourse, 
+  Course, 
+  UpdateCourseRequest 
+} from "@/src/services/courseService";
 import {
   Card,
   CardContent,
@@ -14,14 +20,28 @@ import {
   AlertCircle,
   Loader2,
   Plus,
+  Edit,
+  Trash2,
+  MoreVertical,
 } from "lucide-react";
-import { Course } from "@/src/services/courseService";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import DeleteCourseDialog from "@/components/admin/DeleteCourseDialog";
 
 const AddExam = () => {
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Delete states
+  const [deletingCourse, setDeletingCourse] = useState<Course | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [operationLoading, setOperationLoading] = useState(false);
 
   const handleCourseClick = (course: Course) => {
     // Navigate to course detail page using course code as slug
@@ -54,6 +74,37 @@ const AddExam = () => {
   const handleAddExam = () => {
     // Navigate to the new exam page
     router.push("/admin/add-exam/new");
+  };
+
+  const handleEditCourse = (course: Course) => {
+    router.push(`/admin/edit-course/${course.id}`);
+  };
+
+  const handleDeleteCourse = (course: Course) => {
+    setDeletingCourse(course);
+    setDeleteDialogOpen(true);
+  };
+
+
+  const handleConfirmDelete = async (courseId: string) => {
+    setOperationLoading(true);
+    try {
+      await deleteCourse(courseId);
+      // Refresh the courses list
+      await loadCourses();
+      setDeleteDialogOpen(false);
+      setDeletingCourse(null);
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      setError("Failed to delete course");
+    } finally {
+      setOperationLoading(false);
+    }
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setDeletingCourse(null);
   };
 
   return (
@@ -110,13 +161,37 @@ const AddExam = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course) => (
               <div key={course.id} className="space-y-4">
-                <Card
+                <Card 
+                  className="hover:shadow-md transition-all hover:ring-2 hover:ring-blue-500 cursor-pointer"
                   onClick={() => handleCourseClick(course)}
-                  className="hover:shadow-md transition-all cursor-pointer hover:ring-2 hover:ring-blue-500"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{course.title}</CardTitle>
+                      <CardTitle className="text-lg flex-1">
+                        {course.title}
+                      </CardTitle>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditCourse(course)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteCourse(course)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                     {course.sub_category && (
                       <p className="text-sm text-gray-500">
@@ -126,6 +201,11 @@ const AddExam = () => {
                     {course.code && (
                       <p className="text-xs text-gray-400">
                         Code: {course.code}
+                      </p>
+                    )}
+                    {course.is_active === false && (
+                      <p className="text-xs text-red-500 font-medium">
+                        Inactive
                       </p>
                     )}
                   </CardHeader>
@@ -155,6 +235,15 @@ const AddExam = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Course Dialog */}
+      <DeleteCourseDialog
+        isOpen={deleteDialogOpen}
+        onClose={closeDeleteDialog}
+        course={deletingCourse}
+        onConfirm={handleConfirmDelete}
+        loading={operationLoading}
+      />
     </div>
   );
 };

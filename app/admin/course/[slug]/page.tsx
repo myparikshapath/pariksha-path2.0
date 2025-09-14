@@ -4,11 +4,34 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchAvailableCourses } from "@/src/services/courseService";
+import { 
+  fetchAvailableCourses, 
+  deleteSectionFromCourse,
+  Course 
+} from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Course } from "@/src/services/courseService";
-import { Upload, BookOpen, Clock, DollarSign, ArrowLeft, Loader2, AlertCircle, Eye } from "lucide-react";
+import { 
+  Upload, 
+  BookOpen, 
+  Clock, 
+  DollarSign, 
+  ArrowLeft, 
+  Loader2, 
+  AlertCircle, 
+  Eye, 
+  Plus,
+  Edit,
+  Trash2,
+  MoreVertical
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import DeleteSectionDialog from "@/components/admin/DeleteSectionDialog";
 
 const CourseDetailPage = () => {
   const params = useParams();
@@ -16,6 +39,11 @@ const CourseDetailPage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Section management states
+  const [deletingSection, setDeletingSection] = useState<string | null>(null);
+  const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
+  const [operationLoading, setOperationLoading] = useState(false);
 
   const handleUploadQuestions = (section: string) => {
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
@@ -58,6 +86,44 @@ const CourseDetailPage = () => {
 
   const handleBackClick = () => {
     router.push("/admin/add-exam");
+  };
+
+  // Section management handlers
+  const handleAddSection = () => {
+    if (!course) return;
+    router.push(`/admin/add-section/${course.id}`);
+  };
+
+  const handleEditSection = (sectionName: string) => {
+    if (!course) return;
+    router.push(`/admin/edit-section/${course.id}/${encodeURIComponent(sectionName)}`);
+  };
+
+  const handleDeleteSection = (sectionName: string) => {
+    setDeletingSection(sectionName);
+    setDeleteSectionDialogOpen(true);
+  };
+
+  const handleConfirmDeleteSection = async (sectionName: string) => {
+    if (!course) return;
+    
+    setOperationLoading(true);
+    try {
+      await deleteSectionFromCourse(course.id, sectionName);
+      await loadCourse(); // Refresh course data
+      setDeleteSectionDialogOpen(false);
+      setDeletingSection(null);
+    } catch (error) {
+      console.error("Error deleting section:", error);
+      setError("Failed to delete section");
+    } finally {
+      setOperationLoading(false);
+    }
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteSectionDialogOpen(false);
+    setDeletingSection(null);
   };
 
   if (loading) {
@@ -164,23 +230,40 @@ const CourseDetailPage = () => {
 
       {/* Sections Grid */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Course Sections
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Course Sections
+          </h2>
+          <Button
+            onClick={handleAddSection}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Section
+          </Button>
+        </div>
 
         {!course.sections || course.sections.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">
+            <p className="text-gray-500 mb-4">
               No sections available for this course yet.
             </p>
+            <Button
+              onClick={handleAddSection}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add First Section
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {course.sections.map((section, index) => (
               <Card
                 key={index}
-                className="hover:shadow-md transition-all"
+                className="hover:shadow-md transition-all cursor-pointer"
+                onClick={() => handleViewQuestions(section)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -190,7 +273,29 @@ const CourseDetailPage = () => {
                           {index + 1}
                         </span>
                       </div>
-                      <CardTitle className="text-lg">{section}</CardTitle>
+                      <CardTitle className="text-lg flex-1">{section}</CardTitle>
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditSection(section)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteSection(section)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardHeader>
@@ -232,6 +337,15 @@ const CourseDetailPage = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Section Dialog */}
+      <DeleteSectionDialog
+        isOpen={deleteSectionDialogOpen}
+        onClose={closeDeleteDialog}
+        sectionName={deletingSection || ""}
+        onConfirm={handleConfirmDeleteSection}
+        loading={operationLoading}
+      />
     </div>
   );
 };
