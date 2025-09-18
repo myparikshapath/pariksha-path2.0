@@ -257,7 +257,7 @@ export default function Navbar() {
 
         {/* ---------- DESKTOP RIGHT SECTION ---------- */}
         <div className="hidden lg:flex items-center space-x-4">
-          {isLoggedIn && (
+          {isLoggedIn === true && (
             <Link
               href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
               className="bg-gray-200 text-[#2E4A3C] px-6 py-2 rounded font-bold hover:bg-gray-300 shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
@@ -265,7 +265,8 @@ export default function Navbar() {
               {role === "admin" ? "Admin Dashboard" : "Dashboard"}
             </Link>
           )}
-          {isLoggedIn ? (
+
+          {isLoggedIn === true ? (
             <button
               onClick={logout}
               className="bg-red-600 text-white px-8 py-2 rounded font-bold hover:bg-red-700 transition shadow-xl transform hover:-translate-y-1 hover:scale-100 cursor-pointer"
@@ -273,7 +274,6 @@ export default function Navbar() {
               Logout
             </button>
           ) : (
-            // #869C51
             <Link
               href="/login"
               className="bg-yellow-400 text-black px-8 py-2 rounded-lg font-bold hover:bg-yellow-500 shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
@@ -282,6 +282,7 @@ export default function Navbar() {
             </Link>
           )}
         </div>
+
 
         {/* ---------- MOBILE TOGGLE ---------- */}
         <div className="lg:hidden">
@@ -432,7 +433,7 @@ export default function Navbar() {
             </Accordion>
 
             {/* mobile buttons */}
-            {isLoggedIn && (
+            {isLoggedIn === true && (
               <Link
                 href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
                 className="block w-full bg-gray-200 text-[#2E4A3C] text-center py-2 rounded font-semibold hover:bg-gray-300"
@@ -440,6 +441,7 @@ export default function Navbar() {
                 {role === "admin" ? "Admin Dashboard" : "Dashboard"}
               </Link>
             )}
+
             {isLoggedIn ? (
               <button
                 onClick={logout}
@@ -450,7 +452,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="block w-full bg-yellow-400 text-black text-center py-2 rounded-lg font-semibold hover:bg-[#2E4A3C]"
+                className="block w-full bg-yellow-400 text-black text-center py-2 rounded-lg font-semibold hover:bg-yellow-500"
               >
                 Login
               </Link>

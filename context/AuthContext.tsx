@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const token = localStorage.getItem("access_token");
         const storedRole = localStorage.getItem("user_role") as "student" | "admin" | null;
 
-        if (token) {
+        // ✅ yahan par token ke sath role bhi check kar
+        if (token && storedRole) {
             setIsLoggedIn(true);
             setRole(storedRole);
         } else {
@@ -26,6 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setRole(null);
         }
     }, []);
+
 
     if (isLoggedIn === null) {
         return <div>Loading...</div>; // or splash screen
@@ -53,6 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => {
+    console.log("logout button clicked");
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
     return ctx;
