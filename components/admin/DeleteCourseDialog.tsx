@@ -21,12 +21,12 @@ interface DeleteCourseDialogProps {
   loading?: boolean;
 }
 
-const DeleteCourseDialog = ({ 
-  isOpen, 
-  onClose, 
-  course, 
-  onConfirm, 
-  loading = false 
+const DeleteCourseDialog = ({
+  isOpen,
+  onClose,
+  course,
+  onConfirm,
+  loading = false
 }: DeleteCourseDialogProps) => {
   const handleConfirm = async () => {
     if (course) {
@@ -40,7 +40,7 @@ const DeleteCourseDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Course</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete "{course?.title}"? This action will deactivate the course 
+            Are you sure you want to delete &quot;{course?.title}&quot;? This action will deactivate the course
             and it will no longer be visible to students. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>

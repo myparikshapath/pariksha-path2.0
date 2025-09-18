@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { 
-  updateSectionInCourse, 
+import {
+  updateSectionInCourse,
   deleteSectionFromCourse,
   getCourseDetails,
-  Course 
+  Course
 } from "@/src/services/courseService";
 import {
   Card,
@@ -17,10 +17,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  ArrowLeft, 
-  Loader2, 
-  AlertCircle, 
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
   Save,
   Trash2
 } from "lucide-react";
@@ -40,7 +40,7 @@ const EditSectionPage = () => {
   const router = useRouter();
   const courseId = params.courseId as string;
   const sectionName = decodeURIComponent(params.sectionName as string);
-  
+
   const [course, setCourse] = useState<Course | null>(null);
   const [newSectionName, setNewSectionName] = useState(sectionName);
   const [loading, setLoading] = useState(true);
@@ -49,31 +49,33 @@ const EditSectionPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  useEffect(() => {
-    if (courseId) {
-      loadCourse();
-    }
-  }, [courseId]);
 
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const courseData = await getCourseDetails(courseId);
       setCourse(courseData);
-      
+
       // Check if section exists
       if (!courseData.sections?.includes(sectionName)) {
         setError(`Section "${sectionName}" not found in this course`);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error loading course:', e);
-      setError(e?.message || "Failed to load course");
+      setError(e instanceof Error ? e.message : "Failed to load course");
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId, sectionName]);
+
+
+  useEffect(() => {
+    if (courseId) {
+      loadCourse();
+    }
+  }, [courseId, loadCourse]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,9 +85,9 @@ const EditSectionPage = () => {
     try {
       await updateSectionInCourse(courseId, sectionName, newSectionName.trim());
       router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error updating section:", error);
-      setError("Failed to update section");
+      setError(error instanceof Error ? error.message : "Failed to update section");
     } finally {
       setSaving(false);
     }
@@ -98,9 +100,9 @@ const EditSectionPage = () => {
     try {
       await deleteSectionFromCourse(courseId, sectionName);
       router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error deleting section:", error);
-      setError("Failed to delete section");
+      setError(error instanceof Error ? error.message : "Failed to delete section");
     } finally {
       setDeleting(false);
       setDeleteDialogOpen(false);
@@ -146,7 +148,7 @@ const EditSectionPage = () => {
             {error || "Section not found"}
           </h2>
           <p className="text-gray-600">
-            The section you're trying to edit doesn't exist or has been removed.
+            The section you&apos;re trying to edit doesn&apos;t exist or has been removed.
           </p>
         </div>
       </div>
@@ -223,8 +225,8 @@ const EditSectionPage = () => {
                   <Button type="button" variant="outline" onClick={handleBack}>
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={saving || deleting || !newSectionName.trim() || newSectionName.trim() === sectionName}
                   >
                     {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -244,7 +246,7 @@ const EditSectionPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Section</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the section "{sectionName}"? This action will remove 
+              Are you sure you want to delete the section &quot;{sectionName}&quot;? This action will remove
               the section and all its associated questions. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

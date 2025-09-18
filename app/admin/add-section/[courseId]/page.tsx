@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { 
+import {
   addSectionToCourse,
   getCourseDetails,
-  Course 
+  Course
 } from "@/src/services/courseService";
 import {
   Card,
@@ -16,10 +16,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  ArrowLeft, 
-  Loader2, 
-  AlertCircle, 
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
   Plus
 } from "lucide-react";
 
@@ -27,33 +27,33 @@ const AddSectionPage = () => {
   const params = useParams();
   const router = useRouter();
   const courseId = params.courseId as string;
-  
+
   const [course, setCourse] = useState<Course | null>(null);
   const [sectionName, setSectionName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const loadCourse = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const courseData = await getCourseDetails(courseId);
+      setCourse(courseData);
+    } catch (e: unknown) {
+      console.error('Error loading course:', e);
+      setError(e instanceof Error ? e.message : "Failed to load course");
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId]);
+
   useEffect(() => {
     if (courseId) {
       loadCourse();
     }
-  }, [courseId]);
-
-  const loadCourse = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const courseData = await getCourseDetails(courseId);
-      setCourse(courseData);
-    } catch (e: any) {
-      console.error('Error loading course:', e);
-      setError(e?.message || "Failed to load course");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [courseId, loadCourse]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +112,7 @@ const AddSectionPage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course you're trying to add a section to doesn't exist or has been removed.
+            The course you&apos;re trying to add a section to doesn&apos;t exist or has been removed.
           </p>
         </div>
       </div>
@@ -199,8 +199,8 @@ const AddSectionPage = () => {
                 <Button type="button" variant="outline" onClick={handleBack}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={saving || !sectionName.trim() || isDuplicate}
                 >
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

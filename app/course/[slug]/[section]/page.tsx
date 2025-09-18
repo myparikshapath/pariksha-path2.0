@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question, QuestionResponse, updateQuestion } from "@/src/services/courseService";
+import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question, QuestionResponse } from "@/src/services/courseService";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +14,6 @@ import {
   Loader2,
   ArrowLeft,
   BookOpen,
-  Clock,
   Target,
   Filter,
 } from "lucide-react";
@@ -28,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import QuestionEditor from "@/components/admin/QuestionEditor";
+import { Course } from "@/src/services/courseService";
+import { SectionDetails } from "@/src/services/courseService";
 
 const SectionQuestionsPage = () => {
   const params = useParams();
@@ -37,8 +36,8 @@ const SectionQuestionsPage = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sectionDetails, setSectionDetails] = useState<any>(null);
-  const [courseInfo, setCourseInfo] = useState<any>(null);
+  const [sectionDetails, setSectionDetails] = useState<SectionDetails | null>(null);
+  const [courseInfo, setCourseInfo] = useState<Course | null>(null);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -51,14 +50,10 @@ const SectionQuestionsPage = () => {
     topic: "",
   });
 
-  const [courseId, setCourseId] = useState<string | null>(null);
   const sectionName = decodeURIComponent(section as string);
 
-  useEffect(() => {
-    loadCourseAndSectionData();
-  }, [slug, sectionName, pagination.page, filters]);
 
-  const loadCourseAndSectionData = async () => {
+  const loadCourseAndSectionData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -68,12 +63,22 @@ const SectionQuestionsPage = () => {
       if (!courseData) {
         throw new Error("Course not found");
       }
-      
-      setCourseId(courseData.id);
+
       setCourseInfo({
         id: courseData.id,
         title: courseData.title,
         code: courseData.code,
+        description: courseData.description,
+        category: courseData.category,
+        price: courseData.price,
+        is_free: courseData.is_free,
+        discount_percent: courseData.discount_percent,
+        thumbnail_url: courseData.thumbnail_url,
+        icon_url: courseData.icon_url,
+        banner_url: courseData.banner_url,
+        tagline: courseData.tagline,
+        priority_order: courseData.priority_order,
+        is_active: courseData.is_active,
       });
 
       // Now load section details and questions using the actual course ID
@@ -92,13 +97,19 @@ const SectionQuestionsPage = () => {
       setSectionDetails(detailsResponse.section);
       setQuestions(questionsResponse.questions);
       setPagination(questionsResponse.pagination);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error loading section data:", e);
-      setError(e?.message || "Failed to load section data");
+      setError(e instanceof Error ? e.message : "Failed to load section data");
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug, sectionName, pagination.page, filters, pagination.limit]);
+
+  useEffect(() => {
+    loadCourseAndSectionData();
+  }, [slug, sectionName, pagination.page, filters, loadCourseAndSectionData]);
+
+
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -110,8 +121,35 @@ const SectionQuestionsPage = () => {
   };
 
   const handleQuestionUpdate = (updatedQuestion: QuestionResponse) => {
-    setQuestions(prev => 
-      prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q)
+    setQuestions(prev =>
+      prev.map((q): Question => {
+        if (q.id !== updatedQuestion.id) return q;
+        // Map QuestionResponse back to Question, preserving required fields like marks
+        return {
+          ...q,
+          id: updatedQuestion.id,
+          title: updatedQuestion.title,
+          question_text: updatedQuestion.question_text,
+          question_type: updatedQuestion.question_type,
+          difficulty_level: updatedQuestion.difficulty_level,
+          // exam_year intentionally omitted to satisfy current Question typing
+          options: updatedQuestion.options || [],
+          explanation: updatedQuestion.explanation || "",
+          explanation_images: updatedQuestion.explanation_images || [],
+          remarks: updatedQuestion.remarks || "",
+          remarks_images: updatedQuestion.remarks_images || [],
+          question_images: updatedQuestion.question_images || [],
+          subject: updatedQuestion.subject,
+          topic: updatedQuestion.topic,
+          tags: updatedQuestion.tags || [],
+          // Preserve existing marks and timestamps if backend didn't change them in response
+          marks: q.marks,
+          created_at: updatedQuestion.created_at || q.created_at,
+          updated_at: updatedQuestion.updated_at || q.updated_at,
+          is_active: updatedQuestion.is_active,
+          created_by: updatedQuestion.created_by || q.created_by,
+        };
+      })
     );
     setEditingQuestionId(null);
   };
@@ -150,9 +188,13 @@ const SectionQuestionsPage = () => {
       question_text: question.question_text,
       question_type: question.question_type,
       difficulty_level: question.difficulty_level,
-      exam_year: question.exam_year,
+      // exam_year omitted
       options: question.options || [],
       explanation: question.explanation || "",
+      explanation_images: question.explanation_images || [],
+      remarks: question.remarks || "",
+      remarks_images: question.remarks_images || [],
+      question_images: question.question_images || [],
       subject: question.subject,
       topic: question.topic,
       tags: question.tags || [],
@@ -175,7 +217,7 @@ const SectionQuestionsPage = () => {
             <Badge variant="outline">{question.marks} marks</Badge>
           </div>
         </div>
-        
+
         <QuestionEditor
           question={questionResponse}
           onSave={handleQuestionUpdate}

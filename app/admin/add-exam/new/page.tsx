@@ -55,7 +55,10 @@ export default function NewExamPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (field: keyof CreateCourseRequest, value: any) => {
+  const handleInputChange = <K extends keyof CreateCourseRequest>(
+    field: K,
+    value: CreateCourseRequest[K]
+  ) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -101,13 +104,14 @@ export default function NewExamPage() {
       }
 
       // Create the course
-      const result = await createCourse(formData);
+      await createCourse(formData);
       
       // Navigate back to courses list
       router.push("/admin/add-exam");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating course:", err);
-      setError(err?.message || "Failed to create course");
+      const message = err instanceof Error ? err.message : "Failed to create course";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -177,7 +181,8 @@ export default function NewExamPage() {
                 <Label htmlFor="category">Category *</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value) => handleInputChange("category", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("category", value as CreateCourseRequest["category"]) }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />

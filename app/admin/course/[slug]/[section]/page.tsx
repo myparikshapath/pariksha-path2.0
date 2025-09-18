@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchCourseBySlug } from "@/src/services/courseService";
+import { Course, fetchCourseBySlug } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2, ArrowLeft, Upload } from "lucide-react";
@@ -14,7 +14,7 @@ import api from "@/utils/api";
 const SectionUploadPage = () => {
   const params = useParams();
   const router = useRouter();
-  const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -22,11 +22,7 @@ const SectionUploadPage = () => {
   const [previewError, setPreviewError] = useState<string | null>(null);
   const sectionName = decodeURIComponent(params.section as string);
 
-  useEffect(() => {
-    loadCourse();
-  }, [params.slug]);
-
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetchCourseBySlug(params.slug as string);
@@ -35,13 +31,18 @@ const SectionUploadPage = () => {
       } else {
         throw new Error("Course not found");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error loading course:", error);
-      toast.error("Failed to load course");
+      toast.error(error instanceof Error ? error.message : "Failed to load course");
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.slug]);
+
+
+  useEffect(() => {
+    loadCourse();
+  }, [params.slug, loadCourse]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const csv = acceptedFiles[0];
@@ -97,11 +98,11 @@ const SectionUploadPage = () => {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("course_id", course.id);
+    formData.append("course_id", course?.id || "");
     formData.append("section", sectionName);
 
     try {
-      const response = await api.post(
+      await api.post(
         "/courses/upload-questions",
         formData,
         {
@@ -113,10 +114,10 @@ const SectionUploadPage = () => {
 
       toast.success("Questions uploaded successfully!");
       router.push(`/admin/course/${params.slug}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Upload error:", error);
       const errorMessage =
-        error.response?.data?.detail || "Failed to upload questions";
+        error instanceof Error ? error.message : "Failed to upload questions";
       toast.error(errorMessage);
     } finally {
       setUploading(false);
@@ -176,11 +177,10 @@ const SectionUploadPage = () => {
           <div className="space-y-6">
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isDragActive
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-blue-400"
-              }`}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-blue-400"
+                }`}
             >
               <input {...getInputProps()} />
               <div className="flex flex-col items-center justify-center space-y-2">

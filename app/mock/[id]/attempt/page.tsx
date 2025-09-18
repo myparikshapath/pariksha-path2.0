@@ -4,9 +4,27 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import api from "@/utils/api";
 
+interface QuestionOption {
+    id: string;
+    text: string;
+    is_correct: boolean;
+    order: number;
+}
+
+interface Question {
+    id: string;
+    question_text: string;
+    options: QuestionOption[];
+    explanation?: string;
+    marks: number;
+    difficulty_level: string;
+    subject?: string;
+    topic?: string;
+}
+
 export default function AttemptPage() {
     const { id } = useParams();
-    const [questions, setQuestions] = useState<any[]>([]);
+    const [questions, setQuestions] = useState<Question[]>([]);
 
     useEffect(() => {
         async function fetchQuestions() {
@@ -30,18 +48,18 @@ export default function AttemptPage() {
 
             {questions && questions.length > 0 ? (
                 <div className="space-y-6">
-                    {questions.map((q: any, index: number) => (
+                    {questions.map((q, index) => (
                         <div
-                            key={q.id?.toString() || index} // object ko string bana diya
+                            key={q.id}
                             className="bg-white shadow rounded-xl p-4 border border-gray-200"
                         >
                             <p className="text-lg font-semibold text-gray-800 mb-3">
                                 {index + 1}. {q.question_text}
                             </p>
                             <ul className="space-y-2">
-                                {q.options.map((opt: any, i: number) => (
+                                {q.options.map((opt, i) => (
                                     <li
-                                        key={`${q.id?.toString()}-${i}`} // hamesha unique string banega
+                                        key={`${q.id}-${i}`}
                                         className="p-3 border rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-500 transition"
                                     >
                                         {opt.text}
@@ -50,8 +68,6 @@ export default function AttemptPage() {
                             </ul>
                         </div>
                     ))}
-
-
                 </div>
             ) : (
                 <p className="text-gray-600">No questions found.</p>
