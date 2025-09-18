@@ -7,6 +7,17 @@ import { useState, useEffect } from "react"
 import api from "@/utils/api";
 import Link from "next/link";
 
+interface MockTest {
+  id: string;
+  title: string;
+  description?: string;
+  is_free: boolean;
+  duration?: number;
+  total_marks?: number;
+  created_at: string;
+  updated_at: string;
+}
+
 const mockCategories = [
     { name: "Medical", icon: <Book size={28} /> },
     { name: "Engineering", icon: <GraduationCap size={28} /> },
@@ -23,9 +34,8 @@ export default function MockPage() {
         visible: { opacity: 1, y: 0 },
     };
 
-    // 🔥 Free Tests state
-    const [freeTests, setFreeTests] = useState<any[]>([]);
-    const [paidTests, setPaidTests] = useState<any[]>([]);
+    const [freeTests, setFreeTests] = useState<MockTest[]>([]);
+    const [paidTests, setPaidTests] = useState<MockTest[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -149,7 +159,6 @@ export default function MockPage() {
 
 
                 {/* ===== Paid Test Series ===== */}
-                {/* ===== Paid Test Series ===== */}
                 <motion.section
                     variants={fadeInUp}
                     initial="hidden"
@@ -214,46 +223,6 @@ export default function MockPage() {
                         ))}
                     </div>
                 </motion.section>
-
-                {/* ===== Attempt History ===== */}
-                {/* <motion.section
-                    variants={fadeInUp}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                    className="bg-white rounded-3xl shadow-md p-10"
-                >
-                    <h2 className="text-3xl font-bold mb-6 text-center text-[#2E4A3C]">
-                        Your Attempt History
-                    </h2>
-                    <div className="overflow-x-auto rounded-lg border border-gray-200">
-                        <table className="w-full border-collapse text-sm">
-                            <thead className="bg-[#f7f9f7]">
-                                <tr className="text-left text-gray-700">
-                                    <th className="px-6 py-3 font-semibold">Test Name</th>
-                                    <th className="px-6 py-3 font-semibold">Score</th>
-                                    <th className="px-6 py-3 font-semibold">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {[1, 2, 3].map((row, idx) => (
-                                    <tr
-                                        key={row}
-                                        className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                                            } hover:bg-green-50 transition`}
-                                    >
-                                        <td className="px-6 py-3">Test {row}</td>
-                                        <td className="px-6 py-3 font-semibold text-[#869C51]">
-                                            80%
-                                        </td>
-                                        <td className="px-6 py-3">2025-08-22</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </motion.section>
-                 */}
 
                 {/* ===== CTA Banner ===== */}
                 <motion.section

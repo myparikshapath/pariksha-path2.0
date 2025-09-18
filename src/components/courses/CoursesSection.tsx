@@ -116,7 +116,6 @@ const CoursesSection: React.FC = () => {
                   key={course.id}
                   course={course}
                   isEnrolled={true}
-                  showProgress={true}
                 />
               ))}
             </div>

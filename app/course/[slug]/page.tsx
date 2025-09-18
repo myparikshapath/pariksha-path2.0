@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { fetchCourseBySlug, getCourseSections } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,11 +26,7 @@ const CoursePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadCourseData();
-  }, [params.slug]);
-
-  const loadCourseData = async () => {
+  const loadCourseData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -45,13 +41,17 @@ const CoursePage = () => {
       // Load sections with question counts
       const sectionsData = await getCourseSections(courseData.id);
       setSections(sectionsData.sections);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error loading course data:", e);
-      setError(e?.message || "Failed to load course data");
+      setError(e instanceof Error ? e.message : "Failed to load course data");
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.slug]);
+
+  useEffect(() => {
+    loadCourseData();
+  }, [loadCourseData]);
 
   const handleSectionClick = (sectionName: string) => {
     router.push(`/course/${params.slug}/${encodeURIComponent(sectionName)}`);
@@ -92,7 +92,7 @@ const CoursePage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course you're looking for doesn't exist or has been removed.
+            The course you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
         </div>
       </div>

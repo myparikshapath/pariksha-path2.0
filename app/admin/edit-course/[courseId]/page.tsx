@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { 
-  updateCourse, 
-  getCourseDetails, 
-  Course, 
-  UpdateCourseRequest 
+import {
+  updateCourse,
+  getCourseDetails,
+  Course,
+  UpdateCourseRequest
 } from "@/src/services/courseService";
 import {
   Card,
@@ -19,10 +19,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { 
-  ArrowLeft, 
-  Loader2, 
-  AlertCircle, 
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
   X,
   Save
 } from "lucide-react";
@@ -31,7 +31,7 @@ const EditCoursePage = () => {
   const params = useParams();
   const router = useRouter();
   const courseId = params.courseId as string;
-  
+
   const [course, setCourse] = useState<Course | null>(null);
   const [formData, setFormData] = useState<UpdateCourseRequest>({});
   const [sections, setSections] = useState<string[]>([]);
@@ -40,20 +40,14 @@ const EditCoursePage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (courseId) {
-      loadCourse();
-    }
-  }, [courseId]);
-
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const courseData = await getCourseDetails(courseId);
       setCourse(courseData);
-      
+
       // Initialize form data
       setFormData({
         title: courseData.title,
@@ -68,17 +62,25 @@ const EditCoursePage = () => {
         priority_order: courseData.priority_order,
         is_active: courseData.is_active,
       });
-      
+
       setSections(courseData.sections || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error loading course:', e);
-      setError(e?.message || "Failed to load course");
+      setError(e instanceof Error ? e.message : "Failed to load course");
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
 
-  const handleInputChange = (field: keyof UpdateCourseRequest, value: any) => {
+
+  useEffect(() => {
+    if (courseId) {
+      loadCourse();
+    }
+  }, [courseId, loadCourse]);
+
+
+  const handleInputChange = (field: keyof UpdateCourseRequest, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -150,7 +152,7 @@ const EditCoursePage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course you're trying to edit doesn't exist or has been removed.
+            The course you&apos;re trying to edit doesn&apos;t exist or has been removed.
           </p>
         </div>
       </div>

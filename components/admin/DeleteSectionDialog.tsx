@@ -20,12 +20,12 @@ interface DeleteSectionDialogProps {
   loading?: boolean;
 }
 
-const DeleteSectionDialog = ({ 
-  isOpen, 
-  onClose, 
-  sectionName, 
-  onConfirm, 
-  loading = false 
+const DeleteSectionDialog = ({
+  isOpen,
+  onClose,
+  sectionName,
+  onConfirm,
+  loading = false
 }: DeleteSectionDialogProps) => {
   const handleConfirm = async () => {
     await onConfirm(sectionName);
@@ -37,7 +37,7 @@ const DeleteSectionDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Section</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete the section "{sectionName}"? This action will remove 
+            Are you sure you want to delete the section &quot;{sectionName}&quot;? This action will remove
             the section and all its associated questions. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>

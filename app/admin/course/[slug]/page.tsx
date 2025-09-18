@@ -2,24 +2,24 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { 
-  fetchAvailableCourses, 
+import {
+  fetchAvailableCourses,
   deleteSectionFromCourse,
-  Course 
+  Course
 } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Upload, 
-  BookOpen, 
-  Clock, 
-  DollarSign, 
-  ArrowLeft, 
-  Loader2, 
-  AlertCircle, 
-  Eye, 
+import {
+  Upload,
+  BookOpen,
+  Clock,
+  DollarSign,
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  Eye,
   Plus,
   Edit,
   Trash2,
@@ -39,7 +39,7 @@ const CourseDetailPage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Section management states
   const [deletingSection, setDeletingSection] = useState<string | null>(null);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
@@ -53,11 +53,8 @@ const CourseDetailPage = () => {
     router.push(`/course/${params.slug}/${encodeURIComponent(section)}`);
   };
 
-  useEffect(() => {
-    loadCourse();
-  }, [params.slug]);
 
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -76,13 +73,18 @@ const CourseDetailPage = () => {
       } else {
         setError("Course not found");
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error loading course:", e);
-      setError(e?.message || "Failed to load course");
+      setError(e instanceof Error ? e.message : "Failed to load course");
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.slug]);
+
+  useEffect(() => {
+    loadCourse();
+  }, [params.slug, loadCourse]);
+
 
   const handleBackClick = () => {
     router.push("/admin/add-exam");
@@ -106,16 +108,16 @@ const CourseDetailPage = () => {
 
   const handleConfirmDeleteSection = async (sectionName: string) => {
     if (!course) return;
-    
+
     setOperationLoading(true);
     try {
       await deleteSectionFromCourse(course.id, sectionName);
       await loadCourse(); // Refresh course data
       setDeleteSectionDialogOpen(false);
       setDeletingSection(null);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error deleting section:", error);
-      setError("Failed to delete section");
+      setError(error instanceof Error ? error.message : "Failed to delete section");
     } finally {
       setOperationLoading(false);
     }
@@ -157,7 +159,7 @@ const CourseDetailPage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course you're looking for doesn't exist or has been removed.
+            The course you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
         </div>
       </div>
@@ -287,7 +289,7 @@ const CourseDetailPage = () => {
                             <Edit className="mr-2 h-4 w-4" />
                             Rename
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleDeleteSection(section)}
                             className="text-red-600"
                           >

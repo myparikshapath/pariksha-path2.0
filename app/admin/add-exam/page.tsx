@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  fetchAvailableCourses, 
-  updateCourse, 
-  deleteCourse, 
-  Course, 
-  UpdateCourseRequest 
+import {
+  fetchAvailableCourses,
+  deleteCourse,
+  Course,
 } from "@/src/services/courseService";
 import {
   Card,
@@ -37,7 +35,7 @@ const AddExam = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Delete states
   const [deletingCourse, setDeletingCourse] = useState<Course | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -57,15 +55,15 @@ const AddExam = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Use direct axios call to bypass authentication
       const data = await fetchAvailableCourses();
       console.log('API Response:', data);
-      
+
       setCourses(Array.isArray(data) ? data : []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Error loading courses:', e);
-      setError(e?.message || "Failed to load courses");
+      setError(e instanceof Error ? e.message : "Failed to load courses");
     } finally {
       setLoading(false);
     }
@@ -161,7 +159,7 @@ const AddExam = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course) => (
               <div key={course.id} className="space-y-4">
-                <Card 
+                <Card
                   className="hover:shadow-md transition-all hover:ring-2 hover:ring-blue-500 cursor-pointer"
                   onClick={() => handleCourseClick(course)}
                 >
@@ -182,7 +180,7 @@ const AddExam = () => {
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteCourse(course)}
                               className="text-red-600"
                             >
