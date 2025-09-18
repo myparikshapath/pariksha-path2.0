@@ -1,12 +1,11 @@
 "use client";
 
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   fetchAvailableCourses,
   deleteSectionFromCourse,
+  updateSectionQuestionCount,
   Course
 } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,14 +14,16 @@ import {
   Upload,
   BookOpen,
   Clock,
+  Check,
   DollarSign,
+  Edit,
   ArrowLeft,
   Loader2,
   AlertCircle,
   Eye,
   Plus,
-  Edit,
   Trash2,
+  X,
   MoreVertical
 } from "lucide-react";
 import {
@@ -44,6 +45,12 @@ const CourseDetailPage = () => {
   const [deletingSection, setDeletingSection] = useState<string | null>(null);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [operationLoading, setOperationLoading] = useState(false);
+
+  const [isEditingSection, setIsEditingSection] = useState<string | null>(null);
+  const [tempQuestionCount, setTempQuestionCount] = useState<string>("0");
+
+
+
 
   const handleUploadQuestions = (section: string) => {
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
@@ -127,6 +134,7 @@ const CourseDetailPage = () => {
     setDeleteSectionDialogOpen(false);
     setDeletingSection(null);
   };
+
 
   if (loading) {
     return (
@@ -265,7 +273,7 @@ const CourseDetailPage = () => {
               <Card
                 key={index}
                 className="hover:shadow-md transition-all cursor-pointer"
-                onClick={() => handleViewQuestions(section)}
+              // onClick={() => handleViewQuestions(section.name)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -275,7 +283,7 @@ const CourseDetailPage = () => {
                           {index + 1}
                         </span>
                       </div>
-                      <CardTitle className="text-lg flex-1">{section}</CardTitle>
+                      <CardTitle className="text-lg flex-1">{section.name}</CardTitle>
                     </div>
                     <div onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
@@ -285,12 +293,12 @@ const CourseDetailPage = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditSection(section)}>
+                          <DropdownMenuItem onClick={() => handleEditSection(section.name)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Rename
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeleteSection(section)}
+                            onClick={() => handleDeleteSection(section.name)}
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -301,11 +309,75 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 </CardHeader>
+
+
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Section {index + 1} of {course?.sections?.length}
                     </div>
+
+                    {/* Number of Questions Input */}
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-700">Questions:</label>
+
+                      {/** local state per section */}
+                      {isEditingSection === section.name ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            value={tempQuestionCount}
+                            onChange={(e) => setTempQuestionCount(e.target.value)}
+                            className="border rounded px-2 py-1 w-20 text-sm"
+                          />
+                          <button
+                            className="p-1 rounded bg-green-500 text-white hover:bg-green-600"
+                            onClick={async () => {
+                              if (tempQuestionCount && course) {
+                                try {
+                                  await updateSectionQuestionCount(
+                                    course.id,
+                                    section.name,
+                                    tempQuestionCount
+                                  );
+                                  await loadCourse();
+                                  setIsEditingSection(null); // exit edit mode
+                                } catch (err) {
+                                  console.error("Failed to update question count", err);
+                                  setError("Failed to update question count");
+                                }
+                              }
+                            }}
+                          >
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button
+                            className="p-1 rounded bg-gray-300 hover:bg-gray-400"
+                            onClick={() => setIsEditingSection(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-800">
+                            {section.question_count || 0}
+                          </span>
+                          <button
+                            className="p-1 rounded hover:bg-gray-200"
+                            onClick={(e) => {
+                              setIsEditingSection(section.name);
+                              setTempQuestionCount(section.question_count.toString() || "0");
+                              e.stopPropagation();
+                            }}
+                          >
+                            <Edit className="h-4 w-4 text-gray-600" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex justify-end gap-2">
                       <Button
                         size="sm"
@@ -313,7 +385,7 @@ const CourseDetailPage = () => {
                         className="flex items-center gap-2"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleViewQuestions(section);
+                          handleViewQuestions(section.name);
                         }}
                       >
                         <Eye className="h-4 w-4" />
@@ -325,7 +397,7 @@ const CourseDetailPage = () => {
                         className="flex items-center gap-2"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleUploadQuestions(section);
+                          handleUploadQuestions(section.name);
                         }}
                       >
                         <Upload className="h-4 w-4" />
@@ -334,6 +406,9 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 </CardContent>
+
+                {/* ms ne add kiya hai  */}
+
               </Card>
             ))}
           </div>
@@ -353,3 +428,5 @@ const CourseDetailPage = () => {
 };
 
 export default CourseDetailPage;
+
+

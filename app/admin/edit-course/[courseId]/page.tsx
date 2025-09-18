@@ -63,7 +63,7 @@ const EditCoursePage = () => {
         is_active: courseData.is_active,
       });
 
-      setSections(courseData.sections || []);
+      setSections(courseData?.sections?.map(s => s.name) || []);
     } catch (e: unknown) {
       console.error('Error loading course:', e);
       setError(e instanceof Error ? e.message : "Failed to load course");

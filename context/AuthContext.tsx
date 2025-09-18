@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => {
-    console.log("logout button clicked");
+    // console.log("logout button clicked");
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
     return ctx;

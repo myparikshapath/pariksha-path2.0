@@ -8,14 +8,14 @@ import api from "@/utils/api";
 import Link from "next/link";
 
 interface MockTest {
-  id: string;
-  title: string;
-  description?: string;
-  is_free: boolean;
-  duration?: number;
-  total_marks?: number;
-  created_at: string;
-  updated_at: string;
+    id: string;
+    title: string;
+    description?: string;
+    is_free: boolean;
+    duration?: number;
+    total_marks?: number;
+    created_at: string;
+    updated_at: string;
 }
 
 const mockCategories = [
@@ -42,13 +42,13 @@ export default function MockPage() {
         const fetchTests = async () => {
             try {
                 // ✅ free tests
-                const freeRes = await api.get("/tests?is_free=true");
+                const freeRes = await api.get("/courses?is_free=true");
                 console.log(freeRes);
-                setFreeTests(freeRes.data.items || []);
+                setFreeTests(freeRes.data.courses || []);
 
                 // ✅ paid tests
-                const paidRes = await api.get("/tests?is_free=false");
-                setPaidTests(paidRes.data.items || []);
+                const paidRes = await api.get("/courses?is_free=false");
+                setPaidTests(paidRes.data.courses || []);
             } catch (err) {
                 console.error("Error fetching tests:", err);
             } finally {
@@ -134,20 +134,23 @@ export default function MockPage() {
                                 <motion.div
                                     key={test.id}
                                     whileHover={{ scale: 1.03 }}
-                                    className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between"
+                                    className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between min-h-[220px]"
                                 >
-                                    <h3 className="font-semibold mb-2 text-[#2E4A3C]">
-                                        {test.title}
-                                    </h3>
-                                    <p className="text-gray-600 text-sm mb-4">
-                                        {test.description || "Try a free demo to experience the test interface."}
-                                    </p>
-                                    <Link href={`/mock/${test.id}/attempt`}>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold mb-2 text-[#2E4A3C]">
+                                            {test.title}
+                                        </h3>
+                                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                            {test.description || "Try a free demo to experience the test interface."}
+                                        </p>
+                                    </div>
+                                    <Link href={`/mock/${test.id}/sections`}>
                                         <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
                                             Attempt
                                         </Button>
                                     </Link>
                                 </motion.div>
+
                             ))
                         ) : (
                             <p className="text-center col-span-3 text-gray-500">
@@ -176,21 +179,28 @@ export default function MockPage() {
                             No paid test series available right now.
                         </p>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {paidTests.map((test) => (
                                 <motion.div
                                     key={test.id}
                                     whileHover={{ scale: 1.03 }}
-                                    className="bg-white rounded-2xl shadow-md hover:shadow-lg p-6 flex flex-col justify-between"
+                                    className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between min-h-[220px]"
                                 >
-                                    <h3 className="font-semibold mb-2 text-[#2E4A3C]">
-                                        {test.title}
-                                    </h3>
-                                    <p className="text-gray-600 mb-4">{test.description}</p>
-                                    <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
-                                        Buy Now
-                                    </Button>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold mb-2 text-[#2E4A3C]">
+                                            {test.title}
+                                        </h3>
+                                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                            {test.description || "Try a free demo to experience the test interface."}
+                                        </p>
+                                    </div>
+                                    <Link href={`/mock/${test.id}/attempt`}>
+                                        <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
+                                            Buy Now
+                                        </Button>
+                                    </Link>
                                 </motion.div>
+
                             ))}
                         </div>
                     )}

@@ -79,7 +79,7 @@ const AddSectionPage = () => {
     }
   };
 
-  const isDuplicate = course?.sections?.includes(sectionName.trim()) || false;
+  const isDuplicate = course?.sections?.some(s => s.name) || false;
 
   if (loading) {
     return (
@@ -188,7 +188,7 @@ const AddSectionPage = () => {
                         key={index}
                         className="bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-sm"
                       >
-                        {section}
+                        {section.name}
                       </div>
                     ))}
                   </div>

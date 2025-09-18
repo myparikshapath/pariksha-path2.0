@@ -59,7 +59,7 @@ const EditSectionPage = () => {
       setCourse(courseData);
 
       // Check if section exists
-      if (!courseData.sections?.includes(sectionName)) {
+      if (!courseData.sections?.some(s => s.name)) {
         setError(`Section "${sectionName}" not found in this course`);
       }
     } catch (e: unknown) {
