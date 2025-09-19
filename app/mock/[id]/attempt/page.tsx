@@ -53,6 +53,7 @@ export default function MockTestAttemptPage() {
   }>({});
   const [testStarted, setTestStarted] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(3600); // 1 hour in seconds
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load course and sections data
   const loadCourseData = useCallback(async () => {
@@ -271,6 +272,54 @@ export default function MockTestAttemptPage() {
     loadInitialData();
   }, [loadCourseData, sections.length]);
 
+  // Persist answers and review marks in sessionStorage
+  useEffect(() => {
+    if (!courseInfo || sections.length === 0) return;
+    const key = `mock_state_${courseInfo.id}`;
+    try {
+      const state = {
+        selectedAnswers,
+        markedBySection: sections.reduce<Record<string, string[]>>((acc, sec) => {
+          acc[sec.name] = Array.from(sec.markedForReview || new Set<string>());
+          return acc;
+        }, {}),
+        currentSectionIndex,
+        currentQuestionIndex,
+      };
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(key, JSON.stringify(state));
+      }
+    } catch (e) {
+      console.error("Failed to persist mock state", e);
+    }
+  }, [courseInfo, sections, selectedAnswers, currentSectionIndex, currentQuestionIndex]);
+
+  // Restore persisted state after sections/questions are available
+  useEffect(() => {
+    if (!courseInfo || sections.length === 0 || !testStarted) return;
+    const key = `mock_state_${courseInfo.id}`;
+    try {
+      const raw = typeof window !== "undefined" ? sessionStorage.getItem(key) : null;
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed?.selectedAnswers) setSelectedAnswers(parsed.selectedAnswers);
+      if (typeof parsed?.currentSectionIndex === "number")
+        setCurrentSectionIndex(parsed.currentSectionIndex);
+      if (typeof parsed?.currentQuestionIndex === "number")
+        setCurrentQuestionIndex(parsed.currentQuestionIndex);
+      if (parsed?.markedBySection) {
+        setSections((prev) =>
+          prev.map((sec) => ({
+            ...sec,
+            markedForReview: new Set<string>(parsed.markedBySection[sec.name] || []),
+          }))
+        );
+      }
+    } catch (e) {
+      console.error("Failed to restore mock state", e);
+    }
+  }, [courseInfo, sections.length, testStarted]);
+
   // Timer effect
   useEffect(() => {
     if (!testStarted) return;
@@ -280,7 +329,7 @@ export default function MockTestAttemptPage() {
         if (prev <= 1) {
           clearInterval(timer);
           // Auto-submit when time's up
-          // handleSubmitTest();
+          handleSubmitTest();
           return 0;
         }
         return prev - 1;
@@ -289,6 +338,97 @@ export default function MockTestAttemptPage() {
 
     return () => clearInterval(timer);
   }, [testStarted]);
+
+  // Prevent accidental navigation while test is active
+  useEffect(() => {
+    if (!testStarted) return;
+
+    const beforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "Are you sure you want to leave? Your progress may be lost.";
+    };
+
+    window.addEventListener("beforeunload", beforeUnload);
+    return () => window.removeEventListener("beforeunload", beforeUnload);
+  }, [testStarted]);
+
+  // Submit test
+  const handleSubmitTest = useCallback(async () => {
+    if (isSubmitting) return;
+    if (!courseInfo) return;
+
+    try {
+      setIsSubmitting(true);
+
+      // Prepare payload
+      const markedForReviewAll = sections.reduce<string[]>((acc, sec) => {
+        if (sec.markedForReview) {
+          sec.markedForReview.forEach((id) => acc.push(id));
+        }
+        return acc;
+      }, []);
+
+      const answers = Object.entries(selectedAnswers).map(([qid, ans]) => ({
+        question_id: qid,
+        // prefer order if we can infer, else send text; backend supports either
+        selected_option_text: ans,
+      }));
+
+      console.log("DEBUG: Submitting answers:", {
+        courseId: courseInfo.id,
+        answersCount: answers.length,
+        answers: answers.slice(0, 3), // Show first 3 for debugging
+        timeSpent: 3600 - timeRemaining,
+        markedForReview: markedForReviewAll.length
+      });
+
+      const res = await fetch(`http://localhost:8000/api/v1/courses/${courseInfo.id}/mock/submit`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token") || ""}`
+        },
+        body: JSON.stringify({
+          answers,
+          time_spent_seconds: 3600 - timeRemaining,
+          marked_for_review: markedForReviewAll,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Submit error details:", {
+          status: res.status,
+          statusText: res.statusText,
+          body: errorText
+        });
+        throw new Error(`Failed to submit test: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
+      // Persist results for results page
+      const key = `mock_results_${courseInfo.id}`;
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(key, JSON.stringify(data.results));
+      }
+
+      // Navigate to results page
+      router.push(`/mock/${id}/attempt/result`);
+    } catch (err) {
+      console.error("Submit error", err);
+      alert("Submission failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [courseInfo, id, isSubmitting, sections, selectedAnswers, timeRemaining, router]);
+
+  // Manual submit with confirmation
+  const handleManualSubmit = useCallback(() => {
+    const ok = window.confirm("Submit the test? You won't be able to change answers after submission.");
+    if (!ok) return;
+    void handleSubmitTest();
+  }, [handleSubmitTest]);
 
   // Loading state
   if (loading) {
@@ -505,7 +645,7 @@ export default function MockTestAttemptPage() {
             <TestControls
               onPrevious={() => handleQuestionNavigation("prev")}
               onNext={() => handleQuestionNavigation("next")}
-              onSubmit={() => {}} // Will implement submission later
+              onSubmit={handleManualSubmit}
               isFirstQuestion={isFirstQuestion && currentSectionIndex === 0}
               isLastQuestion={isLastQuestionInSection && isLastSection}
               isMarkedForReview={isMarkedForReview}
