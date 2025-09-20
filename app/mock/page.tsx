@@ -145,7 +145,7 @@ export default function MockPage() {
                     </p>
                   </div>
                   <Link href={`/mock/${test.id}/attempt`}>
-                    <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
+                    <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg hover:cursor-pointer">
                       Attempt
                     </Button>
                   </Link>
@@ -194,7 +194,7 @@ export default function MockPage() {
                     </p>
                   </div>
                   <Link href={`/mock/${test.id}/attempt`}>
-                    <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg">
+                    <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg hover:cursor-pointer">
                       Buy Now
                     </Button>
                   </Link>

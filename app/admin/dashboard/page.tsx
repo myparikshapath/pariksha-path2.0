@@ -53,6 +53,13 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold">Add Exam</h2>
             <p className="text-sm">Add new exam</p>
           </Link>
+          <Link href="/admin/add-material"
+            className="bg-green-600 text-white p-6
+           rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
+          >
+            <h2 className="text-lg font-semibold">Add Material</h2>
+            <p className="text-sm">Add Study Material</p>
+          </Link>
           {/* <Link
             href="/admin/upload-questions"
             className="bg-emerald-900 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
