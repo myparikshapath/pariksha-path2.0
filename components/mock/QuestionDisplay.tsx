@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Question } from '@/src/services/courseService';
+import ImageDisplay from '@/components/ui/ImageDisplay';
 
 interface QuestionDisplayProps {
   question: Question;
@@ -57,9 +58,16 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         <h3 className="text-lg font-medium text-gray-900 mb-2">
           {question.title}
         </h3>
-        <p className="text-gray-700 leading-relaxed">
+        <p className="text-gray-700 leading-relaxed mb-4">
           {question.question_text}
         </p>
+        
+        {/* Question Images */}
+        <ImageDisplay
+          imageUrls={question.question_image_urls || []}
+          alt="Question image"
+          className="mb-4"
+        />
       </div>
 
       {/* Options */}
@@ -91,12 +99,50 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                 >
                   {optionLetter}
                 </span>
-                <span className="flex-1 text-gray-700">{option.text}</span>
+                <div className="flex-1">
+                  <span className="text-gray-700">{option.text}</span>
+                  {/* Option Images */}
+                  <ImageDisplay
+                    imageUrls={option.image_urls || []}
+                    alt={`Option ${optionLetter} image`}
+                    className="mt-2"
+                    maxWidth={400}
+                    maxHeight={200}
+                  />
+                </div>
               </div>
             </motion.button>
           );
         })}
       </div>
+
+      {/* Explanation */}
+      {question.explanation && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <h4 className="text-sm font-medium text-green-800 mb-2">Explanation:</h4>
+          <p className="text-green-700 text-sm mb-2">{question.explanation}</p>
+          <ImageDisplay
+            imageUrls={question.explanation_image_urls || []}
+            alt="Explanation image"
+            maxWidth={500}
+            maxHeight={300}
+          />
+        </div>
+      )}
+
+      {/* Remarks */}
+      {question.remarks && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="text-sm font-medium text-blue-800 mb-2">Remarks:</h4>
+          <p className="text-blue-700 text-sm mb-2">{question.remarks}</p>
+          <ImageDisplay
+            imageUrls={question.remarks_image_urls || []}
+            alt="Remarks image"
+            maxWidth={500}
+            maxHeight={300}
+          />
+        </div>
+      )}
 
       {/* Question Metadata */}
       <div className="flex flex-wrap gap-2 text-sm text-gray-500">

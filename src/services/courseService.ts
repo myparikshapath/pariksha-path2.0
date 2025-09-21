@@ -5,6 +5,7 @@ export interface QuestionOption {
   text: string;
   is_correct: boolean;
   order: number;
+  image_urls: string[];
 }
 
 // Question management interfaces
@@ -21,6 +22,9 @@ export interface QuestionUpdateRequest {
   topic?: string;
   tags?: string[];
   is_active?: boolean;
+  question_image_urls?: string[];
+  explanation_image_urls?: string[];
+  remarks_image_urls?: string[];
 }
 
 export interface QuestionResponse {
@@ -40,6 +44,9 @@ export interface QuestionResponse {
   created_by: string;
   created_at: string;
   updated_at: string;
+  question_image_urls: string[];
+  explanation_image_urls: string[];
+  remarks_image_urls: string[];
 }
 
 // Types for section questions
@@ -61,6 +68,9 @@ export interface Question {
   updated_at: string;
   is_active: boolean;
   created_by: string;
+  question_image_urls: string[];
+  explanation_image_urls: string[];
+  remarks_image_urls: string[];
 }
 
 export interface SectionQuestionsResponse {

@@ -26,6 +26,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { QuestionResponse, QuestionUpdateRequest, updateQuestion, deleteQuestion, QuestionOption } from '@/src/services/courseService';
+import ImageUpload from './ImageUpload';
+import ImageDisplay from '@/components/ui/ImageDisplay';
 
 interface QuestionEditorProps {
   question: QuestionResponse;
@@ -194,22 +196,70 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
           <div className="space-y-4">
             <div>
               <Label className="text-sm font-medium">Question</Label>
-              <p className="mt-1 text-sm text-gray-700">{question.question_text}</p>
+              <p className="mt-1 text-sm text-gray-700 mb-2">{question.question_text}</p>
+              
+              {/* Question Images Display */}
+              <ImageDisplay
+                imageUrls={question.question_image_urls || []}
+                alt="Question image"
+                className="mb-4"
+              />
+              
+              {/* Question Images Upload */}
+              <ImageUpload
+                questionId={question.id}
+                imageType="question"
+                existingImages={question.question_image_urls || []}
+                onImagesUpdate={(images) => {
+                  // Update the question object with new images
+                  const updatedQuestion = { ...question, question_image_urls: images };
+                  onSave(updatedQuestion);
+                }}
+                maxImages={3}
+                className="mb-4"
+              />
             </div>
 
             {question.options && question.options.length > 0 && (
               <div>
                 <Label className="text-sm font-medium">Options</Label>
-                <div className="mt-2 space-y-2">
+                <div className="mt-2 space-y-4">
                   {question.options.map((option, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
-                        {String.fromCharCode(65 + index)}
-                      </span>
-                      <span className={`flex-1 ${option.is_correct ? 'text-green-600 font-medium' : 'text-gray-700'}`}>
-                        {option.text}
-                      </span>
-                      {option.is_correct && <CheckCircle className="h-4 w-4 text-green-600" />}
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        <span className={`flex-1 ${option.is_correct ? 'text-green-600 font-medium' : 'text-gray-700'}`}>
+                          {option.text}
+                        </span>
+                        {option.is_correct && <CheckCircle className="h-4 w-4 text-green-600" />}
+                      </div>
+                      
+                      {/* Option Images Display */}
+                      <ImageDisplay
+                        imageUrls={option.image_urls || []}
+                        alt={`Option ${String.fromCharCode(65 + index)} image`}
+                        className="mb-2"
+                        maxWidth={300}
+                        maxHeight={150}
+                      />
+                      
+                      {/* Option Images Upload */}
+                      <ImageUpload
+                        questionId={question.id}
+                        imageType="option"
+                        optionIndex={index}
+                        existingImages={option.image_urls || []}
+                        onImagesUpdate={(images) => {
+                          const updatedOptions = [...(question.options || [])];
+                          updatedOptions[index] = { ...option, image_urls: images };
+                          const updatedQuestion = { ...question, options: updatedOptions };
+                          onSave(updatedQuestion);
+                        }}
+                        maxImages={2}
+                        className="mb-2"
+                      />
                     </div>
                   ))}
                 </div>
@@ -219,14 +269,54 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             {question.explanation && (
               <div>
                 <Label className="text-sm font-medium">Explanation</Label>
-                <p className="mt-1 text-sm text-gray-700">{question.explanation}</p>
+                <p className="mt-1 text-sm text-gray-700 mb-2">{question.explanation}</p>
+                
+                {/* Explanation Images Display */}
+                <ImageDisplay
+                  imageUrls={question.explanation_image_urls || []}
+                  alt="Explanation image"
+                  className="mb-2"
+                />
+                
+                {/* Explanation Images Upload */}
+                <ImageUpload
+                  questionId={question.id}
+                  imageType="explanation"
+                  existingImages={question.explanation_image_urls || []}
+                  onImagesUpdate={(images) => {
+                    const updatedQuestion = { ...question, explanation_image_urls: images };
+                    onSave(updatedQuestion);
+                  }}
+                  maxImages={2}
+                  className="mb-4"
+                />
               </div>
             )}
 
             {question.remarks && (
               <div>
                 <Label className="text-sm font-medium">Remarks</Label>
-                <p className="mt-1 text-sm text-gray-700">{question.remarks}</p>
+                <p className="mt-1 text-sm text-gray-700 mb-2">{question.remarks}</p>
+                
+                {/* Remarks Images Display */}
+                <ImageDisplay
+                  imageUrls={question.remarks_image_urls || []}
+                  alt="Remarks image"
+                  className="mb-2"
+                />
+                
+                {/* Remarks Images Upload */}
+                <ImageUpload
+                  questionId={question.id}
+                  imageType="remarks"
+                  existingImages={question.remarks_image_urls || []}
+                  onImagesUpdate={(images) => {
+                    const updatedQuestion = { ...question, remarks_image_urls: images };
+                    onSave(updatedQuestion);
+                  }}
+                  maxImages={2}
+                  className="mb-4"
+                />
               </div>
             )}
 
