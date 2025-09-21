@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question, QuestionResponse } from "@/src/services/courseService";
+import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question, QuestionResponse, deleteQuestion } from "@/src/services/courseService";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
 import QuestionEditor from "@/components/admin/QuestionEditor";
 import { Course } from "@/src/services/courseService";
 import { SectionDetails } from "@/src/services/courseService";
+import { toast } from "react-hot-toast";
 
 const SectionQuestionsPage = () => {
   const params = useParams();
@@ -159,9 +160,16 @@ const SectionQuestionsPage = () => {
     setEditingQuestionId(null);
   };
 
-  const handleDeleteQuestion = (questionId: string) => {
-    setQuestions(prev => prev.filter(q => q.id !== questionId));
-    setEditingQuestionId(null); // Exit editing mode if currently editing
+  const handleDeleteQuestion = async (questionId: string) => {
+    try {
+      await deleteQuestion(questionId);
+      setQuestions(prev => prev.filter(q => q.id !== questionId));
+      setEditingQuestionId(null); // Exit editing mode if currently editing
+      toast.success('Question deleted successfully');
+    } catch (error: any) {
+      console.error('Error deleting question:', error);
+      toast.error(error.message || 'Failed to delete question');
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -196,6 +204,9 @@ const SectionQuestionsPage = () => {
       created_by: "",
       created_at: question.created_at,
       updated_at: question.created_at,
+      question_image_urls: question.question_image_urls || [],
+      explanation_image_urls: question.explanation_image_urls || [],
+      remarks_image_urls: question.remarks_image_urls || [],
     };
 
     return (

@@ -25,7 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { QuestionResponse, QuestionUpdateRequest, updateQuestion, deleteQuestion, QuestionOption } from '@/src/services/courseService';
+import { QuestionResponse, QuestionUpdateRequest, updateQuestion, QuestionOption } from '@/src/services/courseService';
 import ImageUpload from './ImageUpload';
 import ImageDisplay from '@/components/ui/ImageDisplay';
 
@@ -126,7 +126,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
     setError(null);
 
     try {
-      await deleteQuestion(question.id);
       onDelete(question.id);
     } catch (err: any) {
       setError(err.message || 'Failed to delete question');
