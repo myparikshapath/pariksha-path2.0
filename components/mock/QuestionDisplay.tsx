@@ -34,7 +34,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-3">
           <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
-            Question {questionNumber} of {totalQuestions}
+           a Question {questionNumber} of {totalQuestions}
           </span>
           <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded">
             {question.difficulty_level}

@@ -162,10 +162,31 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 <Edit3 className="h-4 w-4 mr-2" />
                 Edit
               </Button>
-              <Button onClick={() => onDelete(question.id)} size="sm" variant="outline">
-                <Trash2 className="text-red-600 h-4 w-4 mr-2" />
-                <span className="text-red-600">Delete</span>
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Trash2 className="text-red-600 h-4 w-4 mr-2" />
+                    <span className="text-red-600">Delete</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the question.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => onDelete(question.id)} 
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </CardHeader>
