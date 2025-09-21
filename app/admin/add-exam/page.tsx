@@ -8,7 +8,7 @@ import {
   Course,
 } from "@/src/services/courseService";
 import {
-  Card,
+  Card, 
   CardContent,
   CardHeader,
   CardTitle,

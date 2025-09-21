@@ -52,6 +52,7 @@ export default function MockTestAttemptPage() {
     [key: string]: string;
   }>({});
   const [testStarted, setTestStarted] = useState(false);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(3600); // 1 hour in seconds
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -113,22 +114,51 @@ export default function MockTestAttemptPage() {
         return updated;
       });
 
-      // Fetch questions for the section
+      // Get the section to access question_count
+      const section = sections[sectionIndex];
+      const questionLimit = section?.question_count || 0;
+
+      // If no question limit is set, don't fetch any questions
+      if (questionLimit <= 0) {
+        setSections((prev) => {
+          const updated = [...prev];
+          updated[sectionIndex] = {
+            ...updated[sectionIndex],
+            questions: [],
+            loading: false,
+            error: null,
+            markedForReview:
+              updated[sectionIndex]?.markedForReview || new Set(),
+          };
+          return updated;
+        });
+        return;
+      }
+
+      // Fetch questions for the section with the specified limit
       const response = await getSectionQuestions(
         courseInfo.id,
         sectionName,
         1, // page
-        100, // limit - adjust based on your needs
+        questionLimit, // Use the question_count as the limit
         undefined,
         undefined,
         "mock"
       );
 
+      // Shuffle questions to get random ones each time
+      const shuffledQuestions = [...response.questions].sort(
+        () => Math.random() - 0.5
+      );
+
+      // Take only the number of questions specified by question_count
+      const limitedQuestions = shuffledQuestions.slice(0, questionLimit);
+
       setSections((prev) => {
         const updated = [...prev];
         updated[sectionIndex] = {
           ...updated[sectionIndex],
-          questions: response.questions,
+          questions: limitedQuestions,
           loading: false,
           error: null,
           markedForReview: updated[sectionIndex]?.markedForReview || new Set(),
@@ -149,10 +179,38 @@ export default function MockTestAttemptPage() {
     }
   };
 
+  // Load all sections' questions
+  const loadAllSections = async () => {
+    try {
+      await Promise.all(
+        sections.map((section, index) =>
+          loadSectionQuestions(section.name, index)
+        )
+      );
+    } catch (error) {
+      console.error("Error loading all sections:", error);
+      setError("Failed to load all sections. Please try again.");
+    }
+  };
+
   // Handle starting the test
-  const handleStartTest = () => {
+  const handleStartTest = async () => {
     setTestStarted(true);
-    // Start timer logic will go here
+    await loadAllSections();
+    // Start timer
+    setTimeRemaining(3600); // 1 hour in seconds
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          void handleSubmitTest();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    // Store timer ID to clear it later
+    setTimerId(timer);
   };
 
   // Handle answer selection
@@ -206,10 +264,9 @@ export default function MockTestAttemptPage() {
     const counts: { [key: string]: number } = {};
 
     sections.forEach((section) => {
-      const answered = section.questions.filter(
+      counts[section.name] = section.questions.filter(
         (q) => selectedAnswers[q.id] !== undefined
       ).length;
-      counts[section.name] = answered;
     });
 
     return counts;
@@ -279,10 +336,15 @@ export default function MockTestAttemptPage() {
     try {
       const state = {
         selectedAnswers,
-        markedBySection: sections.reduce<Record<string, string[]>>((acc, sec) => {
-          acc[sec.name] = Array.from(sec.markedForReview || new Set<string>());
-          return acc;
-        }, {}),
+        markedBySection: sections.reduce<Record<string, string[]>>(
+          (acc, sec) => {
+            acc[sec.name] = Array.from(
+              sec.markedForReview || new Set<string>()
+            );
+            return acc;
+          },
+          {}
+        ),
         currentSectionIndex,
         currentQuestionIndex,
       };
@@ -292,14 +354,21 @@ export default function MockTestAttemptPage() {
     } catch (e) {
       console.error("Failed to persist mock state", e);
     }
-  }, [courseInfo, sections, selectedAnswers, currentSectionIndex, currentQuestionIndex]);
+  }, [
+    courseInfo,
+    sections,
+    selectedAnswers,
+    currentSectionIndex,
+    currentQuestionIndex,
+  ]);
 
   // Restore persisted state after sections/questions are available
   useEffect(() => {
     if (!courseInfo || sections.length === 0 || !testStarted) return;
     const key = `mock_state_${courseInfo.id}`;
     try {
-      const raw = typeof window !== "undefined" ? sessionStorage.getItem(key) : null;
+      const raw =
+        typeof window !== "undefined" ? sessionStorage.getItem(key) : null;
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (parsed?.selectedAnswers) setSelectedAnswers(parsed.selectedAnswers);
@@ -311,7 +380,9 @@ export default function MockTestAttemptPage() {
         setSections((prev) =>
           prev.map((sec) => ({
             ...sec,
-            markedForReview: new Set<string>(parsed.markedBySection[sec.name] || []),
+            markedForReview: new Set<string>(
+              parsed.markedBySection[sec.name] || []
+            ),
           }))
         );
       }
@@ -320,37 +391,31 @@ export default function MockTestAttemptPage() {
     }
   }, [courseInfo, sections.length, testStarted]);
 
-  // Timer effect
+  // Prevent accidental navigation while test is active and cleanup timer
   useEffect(() => {
-    if (!testStarted) return;
-
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // Auto-submit when time's up
-          handleSubmitTest();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [testStarted]);
-
-  // Prevent accidental navigation while test is active
-  useEffect(() => {
-    if (!testStarted) return;
+    if (!testStarted) {
+      // Clean up timer if test is not started
+      if (timerId) {
+        clearInterval(timerId);
+        setTimerId(null);
+      }
+      return;
+    }
 
     const beforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
-      e.returnValue = "Are you sure you want to leave? Your progress may be lost.";
+      e.returnValue =
+        "Are you sure you want to leave? Your progress may be lost.";
     };
 
     window.addEventListener("beforeunload", beforeUnload);
-    return () => window.removeEventListener("beforeunload", beforeUnload);
-  }, [testStarted]);
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+      // Don't clear the timer here as it's managed by the timer effect
+    };
+  }, [testStarted, timerId]);
 
   // Submit test
   const handleSubmitTest = useCallback(async () => {
@@ -379,30 +444,37 @@ export default function MockTestAttemptPage() {
         answersCount: answers.length,
         answers: answers.slice(0, 3), // Show first 3 for debugging
         timeSpent: 3600 - timeRemaining,
-        markedForReview: markedForReviewAll.length
+        markedForReview: markedForReviewAll.length,
       });
 
-      const res = await fetch(`http://localhost:8000/api/v1/courses/${courseInfo.id}/mock/submit`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("access_token") || ""}`
-        },
-        body: JSON.stringify({
-          answers,
-          time_spent_seconds: 3600 - timeRemaining,
-          marked_for_review: markedForReviewAll,
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/v1/courses/${courseInfo.id}/mock/submit`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${
+              localStorage.getItem("access_token") || ""
+            }`,
+          },
+          body: JSON.stringify({
+            answers,
+            time_spent_seconds: 3600 - timeRemaining,
+            marked_for_review: markedForReviewAll,
+          }),
+        }
+      );
 
       if (!res.ok) {
         const errorText = await res.text();
         console.error("Submit error details:", {
           status: res.status,
           statusText: res.statusText,
-          body: errorText
+          body: errorText,
         });
-        throw new Error(`Failed to submit test: ${res.status} ${res.statusText}`);
+        throw new Error(
+          `Failed to submit test: ${res.status} ${res.statusText}`
+        );
       }
 
       const data = await res.json();
@@ -421,11 +493,51 @@ export default function MockTestAttemptPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [courseInfo, id, isSubmitting, sections, selectedAnswers, timeRemaining, router]);
+  }, [
+    courseInfo,
+    id,
+    isSubmitting,
+    sections,
+    selectedAnswers,
+    timeRemaining,
+    router,
+  ]);
+
+  // Timer effect
+  useEffect(() => {
+    if (!testStarted) return;
+
+    // Clear any existing timer
+    if (timerId) {
+      clearInterval(timerId);
+    }
+
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Auto-submit when time's up
+          void handleSubmitTest();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // Store the timer ID
+    setTimerId(timer);
+
+    // Cleanup function
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [testStarted, handleSubmitTest]);
 
   // Manual submit with confirmation
   const handleManualSubmit = useCallback(() => {
-    const ok = window.confirm("Submit the test? You won't be able to change answers after submission.");
+    const ok = window.confirm(
+      "Submit the test? You won't be able to change answers after submission."
+    );
     if (!ok) return;
     void handleSubmitTest();
   }, [handleSubmitTest]);
@@ -521,8 +633,8 @@ export default function MockTestAttemptPage() {
                 <div key={index} className="border rounded-lg p-4">
                   <h3 className="font-medium">{section.name}</h3>
                   <p className="text-sm text-gray-600">
-                    {section.question_count} questions •{" "}
-                    {Math.floor(section.question_count * 0.5)} min
+                    {section.questions.length} questions •{" "}
+                    {Math.floor(section.questions.length * 0.5)} min
                   </p>
                 </div>
               ))}
@@ -543,11 +655,10 @@ export default function MockTestAttemptPage() {
   }
 
   // Calculate total questions and answered count
-  const totalQuestions = sections.reduce(
-    (sum, sec) => sum + sec.questions.length,
-    0
-  );
-  const answeredCount = Object.keys(selectedAnswers).length;
+  // const totalQuestions = sections.reduce(
+  //   (sum, sec) => sum + sec.questions.length,
+  //   0
+  // );
 
   // Format time remaining
   const hours = Math.floor(timeRemaining / 3600);
@@ -557,13 +668,22 @@ export default function MockTestAttemptPage() {
     .toString()
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
+  // Calculate progress percentage
+  const totalQuestions = sections.reduce(
+    (sum, sec) => sum + sec.questions.length,
+    0
+  );
+  const answeredCount = Object.keys(selectedAnswers).length;
+  const progressPercentage =
+    totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-lg font-semibold line-clamp-1">
                 {courseInfo?.title}
               </h1>
@@ -574,31 +694,53 @@ export default function MockTestAttemptPage() {
                 </p>
               )}
             </div>
+
+            {/* Progress Bar */}
+            <div className="flex-1 max-w-md mx-4">
+              <div className="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Progress</span>
+                <span>
+                  {answeredCount}/{totalQuestions}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Timer */}
             <div className="text-right">
-              <div className="text-sm font-medium text-gray-900">
+              <div className="text-sm font-medium text-gray-900 mb-1">
                 Time Remaining
               </div>
               <div
-                className={`text-lg font-bold ${
-                  timeRemaining <= 300 ? "text-red-600" : "text-gray-900"
+                className={`text-2xl font-bold transition-colors duration-300 ${
+                  timeRemaining <= 300
+                    ? "text-red-600 animate-pulse"
+                    : timeRemaining <= 600
+                    ? "text-orange-500"
+                    : "text-gray-900"
                 }`}
               >
                 {timeString}
               </div>
             </div>
           </div>
-
-          {/* Section Navigation */}
-          {sections.length > 0 && (
-            <SectionNavigation
-              sections={sections}
-              currentSectionIndex={currentSectionIndex}
-              onSectionChange={handleSectionChange}
-              answeredCounts={answeredCounts}
-            />
-          )}
         </div>
       </header>
+
+      {/* Section Navigation */}
+      {sections.length > 0 && (
+        <SectionNavigation
+          sections={sections}
+          currentSectionIndex={currentSectionIndex}
+          onSectionChange={handleSectionChange}
+          answeredCounts={answeredCounts}
+        />
+      )}
 
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
@@ -662,21 +804,55 @@ export default function MockTestAttemptPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-3">
+      <footer className="bg-white border-t py-4 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-gray-500">
-              Answered: <span className="font-medium">{answeredCount}</span> /{" "}
-              {totalQuestions}
+            <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>
+                  Answered:{" "}
+                  <span className="font-semibold text-gray-900">
+                    {answeredCount}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                <span>
+                  Remaining:{" "}
+                  <span className="font-semibold text-gray-900">
+                    {totalQuestions - answeredCount}
+                  </span>
+                </span>
+              </div>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              // onClick={handleSubmitTest}
-              className="w-full sm:w-auto"
-            >
-              Submit Test
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="px-6"
+              >
+                Exit Test
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleManualSubmit}
+                disabled={isSubmitting}
+                className="px-6 min-w-[120px]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Test"
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </footer>
