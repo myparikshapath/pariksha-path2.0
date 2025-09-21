@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Save,
   X,
@@ -17,17 +23,32 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
-} from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+} from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { QuestionResponse, QuestionUpdateRequest, updateQuestion, QuestionOption } from '@/src/services/courseService';
-import ImageUpload from './ImageUpload';
-import ImageDisplay from '@/components/ui/ImageDisplay';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '@/components/ui/dropdown-menu';
+import {
+  QuestionResponse,
+  QuestionUpdateRequest,
+  updateQuestion,
+  QuestionOption,
+} from "@/src/services/courseService";
+import ImageUpload from "./ImageUpload";
+import ImageDisplay from "@/components/ui/ImageDisplay";
 
 interface QuestionEditorProps {
   question: QuestionResponse;
@@ -44,7 +65,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
   onCancel,
   onDelete,
   isEditing,
-  onEdit
+  onEdit,
 }) => {
   const [formData, setFormData] = useState<QuestionUpdateRequest>({});
   const [loading, setLoading] = useState(false);
@@ -60,37 +81,69 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
         difficulty_level: question.difficulty_level,
         exam_year: question.exam_year,
         options: question.options || [],
-        explanation: question.explanation || '',
-        remarks: question.remarks || '',
+        explanation: question.explanation || "",
+        remarks: question.remarks || "",
         subject: question.subject,
         topic: question.topic,
         tags: question.tags || [],
-        is_active: question.is_active
+        is_active: question.is_active,
       });
     }
   }, [isEditing, question]);
 
-  const handleInputChange = (field: keyof QuestionUpdateRequest, value: any) => {
-    setFormData(prev => ({
+  // const handleInputChange = (field: keyof QuestionUpdateRequest, value: any) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }));
+  // };
+
+  const handleInputChange = <K extends keyof QuestionUpdateRequest>(
+    field: K,
+    value: QuestionUpdateRequest[K]
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
-  const handleOptionChange = (index: number, field: keyof QuestionOption, value: any) => {
+  // const handleOptionChange = (
+  //   index: number,
+  //   field: keyof QuestionOption,
+  //   value: any
+  // ) => {
+  //   const newOptions = [...(formData.options || [])];
+  //   newOptions[index] = { ...newOptions[index], [field]: value };
+  //   handleInputChange("options", newOptions);
+  // };
+
+  const handleOptionChange = <K extends keyof QuestionOption>(
+    index: number,
+    field: K,
+    value: QuestionOption[K]
+  ) => {
     const newOptions = [...(formData.options || [])];
     newOptions[index] = { ...newOptions[index], [field]: value };
-    handleInputChange('options', newOptions);
+    handleInputChange("options", newOptions);
   };
 
   const addOption = () => {
-    const newOptions = [...(formData.options || []), { text: '', is_correct: false, order: (formData.options || []).length }];
-    handleInputChange('options', newOptions);
+    const newOptions = [
+      ...(formData.options || []),
+      {
+        text: "",
+        is_correct: false,
+        order: (formData.options || []).length,
+        image_urls: [],
+      },
+    ];
+    handleInputChange("options", newOptions);
   };
 
   const removeOption = (index: number) => {
     const newOptions = (formData.options || []).filter((_, i) => i !== index);
-    handleInputChange('options', newOptions);
+    handleInputChange("options", newOptions);
   };
 
   const handleSave = async () => {
@@ -114,8 +167,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
 
       // Reset success state after 2 seconds
       setTimeout(() => setSuccess(false), 2000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to update question');
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update question"
+      );
     } finally {
       setLoading(false);
     }
@@ -127,8 +182,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
 
     try {
       onDelete(question.id);
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete question');
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete question"
+      );
     } finally {
       setLoading(false);
     }
@@ -136,12 +193,15 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
 
   const handleTagAdd = (tag: string) => {
     if (tag.trim() && !(formData.tags || []).includes(tag.trim())) {
-      handleInputChange('tags', [...(formData.tags || []), tag.trim()]);
+      handleInputChange("tags", [...(formData.tags || []), tag.trim()]);
     }
   };
 
   const handleTagRemove = (tagToRemove: string) => {
-    handleInputChange('tags', (formData.tags || []).filter(tag => tag !== tagToRemove));
+    handleInputChange(
+      "tags",
+      (formData.tags || []).filter((tag) => tag !== tagToRemove)
+    );
   };
 
   if (!isEditing) {
@@ -158,7 +218,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               </div>
             </div>
             <div>
-
               <Button onClick={onEdit} size="sm" variant="outline">
                 <Edit3 className="h-4 w-4 mr-2" />
                 Edit
@@ -174,13 +233,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the question.
+                      This action cannot be undone. This will permanently delete
+                      the question.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => onDelete(question.id)} 
+                    <AlertDialogAction
+                      onClick={() => onDelete(question.id)}
                       className="bg-red-600 hover:bg-red-700"
                     >
                       Delete
@@ -195,15 +255,17 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
           <div className="space-y-4">
             <div>
               <Label className="text-sm font-medium">Question</Label>
-              <p className="mt-1 text-sm text-gray-700 mb-2">{question.question_text}</p>
-              
+              <p className="mt-1 text-sm text-gray-700 mb-2">
+                {question.question_text}
+              </p>
+
               {/* Question Images Display */}
               <ImageDisplay
                 imageUrls={question.question_image_urls || []}
                 alt="Question image"
                 className="mb-4"
               />
-              
+
               {/* Question Images Upload */}
               <ImageUpload
                 questionId={question.id}
@@ -211,7 +273,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 existingImages={question.question_image_urls || []}
                 onImagesUpdate={(images) => {
                   // Update the question object with new images
-                  const updatedQuestion = { ...question, question_image_urls: images };
+                  const updatedQuestion = {
+                    ...question,
+                    question_image_urls: images,
+                  };
                   onSave(updatedQuestion);
                 }}
                 maxImages={3}
@@ -229,12 +294,20 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                         <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
                           {String.fromCharCode(65 + index)}
                         </span>
-                        <span className={`flex-1 ${option.is_correct ? 'text-green-600 font-medium' : 'text-gray-700'}`}>
+                        <span
+                          className={`flex-1 ${
+                            option.is_correct
+                              ? "text-green-600 font-medium"
+                              : "text-gray-700"
+                          }`}
+                        >
                           {option.text}
                         </span>
-                        {option.is_correct && <CheckCircle className="h-4 w-4 text-green-600" />}
+                        {option.is_correct && (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        )}
                       </div>
-                      
+
                       {/* Option Images Display */}
                       <ImageDisplay
                         imageUrls={option.image_urls || []}
@@ -243,7 +316,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                         maxWidth={300}
                         maxHeight={150}
                       />
-                      
+
                       {/* Option Images Upload */}
                       <ImageUpload
                         questionId={question.id}
@@ -252,8 +325,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                         existingImages={option.image_urls || []}
                         onImagesUpdate={(images) => {
                           const updatedOptions = [...(question.options || [])];
-                          updatedOptions[index] = { ...option, image_urls: images };
-                          const updatedQuestion = { ...question, options: updatedOptions };
+                          updatedOptions[index] = {
+                            ...option,
+                            image_urls: images,
+                          };
+                          const updatedQuestion = {
+                            ...question,
+                            options: updatedOptions,
+                          };
                           onSave(updatedQuestion);
                         }}
                         maxImages={2}
@@ -268,22 +347,27 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             {question.explanation && (
               <div>
                 <Label className="text-sm font-medium">Explanation</Label>
-                <p className="mt-1 text-sm text-gray-700 mb-2">{question.explanation}</p>
-                
+                <p className="mt-1 text-sm text-gray-700 mb-2">
+                  {question.explanation}
+                </p>
+
                 {/* Explanation Images Display */}
                 <ImageDisplay
                   imageUrls={question.explanation_image_urls || []}
                   alt="Explanation image"
                   className="mb-2"
                 />
-                
+
                 {/* Explanation Images Upload */}
                 <ImageUpload
                   questionId={question.id}
                   imageType="explanation"
                   existingImages={question.explanation_image_urls || []}
                   onImagesUpdate={(images) => {
-                    const updatedQuestion = { ...question, explanation_image_urls: images };
+                    const updatedQuestion = {
+                      ...question,
+                      explanation_image_urls: images,
+                    };
                     onSave(updatedQuestion);
                   }}
                   maxImages={2}
@@ -295,22 +379,27 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             {question.remarks && (
               <div>
                 <Label className="text-sm font-medium">Remarks</Label>
-                <p className="mt-1 text-sm text-gray-700 mb-2">{question.remarks}</p>
-                
+                <p className="mt-1 text-sm text-gray-700 mb-2">
+                  {question.remarks}
+                </p>
+
                 {/* Remarks Images Display */}
                 <ImageDisplay
                   imageUrls={question.remarks_image_urls || []}
                   alt="Remarks image"
                   className="mb-2"
                 />
-                
+
                 {/* Remarks Images Upload */}
                 <ImageUpload
                   questionId={question.id}
                   imageType="remarks"
                   existingImages={question.remarks_image_urls || []}
                   onImagesUpdate={(images) => {
-                    const updatedQuestion = { ...question, remarks_image_urls: images };
+                    const updatedQuestion = {
+                      ...question,
+                      remarks_image_urls: images,
+                    };
                     onSave(updatedQuestion);
                   }}
                   maxImages={2}
@@ -333,7 +422,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             )}
           </div>
         </CardContent>
-      </Card >
+      </Card>
     );
   }
 
@@ -363,8 +452,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
-                value={formData.title || ''}
-                onChange={(e) => handleInputChange('title', e.target.value)}
+                value={formData.title || ""}
+                onChange={(e) => handleInputChange("title", e.target.value)}
                 placeholder="Question title"
               />
             </div>
@@ -373,8 +462,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               <Label htmlFor="subject">Subject</Label>
               <Input
                 id="subject"
-                value={formData.subject || ''}
-                onChange={(e) => handleInputChange('subject', e.target.value)}
+                value={formData.subject || ""}
+                onChange={(e) => handleInputChange("subject", e.target.value)}
                 placeholder="Subject"
               />
             </div>
@@ -384,8 +473,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <Label htmlFor="question_text">Question Text</Label>
             <Textarea
               id="question_text"
-              value={formData.question_text || ''}
-              onChange={(e) => handleInputChange('question_text', e.target.value)}
+              value={formData.question_text || ""}
+              onChange={(e) =>
+                handleInputChange("question_text", e.target.value)
+              }
               placeholder="Enter the question text"
               rows={4}
             />
@@ -395,8 +486,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <div>
               <Label htmlFor="question_type">Question Type</Label>
               <Select
-                value={formData.question_type || 'mcq'}
-                onValueChange={(value) => handleInputChange('question_type', value)}
+                value={formData.question_type || "mcq"}
+                onValueChange={(value) =>
+                  handleInputChange("question_type", value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -413,8 +506,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <div>
               <Label htmlFor="difficulty_level">Difficulty</Label>
               <Select
-                value={formData.difficulty_level || 'medium'}
-                onValueChange={(value) => handleInputChange('difficulty_level', value)}
+                value={formData.difficulty_level || "medium"}
+                onValueChange={(value) =>
+                  handleInputChange("difficulty_level", value)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select difficulty" />
@@ -432,8 +527,13 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               <Input
                 id="exam_year"
                 type="number"
-                value={formData.exam_year || ''}
-                onChange={(e) => handleInputChange('exam_year', e.target.value ? parseInt(e.target.value) : null)}
+                value={formData.exam_year || ""}
+                onChange={(e) =>
+                  handleInputChange(
+                    "exam_year",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
                 placeholder="Year"
               />
             </div>
@@ -449,7 +549,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   </span>
                   <Input
                     value={option.text}
-                    onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
+                    onChange={(e) =>
+                      handleOptionChange(index, "text", e.target.value)
+                    }
                     placeholder={`Option ${String.fromCharCode(65 + index)}`}
                     className="flex-1"
                   />
@@ -457,9 +559,15 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                     type="button"
                     variant={option.is_correct ? "default" : "outline"}
                     size="sm"
-                    onClick={() => handleOptionChange(index, 'is_correct', !option.is_correct)}
+                    onClick={() =>
+                      handleOptionChange(
+                        index,
+                        "is_correct",
+                        !option.is_correct
+                      )
+                    }
                   >
-                    {option.is_correct ? 'Correct' : 'Mark Correct'}
+                    {option.is_correct ? "Correct" : "Mark Correct"}
                   </Button>
                   <Button
                     type="button"
@@ -488,8 +596,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <Label htmlFor="explanation">Explanation</Label>
             <Textarea
               id="explanation"
-              value={formData.explanation || ''}
-              onChange={(e) => handleInputChange('explanation', e.target.value)}
+              value={formData.explanation || ""}
+              onChange={(e) => handleInputChange("explanation", e.target.value)}
               placeholder="Enter explanation"
               rows={3}
             />
@@ -499,8 +607,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <Label htmlFor="remarks">Remarks</Label>
             <Textarea
               id="remarks"
-              value={formData.remarks || ''}
-              onChange={(e) => handleInputChange('remarks', e.target.value)}
+              value={formData.remarks || ""}
+              onChange={(e) => handleInputChange("remarks", e.target.value)}
               placeholder="Enter remarks"
               rows={2}
             />
@@ -510,8 +618,8 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <Label htmlFor="topic">Topic</Label>
             <Input
               id="topic"
-              value={formData.topic || ''}
-              onChange={(e) => handleInputChange('topic', e.target.value)}
+              value={formData.topic || ""}
+              onChange={(e) => handleInputChange("topic", e.target.value)}
               placeholder="Topic"
             />
           </div>
@@ -537,10 +645,10 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 <Input
                   placeholder="Add tag"
                   onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleTagAdd((e.target as HTMLInputElement).value);
-                      (e.target as HTMLInputElement).value = '';
+                      (e.target as HTMLInputElement).value = "";
                     }
                   }}
                 />
@@ -549,10 +657,12 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const input = document.querySelector('input[placeholder="Add tag"]') as HTMLInputElement;
+                    const input = document.querySelector(
+                      'input[placeholder="Add tag"]'
+                    ) as HTMLInputElement;
                     if (input) {
                       handleTagAdd(input.value);
-                      input.value = '';
+                      input.value = "";
                     }
                   }}
                 >
@@ -563,11 +673,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              onClick={onCancel}
-              variant="outline"
-              disabled={loading}
-            >
+            <Button onClick={onCancel} variant="outline" disabled={loading}>
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
@@ -583,22 +689,23 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the question.
+                    This action cannot be undone. This will permanently delete
+                    the question.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
 
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-            >
+            <Button onClick={handleSave} disabled={loading}>
               {loading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (

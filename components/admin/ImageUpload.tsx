@@ -1,60 +1,60 @@
-import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import api from '@/utils/api';
-import ImageDisplay from '@/components/ui/ImageDisplay';
+import React, { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Upload, X, Loader2 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import api from "@/utils/api";
+import Image from "next/image";
 
 // Utility function to fix image URL issues
 const fixImageUrl = (url: string): string => {
   if (!url) return url;
-  
+
   // Check if URL contains double bucket name pattern
   // Pattern: https://domain.com/bucket/bucket/images/filename
   const doubleBucketPattern = /^https?:\/\/[^\/]+\/([^\/]+)\/\1\/(.+)$/;
   const match = url.match(doubleBucketPattern);
-  
+
   if (match) {
     const bucketName = match[1];
-    const path = match[2];
+    // const path = match[2];
     // Reconstruct URL with single bucket name
     return url.replace(`/${bucketName}/${bucketName}/`, `/${bucketName}/`);
   }
-  
+
   // Check if URL is missing bucket name before /images
   // Pattern: https://domain.com/images/filename
   const missingBucketPattern = /^https?:\/\/[^\/]+\/images\/(.+)$/;
   const missingMatch = url.match(missingBucketPattern);
-  
+
   if (missingMatch) {
     // Extract domain and filename
-    const domain = url.split('/images/')[0];
+    const domain = url.split("/images/")[0];
     const filename = missingMatch[1];
     // Add bucket name before /images
     return `${domain}/pariksha-path-bucket/images/${filename}`;
   }
-  
+
   // Check if URL uses old path structure (questions/{id}/{type}/filename)
   // Pattern: https://domain.com/questions/{id}/{type}/filename
   const oldPathPattern = /^https?:\/\/[^\/]+\/questions\/[^\/]+\/[^\/]+\/(.+)$/;
   const oldPathMatch = url.match(oldPathPattern);
-  
+
   if (oldPathMatch) {
     // Extract domain and filename
-    const domain = url.split('/questions/')[0];
+    const domain = url.split("/questions/")[0];
     const filename = oldPathMatch[1];
     // Convert to new path structure
     return `${domain}/pariksha-path-bucket/images/${filename}`;
   }
-  
+
   return url;
 };
 
 interface ImageUploadProps {
   questionId: string;
-  imageType: 'question' | 'option' | 'explanation' | 'remarks';
+  imageType: "question" | "option" | "explanation" | "remarks";
   optionIndex?: number;
   existingImages: string[];
   onImagesUpdate: (images: string[]) => void;
@@ -69,55 +69,67 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   existingImages = [],
   onImagesUpdate,
   maxImages = 5,
-  className = '',
+  className = "",
 }) => {
   const [uploading, setUploading] = useState(false);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) return;
 
-    // Check if adding these files would exceed maxImages
-    if (existingImages.length + acceptedFiles.length > maxImages) {
-      toast.error(`Maximum ${maxImages} images allowed`);
-      return;
-    }
+      // Check if adding these files would exceed maxImages
+      if (existingImages.length + acceptedFiles.length > maxImages) {
+        toast.error(`Maximum ${maxImages} images allowed`);
+        return;
+      }
 
-    setUploading(true);
+      setUploading(true);
 
-    try {
-      const uploadPromises = acceptedFiles.map(async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('question_id', questionId);
-        formData.append('image_type', imageType);
-        if (optionIndex !== undefined) {
-          formData.append('option_index', optionIndex.toString());
-        }
+      try {
+        const uploadPromises = acceptedFiles.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("question_id", questionId);
+          formData.append("image_type", imageType);
+          if (optionIndex !== undefined) {
+            formData.append("option_index", optionIndex.toString());
+          }
 
-        const response = await api.post('/admin/images/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+          const response = await api.post("/admin/images/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          return response.data.data.image_url;
         });
 
-        return response.data.data.image_url;
-      });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-      onImagesUpdate([...existingImages, ...uploadedUrls]);
-      toast.success(`${uploadedUrls.length} image(s) uploaded successfully`);
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      toast.error(error.response?.data?.detail || 'Failed to upload images');
-    } finally {
-      setUploading(false);
-    }
-  }, [questionId, imageType, optionIndex, existingImages.length, maxImages, onImagesUpdate]);
+        const uploadedUrls = await Promise.all(uploadPromises);
+        onImagesUpdate([...existingImages, ...uploadedUrls]);
+        toast.success(`${uploadedUrls.length} image(s) uploaded successfully`);
+      } catch (error: unknown) {
+        console.error("Upload error:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to upload images"
+        );
+      } finally {
+        setUploading(false);
+      }
+    },
+    [
+      questionId,
+      imageType,
+      optionIndex,
+      maxImages,
+      onImagesUpdate,
+      existingImages
+    ]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+      "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"],
     },
     maxFiles: maxImages - existingImages.length,
     disabled: uploading || existingImages.length >= maxImages,
@@ -126,21 +138,33 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleDeleteImage = async (imageUrl: string) => {
     try {
       const formData = new FormData();
-      formData.append('question_id', questionId);
-      formData.append('image_url', imageUrl);
-      formData.append('image_type', imageType);
+      formData.append("question_id", questionId);
+      formData.append("image_url", imageUrl);
+      formData.append("image_type", imageType);
       if (optionIndex !== undefined) {
-        formData.append('option_index', optionIndex.toString());
+        formData.append("option_index", optionIndex.toString());
       }
 
-      await api.delete('/admin/images/delete', { data: formData });
-      
-      const updatedImages = existingImages.filter(url => url !== imageUrl);
+      await api.delete("/admin/images/delete", { data: formData });
+
+      const updatedImages = existingImages.filter((url) => url !== imageUrl);
       onImagesUpdate(updatedImages);
-      toast.success('Image deleted successfully');
-    } catch (error: any) {
-      console.error('Delete error:', error);
-      toast.error(error.response?.data?.detail || 'Failed to delete image');
+      toast.success("Image deleted successfully");
+    } catch (error: unknown) {
+      console.error("Delete error:", error);
+      const errorMessage = error && 
+        typeof error === 'object' && 
+        'response' in error && 
+        error.response && 
+        typeof error.response === 'object' &&
+        'data' in error.response &&
+        error.response.data &&
+        typeof error.response.data === 'object' &&
+        'detail' in error.response.data &&
+        typeof error.response.data.detail === 'string'
+          ? error.response.data.detail
+          : "Failed to delete image";
+      toast.error(errorMessage);
     }
   };
 
@@ -154,8 +178,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
             isDragActive
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
           }`}
         >
           <input {...getInputProps()} />
@@ -167,10 +191,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             )}
             <p className="text-gray-600">
               {uploading
-                ? 'Uploading...'
+                ? "Uploading..."
                 : isDragActive
-                ? 'Drop the images here'
-                : 'Drag and drop images here, or click to select'}
+                ? "Drop the images here"
+                : "Drag and drop images here, or click to select"}
             </p>
             <p className="text-sm text-gray-500">
               Supports JPG, PNG, GIF, WebP (max {maxImages} images)
@@ -183,11 +207,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       {existingImages.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">
-            {imageType === 'question' && 'Question Images'}
-            {imageType === 'option' && `Option ${String.fromCharCode(65 + (optionIndex || 0))} Images`}
-            {imageType === 'explanation' && 'Explanation Images'}
-            {imageType === 'remarks' && 'Remarks Images'}
-            ({existingImages.length}/{maxImages})
+            {imageType === "question" && "Question Images"}
+            {imageType === "option" &&
+              `Option ${String.fromCharCode(65 + (optionIndex || 0))} Images`}
+            {imageType === "explanation" && "Explanation Images"}
+            {imageType === "remarks" && "Remarks Images"}(
+            {existingImages.length}/{maxImages})
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {existingImages.map((imageUrl, index) => {
@@ -196,12 +221,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 <Card key={index} className="relative group">
                   <CardContent className="p-2">
                     <div className="relative">
-                      <img
+                      <Image
                         src={fixedUrl}
                         alt={`${imageType} image ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
                       <Button

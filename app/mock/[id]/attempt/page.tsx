@@ -57,6 +57,94 @@ export default function MockTestAttemptPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load course and sections data
+
+  // Load questions for a section
+  const loadSectionQuestions = useCallback(
+    async (sectionName: string, sectionIndex: number) => {
+      if (!courseInfo) return;
+
+      try {
+        setSections((prev) => {
+          const updated = [...prev];
+          updated[sectionIndex] = {
+            ...updated[sectionIndex],
+            loading: true,
+            error: null,
+          };
+          return updated;
+        });
+
+        // Get the section to access question_count
+        const section = sections[sectionIndex];
+        const questionLimit = section?.question_count || 0;
+
+        // If no question limit is set, don't fetch any questions
+        if (questionLimit <= 0) {
+          setSections((prev) => {
+            const updated = [...prev];
+            updated[sectionIndex] = {
+              ...updated[sectionIndex],
+              questions: [],
+              loading: false,
+              error: null,
+              markedForReview:
+                updated[sectionIndex]?.markedForReview || new Set(),
+            };
+            return updated;
+          });
+          return;
+        }
+
+        // Fetch questions for the section with the specified limit
+        const response = await getSectionQuestions(
+          courseInfo.id,
+          sectionName,
+          1, // page
+          questionLimit, // Use the question_count as the limit
+          undefined,
+          undefined,
+          "mock"
+        );
+
+        // Shuffle questions to get random ones each time
+        const shuffledQuestions = [...response.questions].sort(
+          () => Math.random() - 0.5
+        );
+
+        // Take only the number of questions specified by question_count
+        const limitedQuestions = shuffledQuestions.slice(0, questionLimit);
+
+        setSections((prev) => {
+          const updated = [...prev];
+          updated[sectionIndex] = {
+            ...updated[sectionIndex],
+            questions: limitedQuestions,
+            loading: false,
+            error: null,
+            markedForReview:
+              updated[sectionIndex]?.markedForReview || new Set(),
+          };
+          return updated;
+        });
+      } catch (err) {
+        console.error(
+          `Error loading questions for section ${sectionName}:`,
+          err
+        );
+        setSections((prev) => {
+          const updated = [...prev];
+          updated[sectionIndex] = {
+            ...updated[sectionIndex],
+            loading: false,
+            error: "Failed to load questions",
+          };
+          return updated;
+        });
+      }
+    },
+    [courseInfo, sections]
+  );
+
   const loadCourseData = useCallback(async () => {
     try {
       setLoading(true);
@@ -94,90 +182,7 @@ export default function MockTestAttemptPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
-
-  // Load questions for a section
-  const loadSectionQuestions = async (
-    sectionName: string,
-    sectionIndex: number
-  ) => {
-    if (!courseInfo) return;
-
-    try {
-      setSections((prev) => {
-        const updated = [...prev];
-        updated[sectionIndex] = {
-          ...updated[sectionIndex],
-          loading: true,
-          error: null,
-        };
-        return updated;
-      });
-
-      // Get the section to access question_count
-      const section = sections[sectionIndex];
-      const questionLimit = section?.question_count || 0;
-
-      // If no question limit is set, don't fetch any questions
-      if (questionLimit <= 0) {
-        setSections((prev) => {
-          const updated = [...prev];
-          updated[sectionIndex] = {
-            ...updated[sectionIndex],
-            questions: [],
-            loading: false,
-            error: null,
-            markedForReview:
-              updated[sectionIndex]?.markedForReview || new Set(),
-          };
-          return updated;
-        });
-        return;
-      }
-
-      // Fetch questions for the section with the specified limit
-      const response = await getSectionQuestions(
-        courseInfo.id,
-        sectionName,
-        1, // page
-        questionLimit, // Use the question_count as the limit
-        undefined,
-        undefined,
-        "mock"
-      );
-
-      // Shuffle questions to get random ones each time
-      const shuffledQuestions = [...response.questions].sort(
-        () => Math.random() - 0.5
-      );
-
-      // Take only the number of questions specified by question_count
-      const limitedQuestions = shuffledQuestions.slice(0, questionLimit);
-
-      setSections((prev) => {
-        const updated = [...prev];
-        updated[sectionIndex] = {
-          ...updated[sectionIndex],
-          questions: limitedQuestions,
-          loading: false,
-          error: null,
-          markedForReview: updated[sectionIndex]?.markedForReview || new Set(),
-        };
-        return updated;
-      });
-    } catch (err) {
-      console.error(`Error loading questions for section ${sectionName}:`, err);
-      setSections((prev) => {
-        const updated = [...prev];
-        updated[sectionIndex] = {
-          ...updated[sectionIndex],
-          loading: false,
-          error: "Failed to load questions",
-        };
-        return updated;
-      });
-    }
-  };
+  }, [id, loadSectionQuestions]);
 
   // Load all sections' questions
   const loadAllSections = async () => {
@@ -327,7 +332,7 @@ export default function MockTestAttemptPage() {
     };
 
     loadInitialData();
-  }, [loadCourseData, sections.length]);
+  }, [loadCourseData, sections, sections.length, loadSectionQuestions]);
 
   // Persist answers and review marks in sessionStorage
   useEffect(() => {
@@ -531,7 +536,7 @@ export default function MockTestAttemptPage() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [testStarted, handleSubmitTest]);
+  }, [testStarted, timerId, handleSubmitTest]);
 
   // Manual submit with confirmation
   const handleManualSubmit = useCallback(() => {

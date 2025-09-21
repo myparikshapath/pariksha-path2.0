@@ -9,7 +9,29 @@ export default function MockResultPage() {
   const router = useRouter();
   const { id } = params;
 
-  const [results, setResults] = useState<any | null>(null);
+  interface SectionSummary {
+    section: string;
+    attempted: number;
+    total: number;
+    correct: number;
+    accuracy: number;
+  }
+
+  interface MockResults {
+    percentage: number;
+    score: number;
+    max_score: number;
+    accuracy: number;
+    attempted_questions: number;
+    total_questions: number;
+    time_spent_seconds: number;
+    section_summaries: SectionSummary[];
+    course?: {
+      title: string;
+    };
+  }
+
+  const [results, setResults] = useState<MockResults | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -93,7 +115,7 @@ export default function MockResultPage() {
             Section Performance
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(results.section_summaries || []).map((s: any, idx: number) => (
+            {(results.section_summaries || []).map((s: SectionSummary, idx: number) => (
               <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-gray-900">{s.section}</h3>

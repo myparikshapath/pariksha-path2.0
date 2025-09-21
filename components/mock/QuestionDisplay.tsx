@@ -75,7 +75,6 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         {question.options.map((option, index) => {
           const optionLetter = String.fromCharCode(65 + index);
           const isSelected = selectedAnswer === optionLetter;
-          const isCorrect = option.is_correct;
 
           return (
             <motion.button
