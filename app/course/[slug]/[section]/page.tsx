@@ -135,10 +135,7 @@ const SectionQuestionsPage = () => {
           // exam_year intentionally omitted to satisfy current Question typing
           options: updatedQuestion.options || [],
           explanation: updatedQuestion.explanation || "",
-          explanation_images: updatedQuestion.explanation_images || [],
           remarks: updatedQuestion.remarks || "",
-          remarks_images: updatedQuestion.remarks_images || [],
-          question_images: updatedQuestion.question_images || [],
           subject: updatedQuestion.subject,
           topic: updatedQuestion.topic,
           tags: updatedQuestion.tags || [],
@@ -191,10 +188,7 @@ const SectionQuestionsPage = () => {
       // exam_year omitted
       options: question.options || [],
       explanation: question.explanation || "",
-      explanation_images: question.explanation_images || [],
       remarks: question.remarks || "",
-      remarks_images: question.remarks_images || [],
-      question_images: question.question_images || [],
       subject: question.subject,
       topic: question.topic,
       tags: question.tags || [],

@@ -16,9 +16,15 @@ import {
   Trash2,
   Loader2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { QuestionResponse, QuestionUpdateRequest, updateQuestion, deleteQuestion, QuestionOption } from '@/src/services/courseService';
 
 interface QuestionEditorProps {
@@ -91,10 +97,19 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
     setSuccess(false);
 
     try {
-      const updatedQuestion = await updateQuestion(question.id, formData);
+      await updateQuestion(question.id, formData);
       setSuccess(true);
+
+      // Create updated question object from form data
+      const updatedQuestion: QuestionResponse = {
+        ...question,
+        ...formData,
+        options: formData.options || question.options,
+        tags: formData.tags || question.tags,
+      };
+
       onSave(updatedQuestion);
-      
+
       // Reset success state after 2 seconds
       setTimeout(() => setSuccess(false), 2000);
     } catch (err: any) {
@@ -141,10 +156,17 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 <Badge variant="outline">{question.subject}</Badge>
               </div>
             </div>
-            <Button onClick={onEdit} size="sm" variant="outline">
-              <Edit3 className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            <div>
+
+              <Button onClick={onEdit} size="sm" variant="outline">
+                <Edit3 className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button onClick={() => onDelete(question.id)} size="sm" variant="outline">
+                <Trash2 className="text-red-600 h-4 w-4 mr-2" />
+                <span className="text-red-600">Delete</span>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -201,7 +223,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card >
     );
   }
 
@@ -439,7 +461,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" disabled={loading}>
