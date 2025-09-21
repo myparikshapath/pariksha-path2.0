@@ -5,114 +5,109 @@ import { useParams, useRouter } from "next/navigation";
 import { fetchAvailableCourses, Course } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-    BookOpen,
-    Clock,
-    DollarSign,
-    ArrowLeft,
-    Loader2,
-    AlertCircle,
-    Eye,
-} from "lucide-react";
+import { BookOpen, ArrowLeft, Loader2, AlertCircle, Eye } from "lucide-react";
 
 const CourseDetailPage = () => {
-    const params = useParams();
-    const router = useRouter();
-    const [course, setCourse] = useState<Course | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const params = useParams();
+  const router = useRouter();
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const loadCourse = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
+  const loadCourse = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-            const courses = await fetchAvailableCourses();
-            const foundCourse = courses.find((c) => {
-                const courseSlug = c.id;
-                return courseSlug === params.id;
-            });
-            console.log(params);
-            if (foundCourse) {
-                setCourse(foundCourse);
-            } else {
-                setError("Course not found");
-            }
-        } catch (e: unknown) {
-            console.error("Error loading course:", e);
-            setError(e instanceof Error ? e.message : "Failed to load course");
-        } finally {
-            setLoading(false);
-        }
-    }, [params.slug]);
-
-    useEffect(() => {
-        loadCourse();
-    }, [params.slug, loadCourse]);
-
-    const handleBackClick = () => {
-        router.push("/mock");
-    };
-
-    const handleAttemptSection = (sectionName: string) => {
-        router.push(`/mock/${params.id}/sections/${encodeURIComponent(sectionName)}`);
-    };
-
-    if (loading) {
-        return (
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex justify-center items-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                    <span className="ml-2 text-gray-600">Loading course...</span>
-                </div>
-            </div>
-        );
+      const courses = await fetchAvailableCourses();
+      const foundCourse = courses.find((c) => {
+        const courseSlug = c.id;
+        return courseSlug === params.id;
+      });
+      console.log(params);
+      if (foundCourse) {
+        setCourse(foundCourse);
+      } else {
+        setError("Course not found");
+      }
+    } catch (e: unknown) {
+      console.error("Error loading course:", e);
+      setError(e instanceof Error ? e.message : "Failed to load course");
+    } finally {
+      setLoading(false);
     }
+  }, [params]);
 
-    if (error || !course) {
-        return (
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex items-center gap-4 mb-6">
-                    <Button
-                        onClick={handleBackClick}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Courses
-                    </Button>
-                </div>
+  useEffect(() => {
+    loadCourse();
+  }, [params.slug, loadCourse]);
 
-                <div className="text-center py-12">
-                    <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                        {error || "Course not found"}
-                    </h2>
-                    <p className="text-gray-600">
-                        The course you&apos;re looking for doesn&apos;t exist or has been removed.
-                    </p>
-                </div>
-            </div>
-        );
-    }
+  const handleBackClick = () => {
+    router.push("/mock");
+  };
 
+  const handleAttemptSection = (sectionName: string) => {
+    router.push(
+      `/mock/${params.id}/sections/${encodeURIComponent(sectionName)}`
+    );
+  };
+
+  if (loading) {
     return (
-        <div className="container mx-auto px-4 py-8">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
-                <Button
-                    onClick={handleBackClick}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                </Button>
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <span className="ml-2 text-gray-600">Loading course...</span>
+        </div>
+      </div>
+    );
+  }
 
-            {/* Course Info */}
-            <div className="mb-8">
-                {/* <div className="bg-white rounded-lg shadow-sm border p-6">
+  if (error || !course) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            onClick={handleBackClick}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Courses
+          </Button>
+        </div>
+
+        <div className="text-center py-12">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            {error || "Course not found"}
+          </h2>
+          <p className="text-gray-600">
+            The course you&apos;re looking for doesn&apos;t exist or has been
+            removed.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <Button
+          onClick={handleBackClick}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
+      {/* Course Info */}
+      <div className="mb-8">
+        {/* <div className="bg-white rounded-lg shadow-sm border p-6">
                     <div className="flex items-start justify-between mb-4">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -157,64 +152,62 @@ const CourseDetailPage = () => {
                         </div>
                     </div>
                 </div> */}
-            </div>
+      </div>
 
-            {/* Sections Grid */}
-            <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    Course Sections
-                </h2>
+      {/* Sections Grid */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Course Sections
+        </h2>
 
-                {!course.sections || course.sections.length === 0 ? (
-                    <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                        <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500 mb-4">
-                            No sections available for this course yet.
-                        </p>
+        {!course.sections || course.sections.length === 0 ? (
+          <div className="text-center py-12 border-2 border-dashed rounded-lg">
+            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 mb-4">
+              No sections available for this course yet.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {course.sections.map((section, index) => (
+              <Card key={index} className="hover:shadow-md transition-all">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {index + 1}
+                      </span>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {course.sections.map((section, index) => (
-                            <Card
-                                key={index}
-                                className="hover:shadow-md transition-all"
-                            >
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sm font-semibold text-blue-600">
-                                                {index + 1}
-                                            </span>
-                                        </div>
-                                        <CardTitle className="text-lg flex-1">{section.name}</CardTitle>
-                                    </div>
-                                </CardHeader>
+                    <CardTitle className="text-lg flex-1">
+                      {section.name}
+                    </CardTitle>
+                  </div>
+                </CardHeader>
 
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="text-sm text-gray-600">
-                                            Section {index + 1} of {course?.sections?.length}
-                                        </div>
-                                        <div className="flex justify-end">
-
-                                            <Button
-                                                size="sm"
-                                                className="flex items-center gap-2"
-                                                onClick={() => handleAttemptSection(section.name)}
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                                Attempt this Section
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600">
+                      Section {index + 1} of {course?.sections?.length}
                     </div>
-                )}
-            </div>
-        </div>
-    );
+                    <div className="flex justify-end">
+                      <Button
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={() => handleAttemptSection(section.name)}
+                      >
+                        <Eye className="h-4 w-4" />
+                        Attempt this Section
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default CourseDetailPage;

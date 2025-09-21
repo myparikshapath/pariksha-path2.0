@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Question, ImageAttachment } from '@/src/services/courseService';
+import { Question } from '@/src/services/courseService';
+import ImageDisplay from '@/components/ui/ImageDisplay';
 
 interface QuestionDisplayProps {
   question: Question;
@@ -23,123 +24,138 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
   onToggleMarkForReview,
   className = '',
 }) => {
-  const renderQuestionMedia = (media: ImageAttachment[], type: string) => {
-    if (!media || media.length === 0) return null;
-    
-    return (
-      <div className="mt-2 space-y-2">
-        {media.map((item, idx) => (
-          <div key={`${type}-${idx}`} className="relative">
-            <img
-              src={item.url}
-              alt={item.alt_text || `${type} image ${idx + 1}`}
-              className="max-w-full h-auto rounded-lg border border-gray-200"
-              loading="lazy"
-            />
-            {item.caption && (
-              <p className="text-xs text-gray-500 mt-1 text-center">
-                {item.caption}
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
-    <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
-      {/* Question header */}
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h3 className="text-lg font-medium text-gray-900">
-            Question {questionNumber} of {totalQuestions}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {question.difficulty_level && `${question.difficulty_level} • `}
-            {question.topic && `${question.topic} • `}
-            {question.exam_year && `Year: ${question.exam_year}`}
-          </p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${className}`}
+    >
+      {/* Question Header */}
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center space-x-3">
+          <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
+           a Question {questionNumber} of {totalQuestions}
+          </span>
+          <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded">
+            {question.difficulty_level}
+          </span>
         </div>
-        
-        {/* Mark for review button */}
         <button
           onClick={onToggleMarkForReview}
-          className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-full border ${
+          className={`text-sm px-3 py-1 rounded-full border transition-colors ${
             isMarkedForReview
-              ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
-              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-          } transition-colors`}
+              ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+              : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-yellow-50 hover:text-yellow-700'
+          }`}
         >
-          <svg
-            className={`w-4 h-4 ${isMarkedForReview ? 'fill-yellow-500' : 'fill-gray-400'}`}
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-          <span>{isMarkedForReview ? 'Marked' : 'Mark for Review'}</span>
+          {isMarkedForReview ? 'Marked for Review' : 'Mark for Review'}
         </button>
       </div>
 
-      {/* Question text */}
-      <div className="prose max-w-none mb-6">
-        <p className="text-lg font-medium">
+      {/* Question Text */}
+      <div className="mb-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          {question.title}
+        </h3>
+        <p className="text-gray-700 leading-relaxed mb-4">
           {question.question_text}
         </p>
-        {renderQuestionMedia(question.question_images || [], 'question')}
+        
+        {/* Question Images */}
+        <ImageDisplay
+          imageUrls={question.question_image_urls || []}
+          alt="Question image"
+          className="mb-4"
+        />
       </div>
 
       {/* Options */}
-      <div className="space-y-3">
-        {question.options.map((option, idx) => {
-          const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D...
-          const isSelected = selectedAnswer === option.text;
-          
+      <div className="space-y-3 mb-6">
+        {question.options.map((option, index) => {
+          const optionLetter = String.fromCharCode(65 + index);
+          const isSelected = selectedAnswer === optionLetter;
+
           return (
-            <motion.div
-              key={option.order}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onAnswerSelect(option.text)}
-              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+            <motion.button
+              key={index}
+              onClick={() => onAnswerSelect(optionLetter)}
+              className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
                 isSelected
                   ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:bg-gray-50'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
             >
-              <div className="flex items-start">
-                <div
-                  className={`w-6 h-6 rounded-full border flex-shrink-0 flex items-center justify-center mr-3 mt-0.5 ${
+              <div className="flex items-start space-x-3">
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
                     isSelected
-                      ? 'border-blue-500 bg-blue-500'
-                      : 'border-gray-400'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-600'
                   }`}
                 >
-                  {isSelected && (
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  )}
-                </div>
+                  {optionLetter}
+                </span>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">
-                    {optionLetter}. {option.text}
-                  </div>
-                  {renderQuestionMedia(option.images || [], `option-${optionLetter}`)}
+                  <span className="text-gray-700">{option.text}</span>
+                  {/* Option Images */}
+                  <ImageDisplay
+                    imageUrls={option.image_urls || []}
+                    alt={`Option ${optionLetter} image`}
+                    className="mt-2"
+                    maxWidth={400}
+                    maxHeight={200}
+                  />
                 </div>
               </div>
-            </motion.div>
+            </motion.button>
           );
         })}
       </div>
 
-      {/* Explanation (to be shown after submission) */}
+      {/* Explanation */}
       {question.explanation && (
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-          <h4 className="font-medium text-blue-800 mb-2">Explanation:</h4>
-          <p className="text-blue-700">{question.explanation}</p>
-          {renderQuestionMedia(question.explanation_images || [], 'explanation')}
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <h4 className="text-sm font-medium text-green-800 mb-2">Explanation:</h4>
+          <p className="text-green-700 text-sm mb-2">{question.explanation}</p>
+          <ImageDisplay
+            imageUrls={question.explanation_image_urls || []}
+            alt="Explanation image"
+            maxWidth={500}
+            maxHeight={300}
+          />
         </div>
       )}
-    </div>
+
+      {/* Remarks */}
+      {question.remarks && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="text-sm font-medium text-blue-800 mb-2">Remarks:</h4>
+          <p className="text-blue-700 text-sm mb-2">{question.remarks}</p>
+          <ImageDisplay
+            imageUrls={question.remarks_image_urls || []}
+            alt="Remarks image"
+            maxWidth={500}
+            maxHeight={300}
+          />
+        </div>
+      )}
+
+      {/* Question Metadata */}
+      <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+        <span>Subject: {question.subject}</span>
+        <span>•</span>
+        <span>Topic: {question.topic}</span>
+        {question.tags && question.tags.length > 0 && (
+          <>
+            <span>•</span>
+            <span>Tags: {question.tags.join(', ')}</span>
+          </>
+        )}
+      </div>
+    </motion.div>
   );
 };
 

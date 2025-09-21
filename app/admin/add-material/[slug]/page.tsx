@@ -12,8 +12,6 @@ import { Button } from "@/components/ui/button";
 import {
     Upload,
     BookOpen,
-    Clock,
-    DollarSign,
     Edit,
     ArrowLeft,
     Loader2,
@@ -115,9 +113,9 @@ const MaterialDetailPage = () => {
         setDeletingSection(null);
     };
 
-    const handleUploadMaterial = (section: string) => {
-        router.push(`/admin/add-material/${params.slug}/${encodeURIComponent(section)}`);
-    };
+    // const handleUploadMaterial = (section: string) => {
+    //     router.push(`/admin/add-material/${params.slug}/${encodeURIComponent(section)}`);
+    // };
 
     if (loading) {
         return (

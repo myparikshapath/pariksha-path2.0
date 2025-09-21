@@ -186,7 +186,8 @@ const AddSectionPage = () => {
                     {course.sections.map((section, index) => (
                       <div
                         key={index}
-                        className="bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-sm"
+                        className="bg-gray-100 text-gray-800 px-3 py-1 rounded-md 
+                        text-sm"
                       >
                         {section.name}
                       </div>

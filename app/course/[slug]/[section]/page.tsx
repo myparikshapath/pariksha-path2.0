@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getSectionQuestions, getSectionDetails, fetchCourseBySlug, Question, QuestionResponse } from "@/src/services/courseService";
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+  getSectionQuestions,
+  getSectionDetails,
+  fetchCourseBySlug,
+  Question,
+  QuestionResponse,
+  deleteQuestion,
+} from "@/src/services/courseService";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,6 +31,7 @@ import {
 import QuestionEditor from "@/components/admin/QuestionEditor";
 import { Course } from "@/src/services/courseService";
 import { SectionDetails } from "@/src/services/courseService";
+import { toast } from "react-hot-toast";
 
 const SectionQuestionsPage = () => {
   const params = useParams();
@@ -36,9 +41,13 @@ const SectionQuestionsPage = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sectionDetails, setSectionDetails] = useState<SectionDetails | null>(null);
+  const [sectionDetails, setSectionDetails] = useState<SectionDetails | null>(
+    null
+  );
   const [courseInfo, setCourseInfo] = useState<Course | null>(null);
-  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(
+    null
+  );
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -51,7 +60,6 @@ const SectionQuestionsPage = () => {
   });
 
   const sectionName = decodeURIComponent(section as string);
-
 
   const loadCourseAndSectionData = useCallback(async () => {
     try {
@@ -109,19 +117,17 @@ const SectionQuestionsPage = () => {
     loadCourseAndSectionData();
   }, [slug, sectionName, pagination.page, filters, loadCourseAndSectionData]);
 
-
-
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page
   };
 
   const handlePageChange = (newPage: number) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
+    setPagination((prev) => ({ ...prev, page: newPage }));
   };
 
   const handleQuestionUpdate = (updatedQuestion: QuestionResponse) => {
-    setQuestions(prev =>
+    setQuestions((prev) =>
       prev.map((q): Question => {
         if (q.id !== updatedQuestion.id) return q;
         // Map QuestionResponse back to Question, preserving required fields like marks
@@ -135,10 +141,7 @@ const SectionQuestionsPage = () => {
           // exam_year intentionally omitted to satisfy current Question typing
           options: updatedQuestion.options || [],
           explanation: updatedQuestion.explanation || "",
-          explanation_images: updatedQuestion.explanation_images || [],
           remarks: updatedQuestion.remarks || "",
-          remarks_images: updatedQuestion.remarks_images || [],
-          question_images: updatedQuestion.question_images || [],
           subject: updatedQuestion.subject,
           topic: updatedQuestion.topic,
           tags: updatedQuestion.tags || [],
@@ -162,9 +165,18 @@ const SectionQuestionsPage = () => {
     setEditingQuestionId(null);
   };
 
-  const handleDeleteQuestion = (questionId: string) => {
-    setQuestions(prev => prev.filter(q => q.id !== questionId));
-    setEditingQuestionId(null); // Exit editing mode if currently editing
+  const handleDeleteQuestion = async (questionId: string) => {
+    try {
+      await deleteQuestion(questionId);
+      setQuestions((prev) => prev.filter((q) => q.id !== questionId));
+      setEditingQuestionId(null); // Exit editing mode if currently editing
+      toast.success("Question deleted successfully");
+    } catch (error: unknown) {
+      console.error("Error deleting question:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete question"
+      );
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -191,10 +203,7 @@ const SectionQuestionsPage = () => {
       // exam_year omitted
       options: question.options || [],
       explanation: question.explanation || "",
-      explanation_images: question.explanation_images || [],
       remarks: question.remarks || "",
-      remarks_images: question.remarks_images || [],
-      question_images: question.question_images || [],
       subject: question.subject,
       topic: question.topic,
       tags: question.tags || [],
@@ -202,13 +211,16 @@ const SectionQuestionsPage = () => {
       created_by: "",
       created_at: question.created_at,
       updated_at: question.created_at,
+      question_image_urls: question.question_image_urls || [],
+      explanation_image_urls: question.explanation_image_urls || [],
+      remarks_image_urls: question.remarks_image_urls || [],
     };
 
     return (
       <div key={question.id} className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-700">
-            Question {((pagination.page - 1) * pagination.limit) + index + 1}
+            Question {(pagination.page - 1) * pagination.limit + index + 1}
           </h3>
           <div className="flex gap-2">
             <Badge className={getDifficultyColor(question.difficulty_level)}>
@@ -344,7 +356,9 @@ const SectionQuestionsPage = () => {
               </div>
               <div className="flex items-center gap-1">
                 <Target className="h-4 w-4" />
-                <span>Page {pagination.page} of {pagination.total_pages}</span>
+                <span>
+                  Page {pagination.page} of {pagination.total_pages}
+                </span>
               </div>
             </div>
           </div>
@@ -359,7 +373,9 @@ const SectionQuestionsPage = () => {
             <div className="flex gap-4">
               <Select
                 value={filters.difficulty || "all"}
-                onValueChange={(value) => handleFilterChange("difficulty", value === "all" ? "" : value)}
+                onValueChange={(value) =>
+                  handleFilterChange("difficulty", value === "all" ? "" : value)
+                }
               >
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Difficulty" />
@@ -374,7 +390,9 @@ const SectionQuestionsPage = () => {
 
               <Select
                 value={filters.topic || "all"}
-                onValueChange={(value) => handleFilterChange("topic", value === "all" ? "" : value)}
+                onValueChange={(value) =>
+                  handleFilterChange("topic", value === "all" ? "" : value)
+                }
               >
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Topic" />
@@ -390,7 +408,7 @@ const SectionQuestionsPage = () => {
                   variant="outline"
                   onClick={() => {
                     setFilters({ difficulty: "", topic: "" });
-                    setPagination(prev => ({ ...prev, page: 1 }));
+                    setPagination((prev) => ({ ...prev, page: 1 }));
                   }}
                 >
                   Clear Filters
@@ -419,7 +437,9 @@ const SectionQuestionsPage = () => {
       ) : (
         <>
           <div className="space-y-6">
-            {questions.map((question, index) => renderQuestion(question, index))}
+            {questions.map((question, index) =>
+              renderQuestion(question, index)
+            )}
           </div>
           {renderPagination()}
         </>

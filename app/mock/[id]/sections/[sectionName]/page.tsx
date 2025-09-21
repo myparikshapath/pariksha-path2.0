@@ -14,7 +14,6 @@ import {
     Loader2,
     ArrowLeft,
     BookOpen,
-    Target,
 } from "lucide-react";
 import { Course } from "@/src/services/courseService";
 import { SectionDetails } from "@/src/services/courseService";
@@ -73,7 +72,7 @@ const SectionQuestionsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [id, sectionName, pagination.page, pagination.limit]);
+    }, [id, sectionName, pagination.page, pagination]);
 
     useEffect(() => {
         loadCourseAndSectionData();

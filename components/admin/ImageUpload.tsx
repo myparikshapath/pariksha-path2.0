@@ -1,330 +1,259 @@
-"use client";
-
-import React, { useState, useRef } from "react";
-import Image from "next/image";
+import React, { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { ImageIcon, Upload, X, Edit2 } from "lucide-react";
-import { ImageAttachment } from "@/src/services/courseService";
-import toast from "react-hot-toast";
+import { Upload, X, Loader2 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import api from "@/utils/api";
+import Image from "next/image";
+
+// Utility function to fix image URL issues
+const fixImageUrl = (url: string): string => {
+  if (!url) return url;
+
+  // Check if URL contains double bucket name pattern
+  // Pattern: https://domain.com/bucket/bucket/images/filename
+  const doubleBucketPattern = /^https?:\/\/[^\/]+\/([^\/]+)\/\1\/(.+)$/;
+  const match = url.match(doubleBucketPattern);
+
+  if (match) {
+    const bucketName = match[1];
+    // const path = match[2];
+    // Reconstruct URL with single bucket name
+    return url.replace(`/${bucketName}/${bucketName}/`, `/${bucketName}/`);
+  }
+
+  // Check if URL is missing bucket name before /images
+  // Pattern: https://domain.com/images/filename
+  const missingBucketPattern = /^https?:\/\/[^\/]+\/images\/(.+)$/;
+  const missingMatch = url.match(missingBucketPattern);
+
+  if (missingMatch) {
+    // Extract domain and filename
+    const domain = url.split("/images/")[0];
+    const filename = missingMatch[1];
+    // Add bucket name before /images
+    return `${domain}/pariksha-path-bucket/images/${filename}`;
+  }
+
+  // Check if URL uses old path structure (questions/{id}/{type}/filename)
+  // Pattern: https://domain.com/questions/{id}/{type}/filename
+  const oldPathPattern = /^https?:\/\/[^\/]+\/questions\/[^\/]+\/[^\/]+\/(.+)$/;
+  const oldPathMatch = url.match(oldPathPattern);
+
+  if (oldPathMatch) {
+    // Extract domain and filename
+    const domain = url.split("/questions/")[0];
+    const filename = oldPathMatch[1];
+    // Convert to new path structure
+    return `${domain}/pariksha-path-bucket/images/${filename}`;
+  }
+
+  return url;
+};
 
 interface ImageUploadProps {
-  images: ImageAttachment[];
-  onImagesChange: (images: ImageAttachment[]) => void;
+  questionId: string;
+  imageType: "question" | "option" | "explanation" | "remarks";
+  optionIndex?: number;
+  existingImages: string[];
+  onImagesUpdate: (images: string[]) => void;
   maxImages?: number;
-  label?: string;
   className?: string;
 }
 
-export default function ImageUpload({
-  images,
-  onImagesChange,
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  questionId,
+  imageType,
+  optionIndex,
+  existingImages = [],
+  onImagesUpdate,
   maxImages = 5,
-  label = "Images",
   className = "",
-}: ImageUploadProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+}) => {
+  const [uploading, setUploading] = useState(false);
 
-  const handleFileUpload = async (files: FileList | null) => {
-    if (!files) return;
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) return;
 
-    const newImages: ImageAttachment[] = [];
-    const remainingSlots = maxImages - images.length;
-    const filesToProcess = Math.min(files.length, remainingSlots);
-
-    // Validate files first
-    for (let i = 0; i < filesToProcess; i++) {
-      const file = files[i];
-
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not a valid image file`);
-        continue;
+      // Check if adding these files would exceed maxImages
+      if (existingImages.length + acceptedFiles.length > maxImages) {
+        toast.error(`Maximum ${maxImages} images allowed`);
+        return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} is too large. Maximum size is 5MB`);
-        continue;
-      }
-    }
+      setUploading(true);
 
-    if (filesToProcess === 0) return;
-
-    try {
-      // Create FormData for upload
-      const formData = new FormData();
-      for (let i = 0; i < filesToProcess; i++) {
-        formData.append('files', files[i]);
-      }
-
-      // Upload to backend
-      const response = await fetch('/api/v1/uploads/images', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Upload failed');
-      }
-
-      const result = await response.json();
-
-      // Convert uploaded files to ImageAttachment format
-      result.uploaded_files.forEach((uploadedFile: ImageAttachment) => {
-        const newImage: ImageAttachment = {
-          url: uploadedFile.url,
-          alt_text: uploadedFile.alt_text?.replace(/\.[^/.]+$/, ""), // Remove extension
-          caption: "",
-          order: images.length + newImages.length,
-          dimensions: {
-            width: 0, // Could be extracted from image metadata
-            height: 0
+      try {
+        const uploadPromises = acceptedFiles.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("question_id", questionId);
+          formData.append("image_type", imageType);
+          if (optionIndex !== undefined) {
+            formData.append("option_index", optionIndex.toString());
           }
-        };
-        newImages.push(newImage);
-      });
 
-      // Update images
-      onImagesChange([...images, ...newImages]);
-      setIsUploading(false);
-      toast.success(`Uploaded ${newImages.length} image(s)`);
+          const response = await api.post("/admin/images/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
 
-      // Show errors if any
-      if (result.errors && result.errors.length > 0) {
-        result.errors.forEach((error: ImageAttachment) => {
-          toast.error(`${error.alt_text}: ${error.alt_text}`);
+          return response.data.data.image_url;
         });
+
+        const uploadedUrls = await Promise.all(uploadPromises);
+        onImagesUpdate([...existingImages, ...uploadedUrls]);
+        toast.success(`${uploadedUrls.length} image(s) uploaded successfully`);
+      } catch (error: unknown) {
+        console.error("Upload error:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to upload images"
+        );
+      } finally {
+        setUploading(false);
+      }
+    },
+    [
+      questionId,
+      imageType,
+      optionIndex,
+      maxImages,
+      onImagesUpdate,
+      existingImages
+    ]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"],
+    },
+    maxFiles: maxImages - existingImages.length,
+    disabled: uploading || existingImages.length >= maxImages,
+  });
+
+  const handleDeleteImage = async (imageUrl: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("question_id", questionId);
+      formData.append("image_url", imageUrl);
+      formData.append("image_type", imageType);
+      if (optionIndex !== undefined) {
+        formData.append("option_index", optionIndex.toString());
       }
 
-    } catch (error) {
-      console.error('Upload error:', error);
-      setIsUploading(false);
-      toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      await api.delete("/admin/images/delete", { data: formData });
+
+      const updatedImages = existingImages.filter((url) => url !== imageUrl);
+      onImagesUpdate(updatedImages);
+      toast.success("Image deleted successfully");
+    } catch (error: unknown) {
+      console.error("Delete error:", error);
+      const errorMessage = error && 
+        typeof error === 'object' && 
+        'response' in error && 
+        error.response && 
+        typeof error.response === 'object' &&
+        'data' in error.response &&
+        error.response.data &&
+        typeof error.response.data === 'object' &&
+        'detail' in error.response.data &&
+        typeof error.response.data.detail === 'string'
+          ? error.response.data.detail
+          : "Failed to delete image";
+      toast.error(errorMessage);
     }
-
-    if (files.length > remainingSlots) {
-      toast.error(`Only ${remainingSlots} images can be added. ${files.length - remainingSlots} images were skipped.`);
-    }
   };
 
-  const handleImageUpdate = (index: number, updatedImage: Partial<ImageAttachment>) => {
-    const updatedImages = [...images];
-    updatedImages[index] = { ...updatedImages[index], ...updatedImage };
-    onImagesChange(updatedImages);
-  };
-
-  const handleImageRemove = (index: number) => {
-    const updatedImages = images.filter((_, i) => i !== index);
-    // Reorder remaining images
-    const reorderedImages = updatedImages.map((img, i) => ({ ...img, order: i }));
-    onImagesChange(reorderedImages);
-  };
-
-  const handleImageReorder = (fromIndex: number, toIndex: number) => {
-    const updatedImages = [...images];
-    const [movedImage] = updatedImages.splice(fromIndex, 1);
-    updatedImages.splice(toIndex, 0, movedImage);
-
-    // Update order values
-    const reorderedImages = updatedImages.map((img, i) => ({ ...img, order: i }));
-    onImagesChange(reorderedImages);
-  };
-
-  const openFileDialog = () => {
-    fileInputRef.current?.click();
-  };
+  const canUpload = existingImages.length < maxImages && !uploading;
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">{label}</Label>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {images.length}/{maxImages}
-          </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={openFileDialog}
-            disabled={images.length >= maxImages || isUploading}
-            className="h-8"
-          >
-            <Upload className="h-4 w-4 mr-1" />
-            Add Image
-          </Button>
-        </div>
-      </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={(e) => {
-          setIsUploading(true);
-          handleFileUpload(e.target.files);
-          e.target.value = ""; // Reset input
-        }}
-        className="hidden"
-      />
-
-      {images.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {images.map((image, index) => (
-            <ImageCard
-              key={index}
-              image={image}
-              index={index}
-              onUpdate={(updatedImage) => handleImageUpdate(index, updatedImage)}
-              onRemove={() => handleImageRemove(index)}
-              onMoveUp={index > 0 ? () => handleImageReorder(index, index - 1) : undefined}
-              onMoveDown={index < images.length - 1 ? () => handleImageReorder(index, index + 1) : undefined}
-            />
-          ))}
+      {/* Upload Area */}
+      {canUpload && (
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+            isDragActive
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+          }`}
+        >
+          <input {...getInputProps()} />
+          <div className="flex flex-col items-center justify-center space-y-2">
+            {uploading ? (
+              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            ) : (
+              <Upload className="w-8 h-8 text-gray-400" />
+            )}
+            <p className="text-gray-600">
+              {uploading
+                ? "Uploading..."
+                : isDragActive
+                ? "Drop the images here"
+                : "Drag and drop images here, or click to select"}
+            </p>
+            <p className="text-sm text-gray-500">
+              Supports JPG, PNG, GIF, WebP (max {maxImages} images)
+            </p>
+          </div>
         </div>
       )}
 
-      {images.length === 0 && (
-        <Card className="border-dashed border-2 border-muted-foreground/25">
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-sm text-muted-foreground text-center">
-              No images added yet. Click &quot;Add Image&quot; to upload images.
-            </p>
-          </CardContent>
-        </Card>
+      {/* Existing Images */}
+      {existingImages.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700">
+            {imageType === "question" && "Question Images"}
+            {imageType === "option" &&
+              `Option ${String.fromCharCode(65 + (optionIndex || 0))} Images`}
+            {imageType === "explanation" && "Explanation Images"}
+            {imageType === "remarks" && "Remarks Images"}(
+            {existingImages.length}/{maxImages})
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {existingImages.map((imageUrl, index) => {
+              const fixedUrl = fixImageUrl(imageUrl);
+              return (
+                <Card key={index} className="relative group">
+                  <CardContent className="p-2">
+                    <div className="relative">
+                      <Image
+                        src={fixedUrl}
+                        alt={`${imageType} image ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-md"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleDeleteImage(imageUrl)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Upload Limit Message */}
+      {existingImages.length >= maxImages && (
+        <div className="text-center text-sm text-gray-500">
+          Maximum {maxImages} images reached
+        </div>
       )}
     </div>
   );
-}
+};
 
-interface ImageCardProps {
-  image: ImageAttachment;
-  index: number;
-  onUpdate: (updatedImage: Partial<ImageAttachment>) => void;
-  onRemove: () => void;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
-}
-
-function ImageCard({
-  image,
-  index,
-  onUpdate,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-}: ImageCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-
-  return (
-    <Card className="relative group">
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Image Preview */}
-          <div className="relative">
-            <div className="w-full h-32 relative">
-              <Image
-                src={image.url}
-                alt={image.alt_text || `Image ${index + 1}`}
-                fill
-                className="object-cover rounded-md border"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            </div>
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-                className="h-6 w-6 p-0"
-              >
-                <Edit2 className="h-3 w-3" />
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={onRemove}
-                className="h-6 w-6 p-0"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Image Details */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
-                Image {index + 1}
-              </span>
-              <div className="flex gap-1">
-                {onMoveUp && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={onMoveUp}
-                    className="h-6 w-6 p-0"
-                  >
-                    ↑
-                  </Button>
-                )}
-                {onMoveDown && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={onMoveDown}
-                    className="h-6 w-6 p-0"
-                  >
-                    ↓
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {isEditing && (
-              <div className="space-y-2">
-                <div>
-                  <Label htmlFor={`alt-${index}`} className="text-xs">
-                    Alt Text
-                  </Label>
-                  <Input
-                    id={`alt-${index}`}
-                    value={image.alt_text || ""}
-                    onChange={(e) => onUpdate({ alt_text: e.target.value })}
-                    placeholder="Describe the image for accessibility"
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`caption-${index}`} className="text-xs">
-                    Caption
-                  </Label>
-                  <Textarea
-                    id={`caption-${index}`}
-                    value={image.caption || ""}
-                    onChange={(e) => onUpdate({ caption: e.target.value })}
-                    placeholder="Optional caption for the image"
-                    className="h-16 text-xs resize-none"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+export default ImageUpload;
