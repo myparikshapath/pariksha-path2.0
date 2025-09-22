@@ -15,7 +15,7 @@ import PDFUpload from "@/components/admin/PDFUpload";
 import PDFDisplay from "@/components/admin/PDFDisplay";
 import { toast } from "react-hot-toast";
 import api from "@/utils/api";
-import { fetchAvailableCourses, Course, Section } from "@/src/services/courseService";
+import { fetchAvailableCourses } from "@/src/services/courseService";
 
 interface PDFFile {
   id: string;
@@ -36,7 +36,7 @@ const SectionPDFsPage = () => {
   const courseSlug = params.slug as string;
   const sectionName = decodeURIComponent(params.section as string);
 
-  const [course, setCourse] = useState<Course | null>(null);
+  const [course, setCourse] = useState<any>(null);
   const [files, setFiles] = useState<PDFFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +51,7 @@ const SectionPDFsPage = () => {
       console.log("All courses:", courses);
       console.log("Looking for course slug:", courseSlug);
       
-      const foundCourse = courses.find((c: Course) => {
+      const foundCourse = courses.find((c: any) => {
         const courseSlugFromCode = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
         console.log("Checking course:", c.title, "slug:", courseSlugFromCode);
         return courseSlugFromCode === courseSlug;
@@ -63,7 +63,7 @@ const SectionPDFsPage = () => {
       }
 
       // Check if section exists
-      const sectionExists = foundCourse.sections?.some((s: Section) => 
+      const sectionExists = foundCourse.sections?.some((s: any) => 
         s.name?.toLowerCase() === sectionName.toLowerCase()
       );
       
@@ -104,7 +104,6 @@ const SectionPDFsPage = () => {
 
   const handleDeleteFile = async (fileId: string) => {
     try {
-      if (!course) return;
       await api.delete(
         `/admin/sections/${course.id}/${encodeURIComponent(sectionName)}/files/${fileId}`
       );
