@@ -24,7 +24,8 @@ import {
   Plus,
   Trash2,
   X,
-  MoreVertical
+  MoreVertical,
+  FileText
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -58,6 +59,10 @@ const CourseDetailPage = () => {
 
   const handleViewQuestions = (section: string) => {
     router.push(`/course/${params.slug}/${encodeURIComponent(section)}`);
+  };
+
+  const handleManagePDFs = (section: string) => {
+    router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}/pdfs`);
   };
 
 
@@ -402,6 +407,18 @@ const CourseDetailPage = () => {
                       >
                         <Upload className="h-4 w-4" />
                         Upload Questions
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleManagePDFs(section.name);
+                        }}
+                      >
+                        <FileText className="h-4 w-4" />
+                        Manage PDFs
                       </Button>
                     </div>
                   </div>

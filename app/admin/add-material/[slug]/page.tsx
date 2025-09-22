@@ -19,6 +19,7 @@ import {
     Plus,
     Trash2,
     MoreVertical,
+    FileText,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -287,6 +288,24 @@ const MaterialDetailPage = () => {
                                                 <span>
                                                     <Upload className="h-4 w-4 mr-1" />
                                                     Upload Material
+                                                </span>
+                                            </Button>
+                                        </Link>
+
+                                        {/* Manage PDFs Button */}
+                                        <Link
+                                            href={`/admin/course/${params.slug}/${encodeURIComponent(section.name)}/pdfs`}
+                                            passHref
+                                        >
+                                            <Button
+                                                asChild
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex items-center gap-2"
+                                            >
+                                                <span>
+                                                    <FileText className="h-4 w-4 mr-1" />
+                                                    Manage PDFs
                                                 </span>
                                             </Button>
                                         </Link>
