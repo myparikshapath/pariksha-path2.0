@@ -72,7 +72,7 @@ const SectionQuestionsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [id, sectionName, pagination.page, pagination]);
+    }, [id, sectionName, pagination.page]);
 
     useEffect(() => {
         loadCourseAndSectionData();
