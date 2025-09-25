@@ -161,13 +161,13 @@ export default function MockTestAttemptPage() {
       // Initialize sections state
       const initialSections = sectionsResponse.sections.map(
         (section) =>
-          ({
-            ...section,
-            questions: [],
-            loading: false,
-            error: null,
-            markedForReview: new Set<string>(),
-          } as SectionDetails)
+        ({
+          ...section,
+          questions: [],
+          loading: false,
+          error: null,
+          markedForReview: new Set<string>(),
+        } as SectionDetails)
       );
 
       setSections(initialSections);
@@ -458,9 +458,8 @@ export default function MockTestAttemptPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${
-              localStorage.getItem("access_token") || ""
-            }`,
+            Authorization: `Bearer ${localStorage.getItem("access_token") || ""
+              }`,
           },
           body: JSON.stringify({
             answers,
@@ -722,13 +721,12 @@ export default function MockTestAttemptPage() {
                 Time Remaining
               </div>
               <div
-                className={`text-2xl font-bold transition-colors duration-300 ${
-                  timeRemaining <= 300
-                    ? "text-red-600 animate-pulse"
-                    : timeRemaining <= 600
+                className={`text-2xl font-bold transition-colors duration-300 ${timeRemaining <= 300
+                  ? "text-red-600 animate-pulse"
+                  : timeRemaining <= 600
                     ? "text-orange-500"
                     : "text-gray-900"
-                }`}
+                  }`}
               >
                 {timeString}
               </div>

@@ -215,7 +215,7 @@ const CourseDetailPage = () => {
             <div className="text-right">
               <div className="flex items-center gap-2 text-2xl font-bold text-gray-900 mb-2">
                 <DollarSign className="h-6 w-6" />
-                {course.is_free ? "Free" : `$${course.price.toFixed(2)}`}
+                {course.is_free ? "Free" : `Rs.${course.price.toFixed(2)}`}
               </div>
               <div className="text-sm text-gray-500">
                 {course.is_free ? "No payment required" : "One-time payment"}

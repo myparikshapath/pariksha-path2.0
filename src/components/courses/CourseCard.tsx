@@ -18,7 +18,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
-        {course.thumbnail_url ? (
+        {course.thumbnail_url && course.thumbnail_url.startsWith("http") ? (
           <div className="relative w-full h-48">
             <Image
               src={course.thumbnail_url}

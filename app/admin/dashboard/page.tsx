@@ -60,13 +60,13 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold">Add Material</h2>
             <p className="text-sm">Add Study Material</p>
           </Link>
-          {/* <Link
-            href="/admin/upload-questions"
+          <Link
+            href="/admin/add-content"
             className="bg-emerald-900 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
-            <h2 className="text-lg font-semibold">Upload Questions</h2>
-            <p className="text-sm">Upload new questions</p>
-          </Link> */}
+            <h2 className="text-lg font-semibold">Add Content</h2>
+            <p className="text-sm">Add Course content</p>
+          </Link>
         </div>
 
         {/* Footer */}

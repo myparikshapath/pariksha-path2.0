@@ -257,7 +257,7 @@ const MaterialDetailPage = () => {
                                 <CardContent>
                                     <div className="flex justify-end gap-2">
                                         {/* View Materials Button */}
-                                        <Link
+                                        {/* <Link
                                             href={`/admin/view-material/${params.slug}/${encodeURIComponent(section.name)}`}
                                             passHref
                                         >
@@ -272,10 +272,10 @@ const MaterialDetailPage = () => {
                                                     View Materials
                                                 </span>
                                             </Button>
-                                        </Link>
+                                        </Link> */}
 
                                         {/* Upload Material Button */}
-                                        <Link
+                                        {/* <Link
                                             href={`/admin/add-material/${params.slug}/${encodeURIComponent(section.name)}`}
                                             passHref
                                         >
@@ -290,7 +290,7 @@ const MaterialDetailPage = () => {
                                                     Upload Material
                                                 </span>
                                             </Button>
-                                        </Link>
+                                        </Link> */}
 
                                         {/* Manage PDFs Button */}
                                         <Link
