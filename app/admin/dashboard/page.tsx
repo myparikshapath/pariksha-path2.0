@@ -61,11 +61,11 @@ export default function AdminDashboard() {
             <p className="text-sm">Add Study Material</p>
           </Link>
           <Link
-            href="/admin/add-content"
+            href="/admin/manage-content"
             className="bg-emerald-900 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
-            <h2 className="text-lg font-semibold">Add Content</h2>
-            <p className="text-sm">Add Course content</p>
+            <h2 className="text-lg font-semibold">Manage Content</h2>
+            <p className="text-sm">Add or edit exam content</p>
           </Link>
         </div>
 

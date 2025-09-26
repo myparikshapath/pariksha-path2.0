@@ -61,50 +61,74 @@ export default function AdminExamDetailPage({
     ],
   });
 
+  const [mode, setMode] = useState<"add" | "edit">("add");
+  const [isLoading, setIsLoading] = useState(true);
+
   const [debugInfo, setDebugInfo] = useState<string>("");
 
   const [newSectionHeader, setNewSectionHeader] = useState<string>("");
   const [newSectionContent, setNewSectionContent] = useState<string>("");
 
+  // Auto-detect mode and load appropriate data
   useEffect(() => {
-    const actionFromUrl = searchParams.get("action") || "add";
-    console.log("🔍 Debug Info:", {
-      examNameRaw,
-      actionFromUrl,
-      examContent: {
-        exam_code: examContent.exam_code,
-        title: examContent.title,
-        description: examContent.description,
-        linked_course_id: examContent.linked_course_id
-      }
-    });
-    setDebugInfo(`Action: ${actionFromUrl}, Exam Code: ${examNameRaw}, Mode: ${actionFromUrl === "edit" ? "EDIT" : "ADD"}`);
-
-    // Force re-render to ensure debug info is updated
-    setDebugInfo(prev => `${prev} | Updated: ${Date.now()}`);
-  }, [examNameRaw, searchParams, examContent]);
-
-  useEffect(() => {
-    if (action === "edit") {
-      api
-        .get(`/exam-contents/${encodeURIComponent(examNameRaw)}`)
-        .then((response) => {
-          const data = response.data;
-          setExamContent({
-            exam_code: data.exam_code || examNameRaw,
-            title: data.title || examName,
-            description: data.description || "",
-            linked_course_id: data.linked_course_id || "dummy-course-id",
-            thumbnail_url: data.thumbnail_url || null,
-            banner_url: data.banner_url || null,
-            exam_info_sections: data.exam_info_sections || [],
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching exam content:", error);
+    const initializeContent = async () => {
+      setIsLoading(true);
+      try {
+        // Try to fetch existing content
+        const response = await api.get(
+          `/exam-contents/${encodeURIComponent(examNameRaw)}`
+        );
+        console.log("📥 Found existing content, switching to edit mode");
+        setMode("edit");
+        setExamContent({
+          exam_code: response.data.exam_code || examNameRaw,
+          title: response.data.title || examName,
+          description: response.data.description || "",
+          linked_course_id: response.data.linked_course_id || "dummy-course-id",
+          thumbnail_url: response.data.thumbnail_url || null,
+          banner_url: response.data.banner_url || null,
+          exam_info_sections: response.data.exam_info_sections || [],
         });
-    }
-  }, [examNameRaw, action, examName]);
+      } catch (error) {
+        // If not found, use add mode with defaults
+        console.log("📥 No existing content found, using add mode");
+        setMode("add");
+        setExamContent({
+          exam_code: examNameRaw || "",
+          title: examName,
+          description: "",
+          linked_course_id: "dummy-course-id",
+          thumbnail_url: null,
+          banner_url: null,
+          exam_info_sections: [
+            {
+              id: uuidv4(),
+              header: "Syllabus",
+              content: "Maths, Reasoning, GK, English...",
+            },
+            {
+              id: uuidv4(),
+              header: "Exam Pattern",
+              content: "Tier 1, Tier 2, descriptive etc...",
+            },
+          ],
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeContent();
+  }, [examNameRaw, examName]);
+
+  // Update debug info
+  useEffect(() => {
+    setDebugInfo(
+      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${
+        isLoading ? "Loading..." : "Ready"
+      }`
+    );
+  }, [mode, examNameRaw, isLoading]);
 
   const addSection = () => {
     if (!newSectionHeader.trim() && !newSectionContent.trim()) return;
@@ -128,7 +152,9 @@ export default function AdminExamDetailPage({
   const removeSection = (id: string) => {
     setExamContent((prev: ExamContent) => ({
       ...prev,
-      exam_info_sections: prev.exam_info_sections.filter((s: ExamInfoSection) => s.id !== id),
+      exam_info_sections: prev.exam_info_sections.filter(
+        (s: ExamInfoSection) => s.id !== id
+      ),
     }));
   };
 
@@ -150,24 +176,17 @@ export default function AdminExamDetailPage({
     // Ensure we're using the correct exam_code for the URL
     const examCodeForUrl = examContent.exam_code || examNameRaw;
     const url =
-      action === "edit"
+      mode === "edit"
         ? `/exam-contents/${encodeURIComponent(examCodeForUrl)}`
         : `/exam-contents/`;
 
-    console.log("🔍 Action Detection:", {
-      action,
+    console.log("🔍 Mode Detection:", {
+      mode,
       examNameRaw,
       examCodeForUrl,
       url,
-      isEditMode: action === "edit"
+      isEditMode: mode === "edit",
     });
-
-    // Double-check the action detection
-    if (action !== "edit" && action !== "add") {
-      console.warn("⚠️ Unexpected action value:", action);
-      alert(`Unexpected action: ${action}. Please refresh the page and try again.`);
-      return;
-    }
 
     // Prepare data for backend - ensure all fields are properly formatted
     const dataToSend = {
@@ -177,40 +196,58 @@ export default function AdminExamDetailPage({
       linked_course_id: examContent.linked_course_id.trim(),
       thumbnail_url: examContent.thumbnail_url || null,
       banner_url: examContent.banner_url || null,
-      exam_info_sections: examContent.exam_info_sections.map((section: ExamInfoSection) => ({
-        id: section.id,
-        header: section.header.trim(),
-        content: section.content.trim(),
-        order: 0,
-        is_active: true
-      }))
+      exam_info_sections: examContent.exam_info_sections.map(
+        (section: ExamInfoSection) => ({
+          id: section.id,
+          header: section.header.trim(),
+          content: section.content.trim(),
+          order: 0,
+          is_active: true,
+        })
+      ),
     };
 
     try {
       console.log("📤 Sending payload:", dataToSend);
-      console.log("📤 HTTP Method:", action === "edit" ? "PUT" : "POST");
+      console.log("📤 HTTP Method:", mode === "edit" ? "PUT" : "POST");
 
       const response =
-        action === "edit"
+        mode === "edit"
           ? await api.put(url, dataToSend)
           : await api.post(url, dataToSend);
 
       console.log("✅ Response received:", response.status, response.data);
       alert("Content saved successfully!");
-      router.push("/admin/add-content");
+      router.push("/admin/manage-content");
     } catch (error: any) {
       console.error("❌ Error saving content:", error);
       console.error("❌ Error response:", error.response?.data);
-      const errorMessage = error.response?.data?.detail || error.message || "Failed to save content. Please try again.";
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.message ||
+        "Failed to save content. Please try again.";
       alert(`Failed to save content: ${errorMessage}`);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col justify-between">
+        <div className="max-w-5xl mx-auto p-6 w-full flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2E4A3C] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading content...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col justify-between">
       <div className="max-w-5xl mx-auto p-6 w-full flex-1">
         <h1 className="text-3xl font-bold mb-6 text-green-900">
-          {action === "edit" ? "Edit" : "Add"} Content for {examContent.title}
+          {mode === "edit" ? "Edit" : "Add"} Content for {examContent.title}
         </h1>
 
         {/* Debug Info */}
@@ -224,7 +261,10 @@ export default function AdminExamDetailPage({
           placeholder="Exam Title"
           value={examContent.title}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setExamContent((prev: ExamContent) => ({ ...prev, title: e.target.value }))
+            setExamContent((prev: ExamContent) => ({
+              ...prev,
+              title: e.target.value,
+            }))
           }
           className="border px-3 py-2 rounded w-full mb-3"
         />
@@ -234,7 +274,10 @@ export default function AdminExamDetailPage({
           placeholder="Exam Description"
           value={examContent.description}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setExamContent((prev: ExamContent) => ({ ...prev, description: e.target.value }))
+            setExamContent((prev: ExamContent) => ({
+              ...prev,
+              description: e.target.value,
+            }))
           }
           className="border px-3 py-2 rounded w-full mb-6 resize-none"
         />
@@ -287,13 +330,17 @@ export default function AdminExamDetailPage({
             type="text"
             placeholder="Section Header"
             value={newSectionHeader}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSectionHeader(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNewSectionHeader(e.target.value)
+            }
             className="border px-3 py-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           <textarea
             placeholder="Section Content"
             value={newSectionContent}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewSectionContent(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setNewSectionContent(e.target.value)
+            }
             className="border px-3 py-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
           />
           <button
@@ -319,10 +366,11 @@ export default function AdminExamDetailPage({
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setExamContent((prev: ExamContent) => ({
                       ...prev,
-                      exam_info_sections: prev.exam_info_sections.map((s: ExamInfoSection) =>
-                        s.id === section.id
-                          ? { ...s, header: e.target.value }
-                          : s
+                      exam_info_sections: prev.exam_info_sections.map(
+                        (s: ExamInfoSection) =>
+                          s.id === section.id
+                            ? { ...s, header: e.target.value }
+                            : s
                       ),
                     }));
                   }}
@@ -333,10 +381,11 @@ export default function AdminExamDetailPage({
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                     setExamContent((prev: ExamContent) => ({
                       ...prev,
-                      exam_info_sections: prev.exam_info_sections.map((s: ExamInfoSection) =>
-                        s.id === section.id
-                          ? { ...s, content: e.target.value }
-                          : s
+                      exam_info_sections: prev.exam_info_sections.map(
+                        (s: ExamInfoSection) =>
+                          s.id === section.id
+                            ? { ...s, content: e.target.value }
+                            : s
                       ),
                     }));
                   }}
