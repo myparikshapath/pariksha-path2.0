@@ -72,11 +72,11 @@ const SectionQuestionsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [id, sectionName, pagination.page, pagination]);
+    }, [id, sectionName, pagination.page, pagination.limit]); // ✅ Use specific pagination properties
 
     useEffect(() => {
         loadCourseAndSectionData();
-    }, [id, sectionName, pagination.page, loadCourseAndSectionData]);
+    }, [loadCourseAndSectionData]);
 
     const handleAnswerSelect = (questionId: string, optionText: string) => {
         setSelectedAnswers(prev => ({ ...prev, [questionId]: optionText }));

@@ -142,7 +142,7 @@ export default function MockTestAttemptPage() {
         });
       }
     },
-    [courseInfo, sections]
+    [courseInfo] // ✅ Removed sections dependency to prevent infinite re-renders
   );
 
   const loadCourseData = useCallback(async () => {
@@ -182,10 +182,10 @@ export default function MockTestAttemptPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, loadSectionQuestions]);
+  }, [id]); // ✅ Removed loadSectionQuestions dependency to break circular dependency
 
   // Load all sections' questions
-  const loadAllSections = async () => {
+  const loadAllSections = useCallback(async () => {
     try {
       await Promise.all(
         sections.map((section, index) =>
@@ -196,7 +196,7 @@ export default function MockTestAttemptPage() {
       console.error("Error loading all sections:", error);
       setError("Failed to load all sections. Please try again.");
     }
-  };
+  }, [sections, loadSectionQuestions]); // ✅ Added missing dependency
 
   // Handle starting the test
   const handleStartTest = async () => {
@@ -332,7 +332,7 @@ export default function MockTestAttemptPage() {
     };
 
     loadInitialData();
-  }, [loadCourseData, sections, sections.length, loadSectionQuestions]);
+  }, [loadCourseData]); // ✅ Removed unstable dependencies
 
   // Persist answers and review marks in sessionStorage
   useEffect(() => {
@@ -420,7 +420,7 @@ export default function MockTestAttemptPage() {
       window.removeEventListener("beforeunload", beforeUnload);
       // Don't clear the timer here as it's managed by the timer effect
     };
-  }, [testStarted, timerId]);
+  }, [testStarted]);
 
   // Submit test
   const handleSubmitTest = useCallback(async () => {
@@ -535,7 +535,7 @@ export default function MockTestAttemptPage() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [testStarted, timerId, handleSubmitTest]);
+  }, [testStarted, handleSubmitTest]); // ✅ Added missing dependency
 
   // Manual submit with confirmation
   const handleManualSubmit = useCallback(() => {
