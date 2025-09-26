@@ -124,8 +124,7 @@ export default function AdminExamDetailPage({
   // Update debug info
   useEffect(() => {
     setDebugInfo(
-      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${
-        isLoading ? "Loading..." : "Ready"
+      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${isLoading ? "Loading..." : "Ready"
       }`
     );
   }, [mode, examNameRaw, isLoading]);
