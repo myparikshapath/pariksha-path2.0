@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
+interface ExamData {
+  [category: string]: {
+    [subCategory: string]: string[] | {
+      [state: string]: string[];
+    };
+  };
+}
+
 interface Exam {
     name: string;
     category: string;
@@ -20,7 +28,7 @@ export default function AdminExamsPage() {
     const examsPerPage = 15;
 
     // Flatten JSON recursively
-    function flattenExams(data: any): Exam[] {
+    function flattenExams(data: ExamData): Exam[] {
         const result: Exam[] = [];
         for (const category in data) {
             const subCats = data[category];
@@ -69,7 +77,7 @@ export default function AdminExamsPage() {
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 text-green-900">All Exams</h1>
+            <h1 className="text-3xl font-bold mb-6 text-green-900">Manage Exam Content</h1>
 
             {/* Search */}
             <input
@@ -116,24 +124,11 @@ export default function AdminExamsPage() {
                                     router.push(
                                         `/admin/exam/${encodeURIComponent(
                                             exam.name.toLowerCase().replace(/\s+/g, "-")
-                                        )}?action=add`
+                                        )}`
                                     );
                                 }}
                             >
-                                Add Content
-                            </button>
-                            <button
-                                className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    router.push(
-                                        `/admin/exam/${encodeURIComponent(
-                                            exam.name.toLowerCase().replace(/\s+/g, "-")
-                                        )}?action=edit`
-                                    );
-                                }}
-                            >
-                                Edit Content
+                                Manage Content
                             </button>
                         </div>
                     </motion.div>
