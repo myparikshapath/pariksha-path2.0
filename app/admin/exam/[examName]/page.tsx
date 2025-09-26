@@ -28,13 +28,11 @@ export default function AdminExamDetailPage({
   params: Promise<{ examName: string }>;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams(); // Unused variable - commented out
 
   // ✅ unwrap params (since it's a promise in Next.js 15+)
   const resolvedParams = use(params);
   const examNameRaw = resolvedParams.examName;
-
-  const action = searchParams.get("action") || "add";
 
   const examName = examNameRaw
     ? decodeURIComponent(examNameRaw).replace(/-/g, " ")
@@ -78,7 +76,6 @@ export default function AdminExamDetailPage({
         const response = await api.get(
           `/exam-contents/${encodeURIComponent(examNameRaw)}`
         );
-        console.log("📥 Found existing content, switching to edit mode");
         setMode("edit");
         setExamContent({
           exam_code: response.data.exam_code || examNameRaw,
@@ -91,7 +88,7 @@ export default function AdminExamDetailPage({
         });
       } catch (error) {
         // If not found, use add mode with defaults
-        console.log("📥 No existing content found, using add mode");
+        console.error("Error fetching exam content:", error);
         setMode("add");
         setExamContent({
           exam_code: examNameRaw || "",
@@ -124,7 +121,8 @@ export default function AdminExamDetailPage({
   // Update debug info
   useEffect(() => {
     setDebugInfo(
-      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${isLoading ? "Loading..." : "Ready"
+      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${
+        isLoading ? "Loading..." : "Ready"
       }`
     );
   }, [mode, examNameRaw, isLoading]);
@@ -218,12 +216,15 @@ export default function AdminExamDetailPage({
       console.log("✅ Response received:", response.status, response.data);
       alert("Content saved successfully!");
       router.push("/admin/manage-content");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ Error saving content:", error);
-      console.error("❌ Error response:", error.response?.data);
+      console.error(
+        "❌ Error response:",
+        error ? (error as { response?: { data?: unknown } }).response?.data : "Unknown error"
+      );
       const errorMessage =
-        error.response?.data?.detail ||
-        error.message ||
+        (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail ||
+        (error as { message?: string })?.message ||
         "Failed to save content. Please try again.";
       alert(`Failed to save content: ${errorMessage}`);
     }

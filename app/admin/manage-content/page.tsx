@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
+interface ExamData {
+  [category: string]: {
+    [subCategory: string]: string[] | {
+      [state: string]: string[];
+    };
+  };
+}
+
 interface Exam {
     name: string;
     category: string;
@@ -20,7 +28,7 @@ export default function AdminExamsPage() {
     const examsPerPage = 15;
 
     // Flatten JSON recursively
-    function flattenExams(data: any): Exam[] {
+    function flattenExams(data: ExamData): Exam[] {
         const result: Exam[] = [];
         for (const category in data) {
             const subCats = data[category];
