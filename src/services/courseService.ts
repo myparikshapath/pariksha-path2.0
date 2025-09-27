@@ -295,11 +295,13 @@ export const deleteCourse = async (
 // Section management functions
 export const addSectionToCourse = async (
   courseId: string,
-  sectionName: string
+  sectionName: string,
+  questionCount: number = 10
 ): Promise<{ message: string }> => {
   try {
     const response = await api.post(`/courses/${courseId}/sections`, {
       section_name: sectionName,
+      question_count: questionCount
     });
     return response.data;
   } catch (error) {
@@ -362,10 +364,28 @@ export const getSectionQuestions = async (
     if (topic) params.append("topic", topic);
     if (mode) params.append("mode", mode);
 
+    // Log the API call for debugging
+    console.log(`Fetching questions for ${sectionName} with params:`, {
+      courseId,
+      sectionName: encodeURIComponent(sectionName),
+      params: params.toString(),
+      mode,
+      limit
+    });
+
+    // Make sure section name is properly encoded
+    const encodedSectionName = encodeURIComponent(sectionName);
+    
     const response = await api.get(
-      `/courses/${courseId}/sections/${encodeURIComponent(
-        sectionName
-      )}/questions?${params}`
+      `/courses/${courseId}/sections/${encodedSectionName}/questions?${params}`,
+      { 
+        headers: {
+          // Add extra headers for CORS requests
+          'Accept': 'application/json',
+        },
+        // Increase timeout for potentially slow requests
+        timeout: 10000
+      }
     );
     return response.data;
   } catch (error) {
