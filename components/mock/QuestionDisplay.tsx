@@ -35,7 +35,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-3">
           <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
-           a Question {questionNumber} of {totalQuestions}
+            a Question {questionNumber} of {totalQuestions}
           </span>
           <span className="bg-gray-100 text-gray-800 text-sm font-medium px-2.5 py-0.5 rounded">
             {question.difficulty_level}
@@ -43,11 +43,10 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         </div>
         <button
           onClick={onToggleMarkForReview}
-          className={`text-sm px-3 py-1 rounded-full border transition-colors ${
-            isMarkedForReview
-              ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
-              : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-yellow-50 hover:text-yellow-700'
-          }`}
+          className={`text-sm px-3 py-1 rounded-full border transition-colors ${isMarkedForReview
+            ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+            : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-yellow-50 hover:text-yellow-700'
+            }`}
         >
           {isMarkedForReview ? 'Marked for Review' : 'Mark for Review'}
         </button>
@@ -61,7 +60,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         <p className="text-gray-700 leading-relaxed mb-4">
           {question.question_text}
         </p>
-        
+
         {/* Question Images */}
         <ImageDisplay
           imageUrls={question.question_image_urls || []}
@@ -80,21 +79,19 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
             <motion.button
               key={index}
               onClick={() => onAnswerSelect(optionLetter)}
-              className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
-                isSelected
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${isSelected
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                }`}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-start space-x-3">
                 <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                    isSelected
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${isSelected
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 text-gray-600'
+                    }`}
                 >
                   {optionLetter}
                 </span>
@@ -115,33 +112,6 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         })}
       </div>
 
-      {/* Explanation */}
-      {question.explanation && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <h4 className="text-sm font-medium text-green-800 mb-2">Explanation:</h4>
-          <p className="text-green-700 text-sm mb-2">{question.explanation}</p>
-          <ImageDisplay
-            imageUrls={question.explanation_image_urls || []}
-            alt="Explanation image"
-            maxWidth={500}
-            maxHeight={300}
-          />
-        </div>
-      )}
-
-      {/* Remarks */}
-      {question.remarks && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-800 mb-2">Remarks:</h4>
-          <p className="text-blue-700 text-sm mb-2">{question.remarks}</p>
-          <ImageDisplay
-            imageUrls={question.remarks_image_urls || []}
-            alt="Remarks image"
-            maxWidth={500}
-            maxHeight={300}
-          />
-        </div>
-      )}
 
       {/* Question Metadata */}
       <div className="flex flex-wrap gap-2 text-sm text-gray-500">

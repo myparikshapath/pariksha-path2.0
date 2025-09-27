@@ -10,6 +10,7 @@ import {
   Course,
   getCourseSections,
 } from "@/src/services/courseService";
+import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -106,6 +107,13 @@ export default function MockTestAttemptPage() {
           "mock"
         );
 
+        console.log(`Fetched questions for ${sectionName}:`, response);
+        
+        // Add more detailed logging for debugging
+        if (!response.questions || response.questions.length === 0) {
+          console.warn(`No questions returned for section ${sectionName}. API response:`, JSON.stringify(response));
+        }
+
         // Shuffle questions to get random ones each time
         const shuffledQuestions = [...response.questions].sort(
           () => Math.random() - 0.5
@@ -142,7 +150,7 @@ export default function MockTestAttemptPage() {
         });
       }
     },
-    [courseInfo, sections]
+    [courseInfo, sections] // Added sections dependency to fix stale closure issue
   );
 
   const loadCourseData = useCallback(async () => {
@@ -157,6 +165,7 @@ export default function MockTestAttemptPage() {
 
       // Fetch sections
       const sectionsResponse = await getCourseSections(courseData.id);
+      console.log("Fetched course sections:", sectionsResponse);
 
       // Initialize sections state
       const initialSections = sectionsResponse.sections.map(
@@ -172,31 +181,33 @@ export default function MockTestAttemptPage() {
 
       setSections(initialSections);
 
-      // Load first section's questions
-      if (initialSections.length > 0) {
-        await loadSectionQuestions(initialSections[0].name, 0);
-      }
+      // Load first section's questions will happen in useEffect after sections are set
     } catch (err) {
       console.error("Error loading course data:", err);
       setError("Failed to load test. Please try again later.");
     } finally {
       setLoading(false);
     }
-  }, [id, loadSectionQuestions]);
+  }, [id]); // Keep id as the only dependency
 
   // Load all sections' questions
-  const loadAllSections = async () => {
+  const loadAllSections = useCallback(async () => {
     try {
+      console.log("Loading all section questions for sections:", sections);
       await Promise.all(
-        sections.map((section, index) =>
-          loadSectionQuestions(section.name, index)
-        )
+        sections.map((section, index) => {
+          if (section.question_count && section.question_count > 0) {
+            return loadSectionQuestions(section.name, index);
+          }
+          console.log(`Skipping section ${section.name} - no question count specified`);
+          return Promise.resolve();
+        })
       );
     } catch (error) {
       console.error("Error loading all sections:", error);
       setError("Failed to load all sections. Please try again.");
     }
-  };
+  }, [sections, loadSectionQuestions]);
 
   // Handle starting the test
   const handleStartTest = async () => {
@@ -321,18 +332,23 @@ export default function MockTestAttemptPage() {
   useEffect(() => {
     const loadInitialData = async () => {
       await loadCourseData();
-
-      // If we have sections but no questions loaded yet, load questions for the first section
-      if (
-        sections.length > 0 &&
-        (!sections[0]?.questions || sections[0].questions.length === 0)
-      ) {
-        await loadSectionQuestions(sections[0].name, 0);
-      }
     };
 
     loadInitialData();
-  }, [loadCourseData, sections, sections.length, loadSectionQuestions]);
+  }, [loadCourseData]);
+  
+  // Separate effect to load first section questions after sections are loaded
+  useEffect(() => {
+    // Only run when sections are available but first section has no questions yet
+    if (
+      sections.length > 0 &&
+      (!sections[0]?.questions || sections[0].questions.length === 0) &&
+      !sections[0]?.loading
+    ) {
+      console.log("Loading initial section questions for section:", sections[0].name);
+      loadSectionQuestions(sections[0].name, 0);
+    }
+  }, [sections, loadSectionQuestions]);
 
   // Persist answers and review marks in sessionStorage
   useEffect(() => {
@@ -420,7 +436,7 @@ export default function MockTestAttemptPage() {
       window.removeEventListener("beforeunload", beforeUnload);
       // Don't clear the timer here as it's managed by the timer effect
     };
-  }, [testStarted, timerId]);
+  }, [testStarted]);
 
   // Submit test
   const handleSubmitTest = useCallback(async () => {
@@ -438,10 +454,17 @@ export default function MockTestAttemptPage() {
         return acc;
       }, []);
 
-      const answers = Object.entries(selectedAnswers).map(([qid, ans]) => ({
+      // Get all question IDs from all sections
+      const allQuestionIds = sections.flatMap(section => 
+        section.questions.map(question => question.id)
+      );
+      
+      // Format answers according to the expected schema - include ALL questions
+      // even unanswered ones (with null selected_option_text)
+      const answers = allQuestionIds.map(qid => ({
         question_id: qid,
-        // prefer order if we can infer, else send text; backend supports either
-        selected_option_text: ans,
+        // Send as text since that's what we're storing - null if unanswered
+        selected_option_text: selectedAnswers[qid] || null,
       }));
 
       console.log("DEBUG: Submitting answers:", {
@@ -452,41 +475,66 @@ export default function MockTestAttemptPage() {
         markedForReview: markedForReviewAll.length,
       });
 
-      const res = await fetch(
-        `http://localhost:8000/api/v1/courses/${courseInfo.id}/mock/submit`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("access_token") || ""
-              }`,
-          },
-          body: JSON.stringify({
+      // Use our api module instead of raw fetch
+      try {
+        const response = await api.post(
+          `/courses/${courseInfo.id}/mock/submit`, 
+          {
             answers,
             time_spent_seconds: 3600 - timeRemaining,
             marked_for_review: markedForReviewAll,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Submit error details:", {
-          status: res.status,
-          statusText: res.statusText,
-          body: errorText,
-        });
-        throw new Error(
-          `Failed to submit test: ${res.status} ${res.statusText}`
+          }
         );
-      }
-
-      const data = await res.json();
-
-      // Persist results for results page
-      const key = `mock_results_${courseInfo.id}`;
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem(key, JSON.stringify(data.results));
+        
+        // Get results from the response - note that backend nests data in a 'results' property
+        const responseData = response.data;
+        console.log("Submission successful:", responseData);
+        
+        // Extract the results object from the response
+        const data = responseData.results || {};
+        
+        // Add default values for any missing fields to prevent "undefined" display
+        const processedResults = {
+          // Map field names from backend to what the results page expects
+          percentage: data.percentage || 0,
+          score: data.score || data.correct_answers || 0,
+          max_score: data.max_score || data.total_questions || 0,
+          accuracy: data.accuracy || 0,
+          attempted_questions: data.attempted_questions || 0,
+          total_questions: data.total_questions || 0,
+          time_spent_seconds: data.time_spent_seconds || 0,
+          
+          // Ensure section summaries have the correct field structure
+          section_summaries: (data.section_summaries || []).map((summary: any) => ({
+            section: summary.section || "",
+            attempted: summary.attempted || 0,
+            total: summary.total || 0,
+            correct: summary.correct || 0,
+            accuracy: summary.accuracy || 0
+          })),
+          
+          // Use course data from the response if available, otherwise from courseInfo
+          course: data.course || {
+            title: courseInfo?.title || "Mock Test"
+          }
+        };
+        
+        // Log the processed results
+        console.log("Processed results with defaults:", processedResults);
+        
+        // Persist results for results page
+        // Use the URL parameter id to ensure consistency when retrieving on results page
+        const key = `mock_results_${id}`;
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(key, JSON.stringify(processedResults));
+          // For debugging purposes, also log what we're storing and where
+          console.log(`Storing results in sessionStorage with key: ${key}`);
+        }
+      } catch (error) {
+        console.error("Submit error details:", error);
+        throw new Error(
+          `Failed to submit test: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
 
       // Navigate to results page
@@ -520,6 +568,7 @@ export default function MockTestAttemptPage() {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
+          console.log("Time's up! Auto-submitting test...");
           // Auto-submit when time's up
           void handleSubmitTest();
           return 0;
@@ -535,7 +584,7 @@ export default function MockTestAttemptPage() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [testStarted, timerId, handleSubmitTest]);
+  }, [testStarted, handleSubmitTest]); // Removed timerId from dependencies as we're setting it inside
 
   // Manual submit with confirmation
   const handleManualSubmit = useCallback(() => {

@@ -36,9 +36,23 @@ export default function MockResultPage() {
   useEffect(() => {
     if (!id) return;
     const key = `mock_results_${id as string}`;
+    console.log(`Attempting to load results from sessionStorage with key: ${key}`);
+    
     try {
-      const raw = typeof window !== "undefined" ? sessionStorage.getItem(key) : null;
-      if (raw) setResults(JSON.parse(raw));
+      if (typeof window !== "undefined") {
+        // Log all available sessionStorage keys for debugging
+        console.log("Available sessionStorage keys:", 
+          Object.keys(sessionStorage).filter(k => k.startsWith('mock_results_')));
+          
+        const raw = sessionStorage.getItem(key);
+        console.log(`Raw data from sessionStorage: ${raw ? 'Found' : 'Not found'}`);
+        
+        if (raw) {
+          const parsedResults = JSON.parse(raw);
+          console.log("Successfully parsed results:", parsedResults);
+          setResults(parsedResults);
+        }
+      }
     } catch (e) {
       console.error("Failed to load results", e);
     }

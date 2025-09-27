@@ -30,6 +30,7 @@ const AddSectionPage = () => {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [sectionName, setSectionName] = useState("");
+  const [questionCount, setQuestionCount] = useState<number>(3);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +62,7 @@ const AddSectionPage = () => {
 
     setSaving(true);
     try {
-      await addSectionToCourse(courseId, sectionName.trim());
+      await addSectionToCourse(courseId, sectionName.trim(), questionCount);
       router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
     } catch (error) {
       console.error("Error adding section:", error);
@@ -176,6 +177,22 @@ const AddSectionPage = () => {
                 )}
                 <p className="text-sm text-gray-500">
                   Enter a descriptive name for the new section.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="questionCount">Mock Test Question Count</Label>
+                <Input
+                  id="questionCount"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(parseInt(e.target.value) || 10)}
+                  placeholder="Number of questions to show in mock test"
+                />
+                <p className="text-sm text-gray-500">
+                  How many questions should be randomly selected for this section in mock tests?
                 </p>
               </div>
 
