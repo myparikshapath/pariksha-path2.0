@@ -152,18 +152,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       toast.success("Image deleted successfully");
     } catch (error: unknown) {
       console.error("Delete error:", error);
-      const errorMessage = error && 
-        typeof error === 'object' && 
-        'response' in error && 
-        error.response && 
+      const errorMessage = error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        error.response &&
         typeof error.response === 'object' &&
         'data' in error.response &&
         error.response.data &&
         typeof error.response.data === 'object' &&
         'detail' in error.response.data &&
         typeof error.response.data.detail === 'string'
-          ? error.response.data.detail
-          : "Failed to delete image";
+        ? error.response.data.detail
+        : "Failed to delete image";
       toast.error(errorMessage);
     }
   };
@@ -176,11 +176,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       {canUpload && (
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-            isDragActive
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
-          }`}
+          className={`border-2 border-dashed rounded-lg p-1 text-center cursor-pointer transition-colors ${isDragActive
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+            }`}
         >
           <input {...getInputProps()} />
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -193,8 +192,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               {uploading
                 ? "Uploading..."
                 : isDragActive
-                ? "Drop the images here"
-                : "Drag and drop images here, or click to select"}
+                  ? "Drop the images here"
+                  : "Drag and drop images here, or click to select"}
             </p>
             <p className="text-sm text-gray-500">
               Supports JPG, PNG, GIF, WebP (max {maxImages} images)
