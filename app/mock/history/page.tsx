@@ -35,7 +35,7 @@ export default function MockHistoryPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await api.get("/api/v1/mock-history");
         setAttempts(response.data.attempts || []);
       } catch (err) {
@@ -67,7 +67,11 @@ export default function MockHistoryPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8 flex items-center">
-        <Button variant="ghost" onClick={() => router.push("/mock")} className="mr-4">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/mock")}
+          className="mr-4"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Mock Tests
         </Button>
@@ -83,8 +87,16 @@ export default function MockHistoryPage() {
         <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded shadow">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-red-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
@@ -97,8 +109,13 @@ export default function MockHistoryPage() {
           <div className="mb-4">
             <Award className="h-12 w-12 text-gray-400 mx-auto" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Test History Yet</h2>
-          <p className="text-gray-600 mb-6">You haven't completed any mock tests. Take a test to see your results here!</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            No Test History Yet
+          </h2>
+          <p className="text-gray-600 mb-6">
+            You haven&apos;t completed any mock tests. Take a test to see your
+            results here!
+          </p>
           <Button onClick={() => router.push("/mock")}>
             Browse Mock Tests
           </Button>
@@ -109,7 +126,9 @@ export default function MockHistoryPage() {
             <div key={attempt.id} className="p-6 hover:bg-gray-50">
               <div className="flex flex-col sm:flex-row justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">{attempt.course.title}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    {attempt.course.title}
+                  </h3>
                   <div className="flex items-center text-sm text-gray-500">
                     <Calendar className="h-4 w-4 mr-1" />
                     <span>{formatDate(attempt.date)}</span>
@@ -120,32 +139,46 @@ export default function MockHistoryPage() {
                 </div>
                 <div className="mt-4 sm:mt-0">
                   <div className="flex flex-col items-end">
-                    <div className={`text-lg font-bold ${
-                      attempt.percentage >= 70 ? 'text-green-600' : 
-                      attempt.percentage >= 50 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {attempt.score} / {attempt.max_score} ({attempt.percentage}%)
+                    <div
+                      className={`text-lg font-bold ${
+                        attempt.percentage >= 70
+                          ? "text-green-600"
+                          : attempt.percentage >= 50
+                          ? "text-yellow-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {attempt.score} / {attempt.max_score} (
+                      {attempt.percentage}%)
                     </div>
                     <div className="text-sm text-gray-500">
-                      {attempt.attempted_questions} of {attempt.total_questions} questions attempted
+                      {attempt.attempted_questions} of {attempt.total_questions}{" "}
+                      questions attempted
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-between items-center mt-4">
                 <div className="w-2/3 bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full ${
-                      attempt.percentage >= 70 ? 'bg-green-500' : 
-                      attempt.percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      attempt.percentage >= 70
+                        ? "bg-green-500"
+                        : attempt.percentage >= 50
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
                     }`}
                     style={{ width: `${attempt.percentage}%` }}
                   />
                 </div>
-                
+
                 <Link href={`/mock/history/${attempt.id}`}>
-                  <Button variant="outline" size="sm" className="flex items-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center"
+                  >
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </Button>

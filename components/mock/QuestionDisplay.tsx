@@ -65,20 +65,19 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         <ImageDisplay
           imageUrls={question.question_image_urls || []}
           alt="Question image"
-          className="mb-4"
         />
       </div>
 
       {/* Options */}
       <div className="space-y-3 mb-6">
         {question.options.map((option, index) => {
-          const optionLetter = String.fromCharCode(65 + index);
-          const isSelected = selectedAnswer === optionLetter;
+          const optionNumber = index + 1; // Use 1, 2, 3, 4 instead of A, B, C, D
+          const isSelected = selectedAnswer === optionNumber.toString();
 
           return (
             <motion.button
               key={index}
-              onClick={() => onAnswerSelect(optionLetter)}
+              onClick={() => onAnswerSelect(optionNumber.toString())}
               className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${isSelected
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -93,14 +92,14 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                     : 'bg-gray-100 text-gray-600'
                     }`}
                 >
-                  {optionLetter}
+                  {optionNumber}
                 </span>
                 <div className="flex-1">
                   <span className="text-gray-700">{option.text}</span>
                   {/* Option Images */}
                   <ImageDisplay
                     imageUrls={option.image_urls || []}
-                    alt={`Option ${optionLetter} image`}
+                    alt={`Option ${optionNumber} image`}
                     className="mt-2"
                     maxWidth={400}
                     maxHeight={200}
@@ -111,7 +110,6 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           );
         })}
       </div>
-
 
       {/* Question Metadata */}
       <div className="flex flex-wrap gap-2 text-sm text-gray-500">
