@@ -768,12 +768,6 @@ export default function MockTestAttemptPage() {
     );
   }
 
-  // Calculate total questions and answered count
-  // const totalQuestions = sections.reduce(
-  //   (sum, sec) => sum + sec.questions.length,
-  //   0
-  // );
-
   // Format time remaining
   const hours = Math.floor(timeRemaining / 3600);
   const minutes = Math.floor((timeRemaining % 3600) / 60);
