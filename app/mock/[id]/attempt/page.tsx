@@ -108,10 +108,13 @@ export default function MockTestAttemptPage() {
         );
 
         console.log(`Fetched questions for ${sectionName}:`, response);
-        
+
         // Add more detailed logging for debugging
         if (!response.questions || response.questions.length === 0) {
-          console.warn(`No questions returned for section ${sectionName}. API response:`, JSON.stringify(response));
+          console.warn(
+            `No questions returned for section ${sectionName}. API response:`,
+            JSON.stringify(response)
+          );
         }
 
         // Shuffle questions to get random ones each time
@@ -170,13 +173,13 @@ export default function MockTestAttemptPage() {
       // Initialize sections state
       const initialSections = sectionsResponse.sections.map(
         (section) =>
-        ({
-          ...section,
-          questions: [],
-          loading: false,
-          error: null,
-          markedForReview: new Set<string>(),
-        } as SectionDetails)
+          ({
+            ...section,
+            questions: [],
+            loading: false,
+            error: null,
+            markedForReview: new Set<string>(),
+          } as SectionDetails)
       );
 
       setSections(initialSections);
@@ -199,7 +202,9 @@ export default function MockTestAttemptPage() {
           if (section.question_count && section.question_count > 0) {
             return loadSectionQuestions(section.name, index);
           }
-          console.log(`Skipping section ${section.name} - no question count specified`);
+          console.log(
+            `Skipping section ${section.name} - no question count specified`
+          );
           return Promise.resolve();
         })
       );
@@ -233,10 +238,18 @@ export default function MockTestAttemptPage() {
   const handleAnswerSelect = (answer: string) => {
     if (!currentQuestion) return;
 
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: answer,
-    }));
+    console.log(
+      `DEBUG: handleAnswerSelect called with answer="${answer}" for question ${currentQuestion.id}`
+    );
+
+    setSelectedAnswers((prev) => {
+      const newAnswers = {
+        ...prev,
+        [currentQuestion.id]: answer,
+      };
+      console.log(`DEBUG: Updated selectedAnswers:`, newAnswers);
+      return newAnswers;
+    });
   };
 
   // Handle navigation between sections
@@ -336,7 +349,7 @@ export default function MockTestAttemptPage() {
 
     loadInitialData();
   }, [loadCourseData]);
-  
+
   // Separate effect to load first section questions after sections are loaded
   useEffect(() => {
     // Only run when sections are available but first section has no questions yet
@@ -345,7 +358,10 @@ export default function MockTestAttemptPage() {
       (!sections[0]?.questions || sections[0].questions.length === 0) &&
       !sections[0]?.loading
     ) {
-      console.log("Loading initial section questions for section:", sections[0].name);
+      console.log(
+        "Loading initial section questions for section:",
+        sections[0].name
+      );
       loadSectionQuestions(sections[0].name, 0);
     }
   }, [sections, loadSectionQuestions]);
@@ -455,17 +471,33 @@ export default function MockTestAttemptPage() {
       }, []);
 
       // Get all question IDs from all sections
-      const allQuestionIds = sections.flatMap(section => 
-        section.questions.map(question => question.id)
+      const allQuestionIds = sections.flatMap((section) =>
+        section.questions.map((question) => question.id)
       );
-      
+
       // Format answers according to the expected schema - include ALL questions
-      // even unanswered ones (with null selected_option_text)
-      const answers = allQuestionIds.map(qid => ({
-        question_id: qid,
-        // Send as text since that's what we're storing - null if unanswered
-        selected_option_text: selectedAnswers[qid] || null,
-      }));
+      // even unanswered ones (with null selected_option_order)
+      const answers = allQuestionIds.map((qid) => {
+        const isAnswered =
+          selectedAnswers[qid] !== undefined && selectedAnswers[qid] !== null;
+        const rawAnswer = selectedAnswers[qid];
+        const parsedAnswer = isAnswered ? parseInt(rawAnswer) : null;
+
+        // Debug logging - check if parseInt is working
+        console.log(
+          `Question ${qid}: isAnswered=${isAnswered}, rawAnswer="${rawAnswer}", parsed=${parsedAnswer}, isNaN=${
+            parsedAnswer !== null ? isNaN(parsedAnswer) : "N/A (null)"
+          }`
+        );
+
+        return {
+          question_id: qid,
+          selected_option_order: parsedAnswer,
+        };
+      });
+
+      console.log("DEBUG: Current selectedAnswers state:", selectedAnswers);
+      console.log("DEBUG: All question IDs from sections:", allQuestionIds);
 
       console.log("DEBUG: Submitting answers:", {
         courseId: courseInfo.id,
@@ -475,24 +507,37 @@ export default function MockTestAttemptPage() {
         markedForReview: markedForReviewAll.length,
       });
 
+      // Debug the exact data being sent
+      console.log("Example question IDs:", allQuestionIds.slice(0, 3));
+      console.log(`Posting to: /courses/${courseInfo.id}/mock/submit`);
+      console.log(
+        "Time spent:",
+        3600 - timeRemaining,
+        "type:",
+        typeof (3600 - timeRemaining)
+      );
+      console.log("Marked for review:", markedForReviewAll);
+
+      console.log("FULL ANSWERS ARRAY:", JSON.stringify(answers, null, 2));
+
       // Use our api module instead of raw fetch
       try {
         const response = await api.post(
-          `/courses/${courseInfo.id}/mock/submit`, 
+          `/courses/${courseInfo.id}/mock/submit`,
           {
             answers,
-            time_spent_seconds: 3600 - timeRemaining,
-            marked_for_review: markedForReviewAll,
+            time_spent_seconds: Math.floor(3600 - timeRemaining),
+            marked_for_review: markedForReviewAll.map((id) => String(id)),
           }
         );
-        
+
         // Get results from the response - note that backend nests data in a 'results' property
         const responseData = response.data;
         console.log("Submission successful:", responseData);
-        
+
         // Extract the results object from the response
         const data = responseData.results || {};
-        
+
         // Add default values for any missing fields to prevent "undefined" display
         const processedResults = {
           // Map field names from backend to what the results page expects
@@ -503,25 +548,33 @@ export default function MockTestAttemptPage() {
           attempted_questions: data.attempted_questions || 0,
           total_questions: data.total_questions || 0,
           time_spent_seconds: data.time_spent_seconds || 0,
-          
+
           // Ensure section summaries have the correct field structure
-          section_summaries: (data.section_summaries || []).map((summary: any) => ({
-            section: summary.section || "",
-            attempted: summary.attempted || 0,
-            total: summary.total || 0,
-            correct: summary.correct || 0,
-            accuracy: summary.accuracy || 0
-          })),
-          
+          section_summaries: (data.section_summaries || []).map(
+            (summary: {
+              section?: string;
+              attempted?: number;
+              total?: number;
+              correct?: number;
+              accuracy?: number;
+            }) => ({
+              section: summary.section || "",
+              attempted: summary.attempted || 0,
+              total: summary.total || 0,
+              correct: summary.correct || 0,
+              accuracy: summary.accuracy || 0,
+            })
+          ),
+
           // Use course data from the response if available, otherwise from courseInfo
           course: data.course || {
-            title: courseInfo?.title || "Mock Test"
-          }
+            title: courseInfo?.title || "Mock Test",
+          },
         };
-        
+
         // Log the processed results
         console.log("Processed results with defaults:", processedResults);
-        
+
         // Persist results for results page
         // Use the URL parameter id to ensure consistency when retrieving on results page
         const key = `mock_results_${id}`;
@@ -530,10 +583,18 @@ export default function MockTestAttemptPage() {
           // For debugging purposes, also log what we're storing and where
           console.log(`Storing results in sessionStorage with key: ${key}`);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Submit error details:", error);
+
+        // Log more detailed error information
+        if (error instanceof Error && (error as { response?: { data?: unknown } }).response?.data) {
+          console.error("Server error response:", (error as { response?: { data?: unknown } }).response!.data);
+        }
+
         throw new Error(
-          `Failed to submit test: ${error instanceof Error ? error.message : 'Unknown error'}`
+          `Failed to submit test: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
         );
       }
 
@@ -770,12 +831,13 @@ export default function MockTestAttemptPage() {
                 Time Remaining
               </div>
               <div
-                className={`text-2xl font-bold transition-colors duration-300 ${timeRemaining <= 300
-                  ? "text-red-600 animate-pulse"
-                  : timeRemaining <= 600
+                className={`text-2xl font-bold transition-colors duration-300 ${
+                  timeRemaining <= 300
+                    ? "text-red-600 animate-pulse"
+                    : timeRemaining <= 600
                     ? "text-orange-500"
                     : "text-gray-900"
-                  }`}
+                }`}
               >
                 {timeString}
               </div>
