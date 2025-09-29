@@ -73,7 +73,6 @@ export default function Navbar() {
       })),
     },
     { name: "Mock", href: "/mock" },
-    { name: "Blog", href: "/blog" },
     // { name: "Contact", href: "/contact" },
   ];
 

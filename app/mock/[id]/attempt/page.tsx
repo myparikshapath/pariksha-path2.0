@@ -461,11 +461,17 @@ export default function MockTestAttemptPage() {
       
       // Format answers according to the expected schema - include ALL questions
       // even unanswered ones (with null selected_option_text)
-      const answers = allQuestionIds.map(qid => ({
-        question_id: qid,
-        // Send as text since that's what we're storing - null if unanswered
-        selected_option_text: selectedAnswers[qid] || null,
-      }));
+      const answers = allQuestionIds.map(qid => {
+        const isAnswered = selectedAnswers[qid] !== undefined && selectedAnswers[qid] !== null;
+        return {
+          question_id: qid,
+          selected_options: isAnswered ? [String(selectedAnswers[qid])] : [],
+          status: isAnswered ? "incorrect" : "skipped", // Will be properly evaluated on the backend
+          marks_available: 1.0, // Default value, backend will set the actual value
+          time_spent_seconds: null
+        };
+      });
+
 
       console.log("DEBUG: Submitting answers:", {
         courseId: courseInfo.id,
@@ -475,14 +481,20 @@ export default function MockTestAttemptPage() {
         markedForReview: markedForReviewAll.length,
       });
 
+      // Debug the exact data being sent
+      console.log("Example question IDs:", allQuestionIds.slice(0, 3));
+      console.log(`Posting to: /courses/${courseInfo.id}/mock/submit`);
+      console.log("Time spent:", 3600 - timeRemaining, "type:", typeof(3600 - timeRemaining));
+      console.log("Marked for review:", markedForReviewAll);
+      
       // Use our api module instead of raw fetch
       try {
         const response = await api.post(
           `/courses/${courseInfo.id}/mock/submit`, 
           {
             answers,
-            time_spent_seconds: 3600 - timeRemaining,
-            marked_for_review: markedForReviewAll,
+            time_spent_seconds: Math.floor(3600 - timeRemaining),
+            marked_for_review: markedForReviewAll.map(id => String(id)),
           }
         );
         
@@ -530,8 +542,14 @@ export default function MockTestAttemptPage() {
           // For debugging purposes, also log what we're storing and where
           console.log(`Storing results in sessionStorage with key: ${key}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Submit error details:", error);
+        
+        // Log more detailed error information
+        if (error.response && error.response.data) {
+          console.error("Server error response:", error.response.data);
+        }
+        
         throw new Error(
           `Failed to submit test: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
