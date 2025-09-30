@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AxiosError } from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
+import { Eye, EyeOff } from "lucide-react"; // 👈 eye icons
 
 export default function Login() {
     const router = useRouter();
@@ -15,6 +16,7 @@ export default function Login() {
     const [form, setForm] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false); // 👈 state for toggle
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -34,11 +36,9 @@ export default function Login() {
                 const userRole = res.data.user?.role === "admin" ? "admin" : "student";
                 const { access_token, refresh_token } = res.data.tokens;
 
-                // Store tokens in localStorage
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("refresh_token", refresh_token);
 
-                // Update auth context
                 login(access_token, userRole);
 
                 if (res.data.user.role === "admin") {
@@ -90,18 +90,26 @@ export default function Login() {
                         />
                     </div>
 
-                    <div className="flex flex-col">
+                    <div className="flex flex-col relative">
                         <label className="mb-1 font-medium text-gray-700">Password</label>
                         <input
                             name="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"} // 👈 toggle
                             value={form.password}
                             onChange={handleChange}
                             placeholder="Enter your password"
                             autoComplete="current-password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition pr-12"
                             required
                         />
+                        {/* Eye toggle button */}
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-[38px] text-gray-600 hover:text-gray-900"
+                        >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
                         <Link
                             href="/forgot-password"
                             className="text-sm text-green-700 mt-1 hover:underline self-end"

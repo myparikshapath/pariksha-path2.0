@@ -285,7 +285,7 @@ export default function Home() {
             {[...testimonials, ...testimonials].map((item, idx) => (
               <Card
                 key={idx}
-                className="shadow-lg rounded-2xl min-w-[260px] bg-gradient-to-b from-white to-green-50 hover:shadow-2xl transition flex-shrink-0"
+                className="shadow-lg rounded-2xl min-w-[260px] bg-gradient-to-b from-white to-green-50 hover:shadow-2xl transition flex-shrink-0 m-6"
               >
                 <CardContent className="p-6 text-center flex flex-col items-center">
                   {/* WhatsApp-style default DP */}
@@ -379,22 +379,20 @@ export default function Home() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`mt-8 w-full font-bold py-3 rounded-xl shadow-lg transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer ${
-              isSubmitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-yellow-400 hover:bg-yellow-500 text-black"
-            }`}
+            className={`mt-8 w-full font-bold py-3 rounded-xl shadow-lg transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer ${isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-yellow-400 hover:bg-yellow-500 text-black"
+              }`}
           >
             {isSubmitting ? "Sending..." : "Send Message"}
           </button>
 
           {submitMessage && (
             <div
-              className={`mt-4 p-3 rounded-xl text-center font-medium ${
-                submitMessage.includes("Error")
-                  ? "bg-red-100 text-red-700 border border-red-300"
-                  : "bg-green-100 text-green-700 border border-green-300"
-              }`}
+              className={`mt-4 p-3 rounded-xl text-center font-medium ${submitMessage.includes("Error")
+                ? "bg-red-100 text-red-700 border border-red-300"
+                : "bg-green-100 text-green-700 border border-green-300"
+                }`}
             >
               {submitMessage}
             </div>

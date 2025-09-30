@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AxiosError } from "axios";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
     const router = useRouter();
@@ -15,10 +16,12 @@ export default function Register() {
         email: "",
         phone: "",
         password: "",
-        preferred_exam_categories: [] as string[],
+        confirmPassword: "",
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,8 +32,19 @@ export default function Register() {
         setLoading(true);
         setError("");
 
+        if (form.password !== form.confirmPassword) {
+            setError("Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
         try {
-            const res = await api.post("/auth/register", form);
+            const res = await api.post("/auth/register", {
+                name: form.name,
+                email: form.email,
+                phone: form.phone,
+                password: form.password,
+            });
             const email = res.data.user?.email;
 
             alert("Registered successfully! Verify your email with the OTP sent.");
@@ -69,6 +83,7 @@ export default function Register() {
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+                    {/* Name */}
                     <div className="flex flex-col">
                         <label className="mb-1 font-medium text-gray-700">Full Name</label>
                         <input
@@ -82,6 +97,7 @@ export default function Register() {
                         />
                     </div>
 
+                    {/* Email */}
                     <div className="flex flex-col">
                         <label className="mb-1 font-medium text-gray-700">Email</label>
                         <input
@@ -96,6 +112,7 @@ export default function Register() {
                         />
                     </div>
 
+                    {/* Phone */}
                     <div className="flex flex-col">
                         <label className="mb-1 font-medium text-gray-700">Phone</label>
                         <input
@@ -109,72 +126,51 @@ export default function Register() {
                         />
                     </div>
 
-                    <div className="flex flex-col">
+                    {/* Password */}
+                    <div className="flex flex-col relative">
                         <label className="mb-1 font-medium text-gray-700">Password</label>
                         <input
                             name="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             value={form.password}
                             onChange={handleChange}
                             placeholder="Create a password"
                             autoComplete="new-password"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition pr-12"
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-[38px] text-gray-600 hover:text-gray-900"
+                        >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
                     </div>
 
-                    <div className="flex flex-col">
-                        <label className="mb-2 font-medium text-gray-700">
-                            Preferred Exam Categories
-                        </label>
-                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                            {[
-                                { label: "Medical", value: "medical" },
-                                { label: "Engineering", value: "engineering" },
-                                { label: "Teaching", value: "teaching" },
-                                { label: "Govt Exams", value: "govt_exams" },
-                                { label: "Banking", value: "banking" },
-                                { label: "Defence", value: "defence" },
-                                { label: "State Exams", value: "state_exams" },
-                            ].map((category) => {
-                                const selected =
-                                    form.preferred_exam_categories.includes(category.value);
-
-                                return (
-                                    <button
-                                        type="button"
-                                        key={category.value}
-                                        onClick={() => {
-                                            if (selected) {
-                                                setForm({
-                                                    ...form,
-                                                    preferred_exam_categories:
-                                                        form.preferred_exam_categories.filter(
-                                                            (c) => c !== category.value
-                                                        ),
-                                                });
-                                            } else {
-                                                setForm({
-                                                    ...form,
-                                                    preferred_exam_categories: [
-                                                        ...form.preferred_exam_categories,
-                                                        category.value,
-                                                    ],
-                                                });
-                                            }
-                                        }}
-                                        className={`px-4 py-2 rounded-full hover:cursor-pointer border flex-shrink-0 transition ${selected
-                                            ? "bg-[#2E4A3C] text-white border-green-700"
-                                            : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        {category.label}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                    {/* Confirm Password */}
+                    <div className="flex flex-col relative">
+                        <label className="mb-1 font-medium text-gray-700">Confirm Password</label>
+                        <input
+                            name="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={form.confirmPassword}
+                            onChange={handleChange}
+                            placeholder="Re-enter your password"
+                            autoComplete="new-password"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E4A3C] transition pr-12"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-[38px] text-gray-600 hover:text-gray-900"
+                        >
+                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
                     </div>
 
+                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={loading}

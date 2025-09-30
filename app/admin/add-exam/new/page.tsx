@@ -105,7 +105,7 @@ export default function NewExamPage() {
 
       // Create the course
       await createCourse(formData);
-      
+
       // Navigate back to courses list
       router.push("/admin/add-exam");
     } catch (err: unknown) {
@@ -182,7 +182,7 @@ export default function NewExamPage() {
                 <Select
                   value={formData.category}
                   onValueChange={(value) =>
-                    handleInputChange("category", value as CreateCourseRequest["category"]) }
+                    handleInputChange("category", value as CreateCourseRequest["category"])}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -245,10 +245,10 @@ export default function NewExamPage() {
                   <Input
                     id="price"
                     type="number"
-                    min="0"
-                    step="0.01"
+                    min={0}
+                    step="1"
                     value={formData.price}
-                    onChange={(e) => handleInputChange("price", parseFloat(e.target.value) || 0)}
+                    onChange={(e) => handleInputChange("price", parseFloat(e.target.value))}
                   />
                 </div>
 
@@ -257,8 +257,8 @@ export default function NewExamPage() {
                   <Input
                     id="discount_percent"
                     type="number"
-                    min="0"
-                    max="100"
+                    min={0}
+                    max={100}
                     value={formData.discount_percent || 0}
                     onChange={(e) => handleInputChange("discount_percent", parseFloat(e.target.value) || 0)}
                   />

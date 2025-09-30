@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 interface ExamData {
-  [category: string]: {
-    [subCategory: string]: string[] | {
-      [state: string]: string[];
+    [category: string]: {
+        [subCategory: string]: string[] | {
+            [state: string]: string[];
+        };
     };
-  };
 }
 
 interface Exam {
@@ -78,6 +79,14 @@ export default function AdminExamsPage() {
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold mb-6 text-green-900">Manage Exam Content</h1>
+
+            {/* Back Button */}
+            <Button
+                onClick={() => router.push("/admin/manage-content")}
+                className="mb-6 flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-4 py-2 shadow-sm"
+            >
+                <ArrowLeft size={18} /> Back
+            </Button>
 
             {/* Search */}
             <input

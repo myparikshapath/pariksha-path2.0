@@ -78,7 +78,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white/35 backdrop-blur-2xl shadow-md z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-6">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo */}
         <Link href="/" className="block">
           <div className="relative w-40 h-12 sm:w-[200px] sm:h-[50px]">

@@ -1,6 +1,7 @@
 "use client";
 import { MessageCircle, Mail, Phone, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
     const phoneNumber = "+919876543210";
@@ -8,12 +9,21 @@ export default function Footer() {
     const whatsappNumber = "919876543210";
 
     return (
-        <footer className="w-full bg-[#101b15] text-gray-200 pt-16 pb-8">
+        <footer className="w-full bg-[#101b15] text-gray-200 pt-16 pb-2">
             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-y-12 md:gap-y-0 md:gap-x-60">
 
                 {/* About Section */}
                 <div className="md:flex-1">
-                    <h2 className="text-2xl font-bold text-white mb-4">Pariksha Path</h2>
+                    <Image
+                        src="/webLogo.png"
+                        alt="ParikshaPath Logo"
+                        // fill
+                        height={300}
+                        width={300}
+                        className="object-contain pb-4"
+                        priority
+                    />
+                    {/* <h2 className="text-2xl font-bold text-white mb-4">Pariksha Path</h2> */}
                     <p className="text-gray-300">
                         Your trusted platform for exam preparation. We provide courses, mock tests,
                         and study materials to help you succeed in your competitive exams.

@@ -230,7 +230,8 @@ export const enrollInCourse = async (courseId: string): Promise<void> => {
 export const getCourseDetails = async (courseId: string): Promise<Course> => {
 	try {
 		const response = await api.get(`/courses/${courseId}`);
-		return response.data.course;
+		console.log(response);
+		return response.data.course || response.data;
 	} catch (error) {
 		console.error("Error fetching course details:", error);
 		throw error;
