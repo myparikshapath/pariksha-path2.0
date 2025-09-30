@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, use } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { motion } from "framer-motion";
 import api from "@/utils/api";
@@ -220,10 +220,17 @@ export default function AdminExamDetailPage({
       console.error("❌ Error saving content:", error);
       console.error(
         "❌ Error response:",
-        error ? (error as { response?: { data?: unknown } }).response?.data : "Unknown error"
+        error
+          ? (error as { response?: { data?: unknown } }).response?.data
+          : "Unknown error"
       );
       const errorMessage =
-        (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail ||
+        (
+          error as {
+            response?: { data?: { detail?: string } };
+            message?: string;
+          }
+        )?.response?.data?.detail ||
         (error as { message?: string })?.message ||
         "Failed to save content. Please try again.";
       alert(`Failed to save content: ${errorMessage}`);
