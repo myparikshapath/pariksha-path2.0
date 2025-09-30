@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
+import api from "@/utils/api";
 
 export default function Home() {
   const marqueeRef = useRef<HTMLDivElement>(null);
@@ -75,29 +76,30 @@ export default function Home() {
     setSubmitMessage(null);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          message: form.message,
-        }),
+      const response = await api.post("/contact", {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        message: form.message,
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        setSubmitMessage('Thank you for your message! We will get back to you soon.');
-        setForm({ name: '', email: '', phone: '', message: '' });
+      if (response.status >= 200 && response.status < 300) {
+        // const result = response.data;
+        setSubmitMessage(
+          "Thank you for your message! We will get back to you soon."
+        );
+        setForm({ name: "", email: "", phone: "", message: "" });
       } else {
-        const error = await response.json();
-        setSubmitMessage(`Error: ${error.detail || 'Something went wrong. Please try again.'}`);
+        const error = response.data;
+        setSubmitMessage(
+          `Error: ${error.detail || "Something went wrong. Please try again."}`
+        );
       }
     } catch (error) {
-      setSubmitMessage('Error: Unable to connect to server. Please try again later.');
+      console.error("Error submitting contact form:", error);
+      setSubmitMessage(
+        "Error: Unable to connect to server. Please try again later."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -379,19 +381,19 @@ export default function Home() {
             disabled={isSubmitting}
             className={`mt-8 w-full font-bold py-3 rounded-xl shadow-lg transition transform hover:-translate-y-1 hover:scale-105 cursor-pointer ${
               isSubmitting
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-yellow-400 hover:bg-yellow-500 text-black'
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-yellow-400 hover:bg-yellow-500 text-black"
             }`}
           >
-            {isSubmitting ? 'Sending...' : 'Send Message'}
+            {isSubmitting ? "Sending..." : "Send Message"}
           </button>
 
           {submitMessage && (
             <div
               className={`mt-4 p-3 rounded-xl text-center font-medium ${
-                submitMessage.includes('Error')
-                  ? 'bg-red-100 text-red-700 border border-red-300'
-                  : 'bg-green-100 text-green-700 border border-green-300'
+                submitMessage.includes("Error")
+                  ? "bg-red-100 text-red-700 border border-red-300"
+                  : "bg-green-100 text-green-700 border border-green-300"
               }`}
             >
               {submitMessage}
