@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   getSectionQuestions,
   fetchCourseBySlug,
@@ -40,7 +40,6 @@ interface SectionDetails extends BaseSectionDetails {
 
 export default function MockTestAttemptPage() {
   const params = useParams();
-  const router = useRouter();
   const { id } = params;
 
   const [loading, setLoading] = useState(true);
@@ -107,8 +106,6 @@ export default function MockTestAttemptPage() {
           "mock"
         );
 
-        console.log(`Fetched questions for ${sectionName}:`, response);
-
         // Add more detailed logging for debugging
         if (!response.questions || response.questions.length === 0) {
           console.warn(
@@ -168,7 +165,6 @@ export default function MockTestAttemptPage() {
 
       // Fetch sections
       const sectionsResponse = await getCourseSections(courseData.id);
-      console.log("Fetched course sections:", sectionsResponse);
 
       // Initialize sections state
       const initialSections = sectionsResponse.sections.map(
@@ -196,15 +192,11 @@ export default function MockTestAttemptPage() {
   // Load all sections' questions
   const loadAllSections = useCallback(async () => {
     try {
-      console.log("Loading all section questions for sections:", sections);
       await Promise.all(
         sections.map((section, index) => {
           if (section.question_count && section.question_count > 0) {
             return loadSectionQuestions(section.name, index);
           }
-          console.log(
-            `Skipping section ${section.name} - no question count specified`
-          );
           return Promise.resolve();
         })
       );
@@ -238,16 +230,11 @@ export default function MockTestAttemptPage() {
   const handleAnswerSelect = (answer: string) => {
     if (!currentQuestion) return;
 
-    console.log(
-      `DEBUG: handleAnswerSelect called with answer="${answer}" for question ${currentQuestion.id}`
-    );
-
     setSelectedAnswers((prev) => {
       const newAnswers = {
         ...prev,
         [currentQuestion.id]: answer,
       };
-      console.log(`DEBUG: Updated selectedAnswers:`, newAnswers);
       return newAnswers;
     });
   };
@@ -358,10 +345,6 @@ export default function MockTestAttemptPage() {
       (!sections[0]?.questions || sections[0].questions.length === 0) &&
       !sections[0]?.loading
     ) {
-      console.log(
-        "Loading initial section questions for section:",
-        sections[0].name
-      );
       loadSectionQuestions(sections[0].name, 0);
     }
   }, [sections, loadSectionQuestions]);
@@ -482,45 +465,12 @@ export default function MockTestAttemptPage() {
           selectedAnswers[qid] !== undefined && selectedAnswers[qid] !== null;
         const rawAnswer = selectedAnswers[qid];
         const parsedAnswer = isAnswered ? parseInt(rawAnswer) : null;
-
-        // Debug logging - check if parseInt is working
-        console.log(
-          `Question ${qid}: isAnswered=${isAnswered}, rawAnswer="${rawAnswer}", parsed=${parsedAnswer}, isNaN=${
-            parsedAnswer !== null ? isNaN(parsedAnswer) : "N/A (null)"
-          }`
-        );
-
         return {
           question_id: qid,
           selected_option_order: parsedAnswer,
         };
       });
 
-      console.log("DEBUG: Current selectedAnswers state:", selectedAnswers);
-      console.log("DEBUG: All question IDs from sections:", allQuestionIds);
-
-      console.log("DEBUG: Submitting answers:", {
-        courseId: courseInfo.id,
-        answersCount: answers.length,
-        answers: answers.slice(0, 3), // Show first 3 for debugging
-        timeSpent: 3600 - timeRemaining,
-        markedForReview: markedForReviewAll.length,
-      });
-
-      // Debug the exact data being sent
-      console.log("Example question IDs:", allQuestionIds.slice(0, 3));
-      console.log(`Posting to: /courses/${courseInfo.id}/mock/submit`);
-      console.log(
-        "Time spent:",
-        3600 - timeRemaining,
-        "type:",
-        typeof (3600 - timeRemaining)
-      );
-      console.log("Marked for review:", markedForReviewAll);
-
-      console.log("FULL ANSWERS ARRAY:", JSON.stringify(answers, null, 2));
-
-      // Use our api module instead of raw fetch
       try {
         const response = await api.post(
           `/courses/${courseInfo.id}/mock/submit`,
@@ -572,23 +522,24 @@ export default function MockTestAttemptPage() {
           },
         };
 
-        // Log the processed results
-        console.log("Processed results with defaults:", processedResults);
-
         // Persist results for results page
         // Use the URL parameter id to ensure consistency when retrieving on results page
         const key = `mock_results_${id}`;
         if (typeof window !== "undefined") {
           sessionStorage.setItem(key, JSON.stringify(processedResults));
-          // For debugging purposes, also log what we're storing and where
-          console.log(`Storing results in sessionStorage with key: ${key}`);
         }
       } catch (error: unknown) {
         console.error("Submit error details:", error);
 
         // Log more detailed error information
-        if (error instanceof Error && (error as { response?: { data?: unknown } }).response?.data) {
-          console.error("Server error response:", (error as { response?: { data?: unknown } }).response!.data);
+        if (
+          error instanceof Error &&
+          (error as { response?: { data?: unknown } }).response?.data
+        ) {
+          console.error(
+            "Server error response:",
+            (error as { response?: { data?: unknown } }).response!.data
+          );
         }
 
         throw new Error(
@@ -599,22 +550,14 @@ export default function MockTestAttemptPage() {
       }
 
       // Navigate to results page
-      router.push(`/mock/${id}/attempt/result`);
+      window.location.href = `/mock/${id}/attempt/result`;
     } catch (err) {
       console.error("Submit error", err);
       alert("Submission failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
-  }, [
-    courseInfo,
-    id,
-    isSubmitting,
-    sections,
-    selectedAnswers,
-    timeRemaining,
-    router,
-  ]);
+  }, [courseInfo, id, isSubmitting, sections, selectedAnswers, timeRemaining]);
 
   // Timer effect
   useEffect(() => {
@@ -629,8 +572,6 @@ export default function MockTestAttemptPage() {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          console.log("Time's up! Auto-submitting test...");
-          // Auto-submit when time's up
           void handleSubmitTest();
           return 0;
         }
@@ -692,7 +633,7 @@ export default function MockTestAttemptPage() {
           <h2 className="text-xl font-semibold mb-2">Error Loading Test</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <Button
-            onClick={() => router.push("/mock")}
+            onClick={() => window.history.back()}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -707,7 +648,11 @@ export default function MockTestAttemptPage() {
   if (!testStarted) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <Button onClick={() => router.back()} variant="ghost" className="mb-6">
+        <Button
+          onClick={() => window.history.back()}
+          variant="ghost"
+          className="mb-6"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>

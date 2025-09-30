@@ -110,18 +110,16 @@ export default function MockAttemptDetailsPage() {
     const correctOption = qa.correct_option_order;
     const isCorrect = qa.is_correct;
 
-    // Debug logging to verify data is coming correctly
-    console.log(`Question ${index} data:`, {
-      selected_option_order: qa.selected_option_order,
-      correct_option_order: qa.correct_option_order,
-      is_correct: qa.is_correct,
-      options_count: qa.question.options.length,
-    });
-
     return (
       <div
         key={qa.question_id}
-        className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500"
+        className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${
+          qa.is_correct
+            ? "border-green-500"
+            : selectedOption !== null
+            ? "border-red-500"
+            : "border-gray-400"
+        }`}
       >
         {/* Question Header */}
         <div className="flex items-start justify-between mb-4">

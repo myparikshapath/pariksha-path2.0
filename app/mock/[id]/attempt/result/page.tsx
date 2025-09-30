@@ -36,17 +36,25 @@ export default function MockResultPage() {
   useEffect(() => {
     if (!id) return;
     const key = `mock_results_${id as string}`;
-    console.log(`Attempting to load results from sessionStorage with key: ${key}`);
-    
+    console.log(
+      `Attempting to load results from sessionStorage with key: ${key}`
+    );
+
     try {
       if (typeof window !== "undefined") {
         // Log all available sessionStorage keys for debugging
-        console.log("Available sessionStorage keys:", 
-          Object.keys(sessionStorage).filter(k => k.startsWith('mock_results_')));
-          
+        console.log(
+          "Available sessionStorage keys:",
+          Object.keys(sessionStorage).filter((k) =>
+            k.startsWith("mock_results_")
+          )
+        );
+
         const raw = sessionStorage.getItem(key);
-        console.log(`Raw data from sessionStorage: ${raw ? 'Found' : 'Not found'}`);
-        
+        console.log(
+          `Raw data from sessionStorage: ${raw ? "Found" : "Not found"}`
+        );
+
         if (raw) {
           const parsedResults = JSON.parse(raw);
           console.log("Successfully parsed results:", parsedResults);
@@ -63,8 +71,12 @@ export default function MockResultPage() {
       <div className="max-w-3xl mx-auto p-6">
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <h1 className="text-xl font-semibold mb-2">No Results Found</h1>
-          <p className="text-gray-600 mb-4">Please complete a mock test first.</p>
-          <Button onClick={() => router.push(`/mock/${id}/attempt`)}>Back to Test</Button>
+          <p className="text-gray-600 mb-4">
+            Please complete a mock test first.
+          </p>
+          <Button onClick={() => router.push(`/mock/${id}/attempt`)}>
+            Back to Test
+          </Button>
         </div>
       </div>
     );
@@ -78,44 +90,50 @@ export default function MockResultPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Test Completed!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Test Completed!
+          </h1>
           <p className="text-lg text-gray-600">{results.course?.title}</p>
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <Button variant="outline" onClick={() => router.push("/mock")}>
-              Back to Mocks
-            </Button>
-            <Button variant="ghost" onClick={() => router.push(`/mock/${id}/attempt`)}>
-              Retake Test
-            </Button>
-          </div>
         </div>
 
         {/* Main Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Stat 
-            label="Score" 
+          <Stat
+            label="Score"
             value={`${results.score} / ${results.max_score}`}
             icon="🎯"
             color="blue"
           />
-          <Stat 
-            label="Percentage" 
+          <Stat
+            label="Percentage"
             value={`${percentage}%`}
             icon="📊"
-            color={percentage >= 70 ? "green" : percentage >= 50 ? "yellow" : "red"}
+            color={
+              percentage >= 70 ? "green" : percentage >= 50 ? "yellow" : "red"
+            }
           />
-          <Stat 
-            label="Accuracy" 
+          <Stat
+            label="Accuracy"
             value={`${Math.round((results.accuracy || 0) * 100)}%`}
             icon="🎯"
             color="purple"
           />
-          <Stat 
-            label="Attempted" 
+          <Stat
+            label="Attempted"
             value={`${results.attempted_questions} / ${results.total_questions}`}
             icon="📝"
             color="indigo"
@@ -129,40 +147,55 @@ export default function MockResultPage() {
             Section Performance
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(results.section_summaries || []).map((s: SectionSummary, idx: number) => (
-              <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900">{s.section}</h3>
-                  <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded-full">
-                    {s.attempted}/{s.total}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Correct:</span>
-                    <span className="font-medium text-green-600">{s.correct}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Accuracy:</span>
-                    <span className={`font-medium ${
-                      s.accuracy >= 0.7 ? 'text-green-600' : 
-                      s.accuracy >= 0.5 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {Math.round((s.accuracy || 0) * 100)}%
+            {(results.section_summaries || []).map(
+              (s: SectionSummary, idx: number) => (
+                <div
+                  key={idx}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900">{s.section}</h3>
+                    <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded-full">
+                      {s.attempted}/{s.total}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-500 ${
-                        s.accuracy >= 0.7 ? 'bg-green-500' : 
-                        s.accuracy >= 0.5 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${(s.accuracy || 0) * 100}%` }}
-                    />
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Correct:</span>
+                      <span className="font-medium text-green-600">
+                        {s.correct}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Accuracy:</span>
+                      <span
+                        className={`font-medium ${
+                          s.accuracy >= 0.7
+                            ? "text-green-600"
+                            : s.accuracy >= 0.5
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {Math.round((s.accuracy || 0) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ${
+                          s.accuracy >= 0.7
+                            ? "bg-green-500"
+                            : s.accuracy >= 0.5
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{ width: `${(s.accuracy || 0) * 100}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
 
@@ -174,18 +207,25 @@ export default function MockResultPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">Time Management</h3>
+              <h3 className="font-semibold text-blue-900 mb-2">
+                Time Management
+              </h3>
               <p className="text-sm text-blue-700">
-                You spent {Math.floor((results.time_spent_seconds || 0) / 60)} minutes on this test.
-                {results.time_spent_seconds && results.time_spent_seconds < 1800 && 
+                You spent {Math.floor((results.time_spent_seconds || 0) / 60)}{" "}
+                minutes on this test.
+                {results.time_spent_seconds &&
+                  results.time_spent_seconds < 1800 &&
                   " Great time management!"}
               </p>
             </div>
             <div className="bg-green-50 rounded-lg p-4">
-              <h3 className="font-semibold text-green-900 mb-2">Completion Rate</h3>
+              <h3 className="font-semibold text-green-900 mb-2">
+                Completion Rate
+              </h3>
               <p className="text-sm text-green-700">
-                You attempted {results.attempted_questions} out of {results.total_questions} questions.
-                {results.attempted_questions === results.total_questions && 
+                You attempted {results.attempted_questions} out of{" "}
+                {results.total_questions} questions.
+                {results.attempted_questions === results.total_questions &&
                   " Excellent! You answered all questions."}
               </p>
             </div>
@@ -194,21 +234,14 @@ export default function MockResultPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
+          <Button
             onClick={() => router.push(`/mock/${id}/attempt`)}
             className="px-8 py-3 text-lg"
           >
             Retake Test
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => router.push(`/mock/${id}`)}
-            className="px-8 py-3 text-lg"
-          >
-            View Mock Details
-          </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => router.push("/mock")}
             className="px-8 py-3 text-lg"
           >
@@ -220,33 +253,37 @@ export default function MockResultPage() {
   );
 }
 
-function Stat({ 
-  label, 
-  value, 
-  icon, 
-  color = "blue" 
-}: { 
-  label: string; 
-  value: string; 
-  icon?: string; 
+function Stat({
+  label,
+  value,
+  icon,
+  color = "blue",
+}: {
+  label: string;
+  value: string;
+  icon?: string;
   color?: "blue" | "green" | "yellow" | "red" | "purple" | "indigo";
 }) {
   const colorClasses = {
     blue: "from-blue-500 to-blue-600",
-    green: "from-green-500 to-green-600", 
+    green: "from-green-500 to-green-600",
     yellow: "from-yellow-500 to-yellow-600",
     red: "from-red-500 to-red-600",
     purple: "from-purple-500 to-purple-600",
-    indigo: "from-indigo-500 to-indigo-600"
+    indigo: "from-indigo-500 to-indigo-600",
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
       <div className="flex items-center justify-center mb-3">
         {icon && <span className="text-2xl mr-2">{icon}</span>}
-        <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${colorClasses[color]} flex items-center justify-center`}>
+        <div
+          className={`w-12 h-12 rounded-full bg-gradient-to-r ${colorClasses[color]} flex items-center justify-center`}
+        >
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-            <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${colorClasses[color]}`}></div>
+            <div
+              className={`w-4 h-4 rounded-full bg-gradient-to-r ${colorClasses[color]}`}
+            ></div>
           </div>
         </div>
       </div>
