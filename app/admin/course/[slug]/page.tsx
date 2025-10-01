@@ -20,12 +20,12 @@ import {
   ArrowLeft,
   Loader2,
   AlertCircle,
-  Eye,
   Plus,
   Trash2,
   X,
   MoreVertical,
-  FileText
+  FileText,
+  Eye
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -50,9 +50,6 @@ const CourseDetailPage = () => {
   const [isEditingSection, setIsEditingSection] = useState<string | null>(null);
   const [tempQuestionCount, setTempQuestionCount] = useState<string>("0");
 
-
-
-
   const handleUploadQuestions = (section: string) => {
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
   };
@@ -65,16 +62,13 @@ const CourseDetailPage = () => {
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}/pdfs`);
   };
 
-
   const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const courses = await fetchAvailableCourses();
-      console.log("All courses:", courses);
 
-      // Find course by slug (code or id)
       const foundCourse = courses.find((c) => {
         const courseSlug = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
         return courseSlug === params.slug;
@@ -97,12 +91,10 @@ const CourseDetailPage = () => {
     loadCourse();
   }, [params.slug, loadCourse]);
 
-
   const handleBackClick = () => {
     router.push("/admin/add-exam");
   };
 
-  // Section management handlers
   const handleAddSection = () => {
     if (!course) return;
     router.push(`/admin/add-section/${course.id}`);
@@ -124,7 +116,7 @@ const CourseDetailPage = () => {
     setOperationLoading(true);
     try {
       await deleteSectionFromCourse(course.id, sectionName);
-      await loadCourse(); // Refresh course data
+      await loadCourse();
       setDeleteSectionDialogOpen(false);
       setDeletingSection(null);
     } catch (error: unknown) {
@@ -139,7 +131,6 @@ const CourseDetailPage = () => {
     setDeleteSectionDialogOpen(false);
     setDeletingSection(null);
   };
-
 
   if (loading) {
     return (
@@ -196,23 +187,17 @@ const CourseDetailPage = () => {
       {/* Course Info */}
       <div className="mb-8">
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {course.title}
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
               {course.sub_category && (
-                <p className="text-lg text-gray-600 mb-2">
-                  {course.sub_category}
-                </p>
+                <p className="text-lg text-gray-600 mb-2">{course.sub_category}</p>
               )}
               {course.code && (
-                <p className="text-sm text-gray-500">
-                  Course Code: {course.code}
-                </p>
+                <p className="text-sm text-gray-500">Course Code: {course.code}</p>
               )}
             </div>
-            <div className="text-right">
+            <div className="text-left md:text-right">
               <div className="flex items-center gap-2 text-2xl font-bold text-gray-900 mb-2">
                 <DollarSign className="h-6 w-6" />
                 {course.is_free ? "Free" : `Rs.${course.price.toFixed(2)}`}
@@ -222,17 +207,13 @@ const CourseDetailPage = () => {
               </div>
             </div>
           </div>
+          {course.description && <p className="text-gray-700 mb-4">{course.description}</p>}
 
-          {course.description && (
-            <p className="text-gray-700 mb-4">{course.description}</p>
-          )}
-
-          <div className="flex items-center gap-6 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               <span>
-                {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
-                Sections
+                {Array.isArray(course.sections) ? course.sections.length : 0} Sections
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -245,14 +226,9 @@ const CourseDetailPage = () => {
 
       {/* Sections Grid */}
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Course Sections
-          </h2>
-          <Button
-            onClick={handleAddSection}
-            className="flex items-center gap-2"
-          >
+        <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+          <h2 className="text-2xl font-bold text-gray-900">Course Sections</h2>
+          <Button onClick={handleAddSection} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Add Section
           </Button>
@@ -261,171 +237,148 @@ const CourseDetailPage = () => {
         {!course.sections || course.sections.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">
-              No sections available for this course yet.
-            </p>
-            <Button
-              onClick={handleAddSection}
-              className="flex items-center gap-2"
-            >
+            <p className="text-gray-500 mb-4">No sections available for this course yet.</p>
+            <Button onClick={handleAddSection} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Add First Section
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
             {course.sections.map((section, index) => (
               <Card
                 key={index}
-                className="hover:shadow-md transition-all cursor-pointer"
-              // onClick={() => handleViewQuestions(section.name)}
+                className="hover:shadow-md transition-all cursor-pointer p-4 flex flex-col"
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-semibold text-blue-600">
-                          {index + 1}
-                        </span>
-                      </div>
-                      <CardTitle className="text-lg flex-1">{section.name}</CardTitle>
+                <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-blue-600">{index + 1}</span>
                     </div>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditSection(section.name)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Rename
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteSection(section.name)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    <CardTitle className="text-lg sm:text-base md:text-lg flex-1">{section.name}</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditSection(section.name)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteSection(section.name)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardHeader>
 
-
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-600">
-                      Section {index + 1} of {course?.sections?.length}
-                    </div>
-
-                    {/* Number of Questions Input */}
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-gray-700">Questions:</label>
-
-                      {/** local state per section */}
-                      {isEditingSection === section.name ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min={0}
-                            value={tempQuestionCount}
-                            onChange={(e) => setTempQuestionCount(e.target.value)}
-                            className="border rounded px-2 py-1 w-20 text-sm"
-                          />
-                          <button
-                            className="p-1 rounded bg-green-500 text-white hover:bg-green-600"
-                            onClick={async () => {
-                              if (tempQuestionCount && course) {
-                                try {
-                                  await updateSectionQuestionCount(
-                                    course.id,
-                                    section.name,
-                                    tempQuestionCount
-                                  );
-                                  await loadCourse();
-                                  setIsEditingSection(null); // exit edit mode
-                                } catch (err) {
-                                  console.error("Failed to update question count", err);
-                                  setError("Failed to update question count");
-                                }
+                <CardContent className="flex flex-col gap-4">
+                  {/* Number of Questions */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <label className="text-sm text-gray-700">Questions:</label>
+                    {isEditingSection === section.name ? (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <input
+                          type="number"
+                          min={0}
+                          value={tempQuestionCount}
+                          onChange={(e) => setTempQuestionCount(e.target.value)}
+                          className="border rounded px-2 py-1 w-20 text-sm"
+                        />
+                        <button
+                          className="p-1 rounded bg-green-500 text-white hover:bg-green-600"
+                          onClick={async () => {
+                            if (tempQuestionCount && course) {
+                              try {
+                                await updateSectionQuestionCount(
+                                  course.id,
+                                  section.name,
+                                  tempQuestionCount
+                                );
+                                await loadCourse();
+                                setIsEditingSection(null);
+                              } catch (err) {
+                                console.error("Failed to update question count", err);
+                                setError("Failed to update question count");
                               }
-                            }}
-                          >
-                            <Check className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="p-1 rounded bg-gray-300 hover:bg-gray-400"
-                            onClick={() => setIsEditingSection(null)}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-800">
-                            {section.question_count || 0}
-                          </span>
-                          <button
-                            className="p-1 rounded hover:bg-gray-200"
-                            onClick={(e) => {
-                              setIsEditingSection(section.name);
-                              setTempQuestionCount(section.question_count.toString() || "0");
-                              e.stopPropagation();
-                            }}
-                          >
-                            <Edit className="h-4 w-4 text-gray-600" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                            }
+                          }}
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                        <button
+                          className="p-1 rounded bg-gray-300 hover:bg-gray-400"
+                          onClick={() => setIsEditingSection(null)}
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-gray-800">{section.question_count || 0}</span>
+                        <button
+                          className="p-1 rounded hover:bg-gray-200"
+                          onClick={(e) => {
+                            setIsEditingSection(section.name);
+                            setTempQuestionCount(section.question_count.toString() || "0");
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Edit className="h-4 w-4 text-gray-600" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex items-center gap-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewQuestions(section.name);
-                        }}
-                      >
-                        <Eye className="h-4 w-4" />
-                        View Questions
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex items-center gap-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUploadQuestions(section.name);
-                        }}
-                      >
-                        <Upload className="h-4 w-4" />
-                        Upload Questions
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex items-center gap-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleManagePDFs(section.name);
-                        }}
-                      >
-                        <FileText className="h-4 w-4" />
-                        Manage PDFs
-                      </Button>
-                    </div>
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewQuestions(section.name);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Questions
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUploadQuestions(section.name);
+                      }}
+                    >
+                      <Upload className="h-4 w-4" />
+                      Upload Questions
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleManagePDFs(section.name);
+                      }}
+                    >
+                      <FileText className="h-4 w-4" />
+                      Manage PDFs
+                    </Button>
                   </div>
                 </CardContent>
-
-                {/* ms ne add kiya hai  */}
-
               </Card>
             ))}
           </div>
@@ -445,5 +398,3 @@ const CourseDetailPage = () => {
 };
 
 export default CourseDetailPage;
-
-

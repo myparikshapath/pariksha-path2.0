@@ -42,7 +42,8 @@ export default function About() {
 
             {/* Why Choose Us */}
             <section className="mt-20">
-                <h2 className="text-3xl text-[#2E4A3C] font-bold text-center mb-12">Why Choose Us</h2>
+                <h2 className="text-3xl text-[#2E4A3C] font-bold text-center">Why Choose Us</h2>
+                <div className="w-52 h-1 bg-yellow-400 mx-auto mb-12 mt-2 rounded"></div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     {[
                         { title: "Expert Mentors", desc: "Our educators are experienced professionals who provide guidance tailored to each student’s needs." },

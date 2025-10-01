@@ -4,9 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function Footer() {
-    const phoneNumber = "+919876543210";
-    const email = "support@parikshapath.com";
-    const whatsappNumber = "919876543210";
+    const phoneNumber = "+919992266559";
+    const email = "myparikshapath@gmai.com";
+    const whatsappNumber = "919992266559";
 
     return (
         <footer className="w-full bg-[#101b15] text-gray-200 pt-16 pb-2">
@@ -72,10 +72,10 @@ export default function Footer() {
 
                     {/* Social Icons */}
                     <div className="flex space-x-4 mt-4">
-                        <Link href="#" className="hover:text-[#869C51]"><Facebook size={24} /></Link>
-                        <Link href="#" className="hover:text-[#869C51]"><Twitter size={24} /></Link>
-                        <Link href="#" className="hover:text-[#869C51]"><Instagram size={24} /></Link>
-                        <Link href="#" className="hover:text-[#869C51]"><Linkedin size={24} /></Link>
+                        <Link href="https://www.facebook.com/people/M-Parikshapath/61580287940692/" className="hover:text-[#869C51]"><Facebook size={24} /></Link>
+                        {/* <Link href="#" className="hover:text-[#869C51]"><Twitter size={24} /></Link> */}
+                        <Link href="https://www.instagram.com/myparikshapath_/" className="hover:text-[#869C51]"><Instagram size={24} /></Link>
+                        {/* <Link href="#" className="hover:text-[#869C51]"><Linkedin size={24} /></Link> */}
                     </div>
                 </div>
             </div>

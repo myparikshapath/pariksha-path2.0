@@ -125,13 +125,13 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start mt-6">
               <Link
-                href="#"
+                href="/mock"
                 className={`bg-yellow-400 text-[#2E4A3C] font-bold px-6 py-3 rounded-xl ${hoverButtonClasses} text-center`}
               >
                 Start Learning Free
               </Link>
               <Link
-                href="#"
+                href="#popular-courses"
                 className="bg-white text-[#2E4A3C] font-bold px-6 py-3 rounded-xl hover:bg-gray-100 shadow-xl transition text-center"
               >
                 Explore Courses
@@ -178,29 +178,32 @@ export default function Home() {
       </section>
 
       {/* POPULAR COURSES */}
-      <section className="max-w-6xl mx-auto mt-16">
+      <section id="popular-courses" className="max-w-6xl mx-auto mt-16">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C] text-center">
           Popular Courses
         </h2>
-        <div className="w-16 h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
+        <div className="w-60 h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
 
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 px-2 sm:px-0">
           {[
-            { icon: Cpu, name: "Engineering Exams", button: "Start Test Free" },
+            { icon: Cpu, name: "Engineering Exams", button: "Start Test Free", href: "/course/jee-mains", },
             {
               icon: BookOpen,
               name: "CTET / Teaching Exams",
               button: "Explore Now",
+              href: "/course/ctet",
             },
             {
               icon: BarChart2,
               name: "Competitive Exams",
               button: "Explore Now",
+              href: "/course/upsc",
             },
             {
               icon: Globe,
               name: "General Knowledge Quizzes",
               button: "Try Now",
+              href: "/course/ssc-cpo",
             },
           ].map((course, idx) => (
             <Card
@@ -211,7 +214,7 @@ export default function Home() {
                 <course.icon className="text-6xl sm:text-3xl mx-auto mb-4 text-[#2E4A3C]" />
                 <p className="font-semibold text-[#2E4A3C]">{course.name}</p>
                 <Link
-                  href="#"
+                  href={course.href}
                   className="mt-4 inline-block bg-yellow-400 text-[#2E4A3C] font-bold px-4 py-2 rounded-xl hover:bg-yellow-500 shadow-md transition"
                 >
                   {course.button}
@@ -227,7 +230,7 @@ export default function Home() {
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C]">
           Why Choose My ParikshaPath ?
         </h2>
-        <div className="w-16 h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
+        <div className="w-[30vw] h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
@@ -270,7 +273,7 @@ export default function Home() {
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C] text-center">
           Success Stories - Our Students, Our Pride
         </h2>
-        <div className="w-40 h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
+        <div className="w-[40vw] h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
 
         <div
           className="relative overflow-x-auto w-full cursor-pointer no-scrollbar"
