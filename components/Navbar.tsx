@@ -51,6 +51,22 @@ export default function Navbar() {
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
+  useEffect(() => {
+    if (hoveredDropdown) {
+      const examsDropdown = navLinks.find((link) => link.name === hoveredDropdown)?.dropdown;
+      if (examsDropdown && examsDropdown.length > 0 && !activeCategory) {
+        setActiveCategory(examsDropdown[0].category); // SSC or first category
+      }
+      document.body.style.overflow = "hidden"; // lock background scroll
+    } else {
+      setActiveCategory(null);
+      document.body.style.overflow = "auto";
+    }
+    return () => { document.body.style.overflow = "auto"; };
+  }, [hoveredDropdown]);
+
+
+
   const isActive = (href: string) => pathname === href;
 
   const navLinks = [
@@ -85,7 +101,6 @@ export default function Navbar() {
             <Image
               src="/webLogo.png"
               alt="ParikshaPath Logo"
-              // fill
               height={800}
               width={200}
               className="object-contain"
@@ -94,23 +109,18 @@ export default function Navbar() {
           </div>
         </Link>
 
-
         {/* ---------- DESKTOP MENU ---------- */}
         <ul className="hidden lg:flex flex-1 justify-center items-start space-x-6 font-bold">
           {navLinks.map((link, idx) => (
-            <li
-              key={idx}
-              className="relative group"
-              onMouseEnter={() => {
-                setHoveredDropdown(link.name);
-                if (link.dropdown)
-                  setActiveCategory(link.dropdown[0]?.category || null);
-              }}
-              onMouseLeave={() => setHoveredDropdown(null)}
-            >
+            <li key={idx} className="relative group">
               {link.dropdown ? (
                 <button
                   type="button"
+                  onClick={() =>
+                    setHoveredDropdown(
+                      hoveredDropdown === link.name ? null : link.name
+                    )
+                  }
                   className="cursor-pointer flex items-center space-x-1 hover:text-[#2E4A3C] transition-colors text-md font-bold"
                 >
                   {link.name}
@@ -128,22 +138,33 @@ export default function Navbar() {
               )}
 
               {/* --- DESKTOP MEGA DROPDOWN --- */}
-              {link.dropdown && (
-                <AnimatePresence>
-                  {hoveredDropdown === link.name && (
+              <AnimatePresence>
+                {hoveredDropdown === link.name && link.dropdown && (
+                  <>
+                    {/* Overlay blur background */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setHoveredDropdown(null)}
+                    ></motion.div>
+
                     <motion.div
                       initial={{ opacity: 0, y: -15, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.98 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-20` : `ml-[-25px]`}`}
+                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-4` : `ml-[-75px]`
+                        }`}
                     >
                       {/* LEFT panel - categories */}
                       <div className="w-[28%] max-w-[360px] border-r border-gray-100 overflow-y-auto bg-gradient-to-b from-green-50 to-green-100">
                         {link.dropdown.map((group: DropdownGroup, i) => (
                           <motion.button
                             key={i}
-                            onMouseEnter={() => setActiveCategory(group.category)}
+                            onClick={() => setActiveCategory(group.category)}
                             className={`w-full text-left px-5 py-3 text-lg font-bold transition-all duration-300 rounded-r-full
                 ${activeCategory === group.category
                                 ? "bg-green-100 text-green-800 shadow-inner"
@@ -156,9 +177,9 @@ export default function Navbar() {
                         ))}
                       </div>
 
-                      {/* RIGHT panel - exams */}
+                      {/* RIGHT panel - exams (scrollable only inside panel) */}
                       <motion.div
-                        key={activeCategory}
+                        // key={activeCategory}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
@@ -193,6 +214,7 @@ export default function Navbar() {
                                           }}
                                         >
                                           <Link
+                                            onClick={() => setHoveredDropdown(null)}
                                             href={`/course/${slugify(ex)}`}
                                             className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
                                           >
@@ -211,30 +233,29 @@ export default function Navbar() {
                                               {subState.state}
                                             </div>
                                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                                              {subState.exams.map(
-                                                (ex, ei) => (
-                                                  <motion.div
-                                                    key={ei}
-                                                    whileHover={{
-                                                      scale: 1.05,
-                                                      y: -4,
-                                                    }}
-                                                    transition={{
-                                                      type: "spring",
-                                                      stiffness: 250,
-                                                    }}
+                                              {subState.exams.map((ex, ei) => (
+                                                <motion.div
+                                                  key={ei}
+                                                  whileHover={{
+                                                    scale: 1.05,
+                                                    y: -4,
+                                                  }}
+                                                  transition={{
+                                                    type: "spring",
+                                                    stiffness: 250,
+                                                  }}
+                                                >
+                                                  <Link
+                                                    onClick={() => setHoveredDropdown(null)}
+                                                    href={`/course/${slugify(
+                                                      ex
+                                                    )}`}
+                                                    className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
                                                   >
-                                                    <Link
-                                                      href={`/course/${slugify(
-                                                        ex
-                                                      )}`}
-                                                      className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
-                                                    >
-                                                      {ex}
-                                                    </Link>
-                                                  </motion.div>
-                                                )
-                                              )}
+                                                    {ex}
+                                                  </Link>
+                                                </motion.div>
+                                              ))}
                                             </div>
                                           </div>
                                         )
@@ -247,9 +268,9 @@ export default function Navbar() {
                           ))}
                       </motion.div>
                     </motion.div>
-                  )}
-                </AnimatePresence>
-              )}
+                  </>
+                )}
+              </AnimatePresence>
             </li>
           ))}
         </ul>
@@ -281,7 +302,6 @@ export default function Navbar() {
             </Link>
           )}
         </div>
-
 
         {/* ---------- MOBILE TOGGLE ---------- */}
         <div className="lg:hidden">

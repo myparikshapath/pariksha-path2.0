@@ -37,7 +37,7 @@ export default function RootLayout({
           <ScrollToTop />
           <AuthProvider>
             <Navbar />
-            <div className="mt-24">
+            <div className="mt-20">
               {children}
             </div>
           </AuthProvider>

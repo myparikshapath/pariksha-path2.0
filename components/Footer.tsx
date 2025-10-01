@@ -34,10 +34,10 @@ export default function Footer() {
                 <div className="md:flex-1">
                     <h3 className="text-xl font-semibold mb-4 text-[#D9E2C4]">Popular Courses</h3>
                     <ul className="space-y-2">
-                        {["NDA", "CDS", "HSSC", "HCS", "SSC"].map((course) => (
+                        {["NDA", "CDS", "HSSC", "HCS", "SSC-CGL"].map((course) => (
                             <li key={course}>
                                 <Link
-                                    href={`/courses/${course.toLowerCase()}`}
+                                    href={`/course/${course.toLowerCase()}`}
                                     className="hover:text-[#869C51] transition-colors block"
                                 >
                                     {course}
