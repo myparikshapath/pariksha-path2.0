@@ -194,7 +194,7 @@ const CoursePage = () => {
             const success = verifyData?.success ?? verifyData?.verified ?? false;
             if (success) {
               alert(`✅ Successfully enrolled in ${course.title}`);
-              router.push("/my-courses");
+              router.push("/student/dashboard");
             } else {
               console.error("Payment verification failed:", verifyData);
               alert("❌ Payment verification failed. Please contact support.");

@@ -247,8 +247,11 @@ export default function NewExamPage() {
                     type="number"
                     min={0}
                     step="1"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange("price", parseFloat(e.target.value))}
+                    value={formData.price === 0 ? "" : formData.price}   // show empty when 0
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      handleInputChange("price", val === "" ? 0 : parseFloat(val));
+                    }}
                   />
                 </div>
 
@@ -259,8 +262,11 @@ export default function NewExamPage() {
                     type="number"
                     min={0}
                     max={100}
-                    value={formData.discount_percent || 0}
-                    onChange={(e) => handleInputChange("discount_percent", parseFloat(e.target.value) || 0)}
+                    value={formData.discount_percent === 0 ? "" : formData.discount_percent}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      handleInputChange("discount_percent", val === "" ? 0 : parseFloat(val));
+                    }}
                   />
                 </div>
               </div>

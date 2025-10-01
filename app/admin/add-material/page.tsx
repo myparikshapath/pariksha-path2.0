@@ -216,7 +216,7 @@ const AddExam = () => {
                                         <div className="mt-4 pt-4 border-t border-gray-100">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-sm font-medium">
-                                                    {course.is_free ? "Free" : `$${course.price.toFixed(2)}`}
+                                                    {course.is_free ? "Free" : `₹${course.price.toFixed(2)}`}
                                                 </span>
                                                 <div className="text-xs text-gray-500">
                                                     {Array.isArray(course.sections)
