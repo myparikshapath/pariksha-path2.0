@@ -83,30 +83,14 @@ export default function NewExamPage() {
     setError(null);
 
     try {
-      // Validate required fields
-      if (!formData.title.trim()) {
-        throw new Error("Title is required");
-      }
-      if (!formData.code.trim()) {
-        throw new Error("Code is required");
-      }
-      if (!formData.sub_category.trim()) {
-        throw new Error("Sub-category is required");
-      }
-      if (!formData.description.trim()) {
-        throw new Error("Description is required");
-      }
-      if (!formData.thumbnail_url.trim()) {
-        throw new Error("Thumbnail URL is required");
-      }
-      if (sections.length === 0) {
-        throw new Error("At least one section is required");
-      }
+      if (!formData.title.trim()) throw new Error("Title is required");
+      if (!formData.code.trim()) throw new Error("Code is required");
+      if (!formData.sub_category.trim()) throw new Error("Sub-category is required");
+      if (!formData.description.trim()) throw new Error("Description is required");
+      if (!formData.thumbnail_url.trim()) throw new Error("Thumbnail URL is required");
+      if (sections.length === 0) throw new Error("At least one section is required");
 
-      // Create the course
       await createCourse(formData);
-
-      // Navigate back to courses list
       router.push("/admin/add-exam");
     } catch (err: unknown) {
       console.error("Error creating course:", err);
@@ -184,10 +168,10 @@ export default function NewExamPage() {
                   onValueChange={(value) =>
                     handleInputChange("category", value as CreateCourseRequest["category"])}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white border border-gray-300 text-gray-800 rounded-md">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white rounded-md border border-gray-300">
                     {EXAM_CATEGORIES.map((category) => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
@@ -229,17 +213,24 @@ export default function NewExamPage() {
             <CardTitle>Pricing</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_free"
-                checked={formData.is_free}
-                onCheckedChange={(checked) => handleInputChange("is_free", checked)}
-              />
-              <Label htmlFor="is_free">Free Course</Label>
+            {/* Labeled Toggle */}
+            <div className="flex items-center gap-4">
+              <span className="text-gray-700 font-medium">Paid</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={formData.is_free}
+                  onChange={(e) => handleInputChange("is_free", e.target.checked)}
+                />
+                <div className={`w-16 h-8 bg-gray-300 rounded-full transition-colors duration-300 ${formData.is_free ? "bg-blue-600" : "bg-gray-300"}`}></div>
+                <div className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${formData.is_free ? "translate-x-8" : ""}`}></div>
+              </label>
+              <span className="text-gray-700 font-medium">Free Course</span>
             </div>
 
             {!formData.is_free && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price (₹)</Label>
                   <Input
@@ -247,7 +238,7 @@ export default function NewExamPage() {
                     type="number"
                     min={0}
                     step="1"
-                    value={formData.price === 0 ? "" : formData.price}   // show empty when 0
+                    value={formData.price === 0 ? "" : formData.price}
                     onChange={(e) => {
                       const val = e.target.value;
                       handleInputChange("price", val === "" ? 0 : parseFloat(val));
@@ -273,6 +264,7 @@ export default function NewExamPage() {
             )}
           </CardContent>
         </Card>
+
 
         {/* Sections */}
         <Card>
@@ -369,7 +361,7 @@ export default function NewExamPage() {
         </Card>
 
         {/* Submit Buttons */}
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-4 flex-wrap">
           <Button type="button" variant="outline" onClick={() => router.back()}>
             Cancel
           </Button>
