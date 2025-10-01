@@ -1,131 +1,223 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const categories = ["Notifications", "Syllabus", "Strategy", "Motivation"];
-const articles = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    title: `Sample Article Title ${i + 1}`,
-    body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin euismod, justo vitae dictum blandit, arcu odio consequat erat, at commodo.",
-    category: categories[i % categories.length],
-}));
+type Section = {
+    heading: string;
+    content: string | string[];
+    type?: "list" | "steps"; // differentiate between normal lists and numbered steps
+};
 
-export default function ArticlesPage() {
-    const [currentCategory, setCurrentCategory] = useState<string | null>(null);
-    const [search, setSearch] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const articlesPerPage = 6;
+type Article = {
+    id: number;
+    title: string;
+    sections: Section[];
+};
 
-    const filteredArticles = articles.filter(
-        (a) =>
-            (!currentCategory || a.category === currentCategory) &&
-            a.title.toLowerCase().includes(search.toLowerCase())
+const articles: Article[] = [
+    {
+        id: 1,
+        title: "Exams Are Not the End, They’re Just a Beginning",
+        sections: [
+            {
+                heading: "Introduction",
+                content:
+                    "Every year, millions of students prepare for exams. Some achieve success, while others face failure. But failure does not mean the end of life. An exam is just a milestone, not the final destination.",
+            },
+            {
+                heading: "Failure is Not Final",
+                content: [
+                    "If you did not succeed in an exam, it simply means you have another chance to improve.",
+                    "Thomas Edison failed 1000 times before inventing the bulb.",
+                    "Dr. APJ Abdul Kalam was rejected in his first attempt at ISRO.",
+                    "Amitabh Bachchan was rejected by All India Radio.",
+                    "But they never gave up. Their persistence turned their failures into great success.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "What Exams Really Teach Us",
+                content: ["Patience", "Value of time", "Courage to face failure", "Confidence to keep moving forward"],
+                type: "list",
+            },
+            {
+                heading: "How to Bounce Back from Failure",
+                content: [
+                    "Review – Find out where you went wrong and which subjects were weak.",
+                    "Plan Again – Create a smart study plan and timetable for next attempt.",
+                    "Think Positive – Keep telling yourself 'I can do it.'",
+                    "Practice Consistently – Study daily in small portions instead of last-minute cramming.",
+                ],
+                type: "steps",
+            },
+            {
+                heading: "Conclusion",
+                content:
+                    "If you failed today, it’s not the end – it’s the beginning of your success story. Don’t see exams as the end, see them as a new beginning. 🌟",
+            },
+        ],
+    },
+    {
+        id: 2,
+        title: "Consistency Beats Talent – Every Single Time",
+        sections: [
+            {
+                heading: "Introduction",
+                content:
+                    "When it comes to success in exams and life, many people believe that talent alone is enough. But the truth is, consistency always outshines raw talent. Talent might give you a head start, but it’s consistency that takes you across the finish line.",
+            },
+            {
+                heading: "Why Consistency Matters",
+                content:
+                    "Consistency means putting in effort every day, even if it’s small. A student who studies 2 hours daily will achieve more than someone who studies 20 hours once a week.",
+            },
+            {
+                heading: "Talent vs. Consistency",
+                content: [
+                    "Talent is natural ability.",
+                    "Consistency is regular practice.",
+                    "A talented student without discipline may fail, but an average student who studies daily can become a topper.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "Examples from Real Life",
+                content: [
+                    "Cricketers who practice daily improve more than those relying only on talent.",
+                    "Famous scientists and leaders achieved greatness through years of consistent effort.",
+                    "Exam toppers often say they didn’t study overnight; they studied every day.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "How to Build Consistency",
+                content: [
+                    "Start Small – Even 1 hour daily is enough in the beginning.",
+                    "Fix a Routine – Study at the same time every day.",
+                    "Stay Accountable – Track your progress in a diary or calendar.",
+                    "Avoid Burnout – Take short breaks but don’t skip study days.",
+                    "Focus on Progress – Small improvements daily create big results.",
+                ],
+                type: "steps",
+            },
+            {
+                heading: "The Formula",
+                content: "💡 Formula for success: 2 hours daily > 20 hours once a week",
+            },
+            {
+                heading: "Conclusion",
+                content:
+                    "Consistency beats talent every single time. Talent may shine in the short term, but consistency builds a strong foundation for lifelong success.",
+            },
+        ],
+    },
+];
+
+// --- Modern Renderers ---
+
+function AccentList({ items }: { items: string[] }) {
+    return (
+        <div className="space-y-3">
+            {items.map((line, i) => (
+                <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="border-l-4 border-[#2E4A3C] pl-4 text-gray-800 text-lg leading-relaxed"
+                >
+                    {line}
+                </motion.div>
+            ))}
+        </div>
     );
+}
 
-    const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
-    const displayedArticles = filteredArticles.slice(
-        (currentPage - 1) * articlesPerPage,
-        currentPage * articlesPerPage
+function StepList({ items }: { items: string[] }) {
+    return (
+        <div className="space-y-5">
+            {items.map((line, i) => (
+                <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-4"
+                >
+                    <div className="w-9 h-9 flex items-center justify-center rounded-full bg-[#2E4A3C] text-white font-semibold text-lg">
+                        {i + 1}
+                    </div>
+                    <p className="text-gray-800 text-lg leading-relaxed">{line}</p>
+                </motion.div>
+            ))}
+        </div>
     );
+}
+
+export default function ArticlesPanels() {
+    const [index, setIndex] = useState(0);
+    const article = articles[index];
+
+    const next = () => setIndex((i) => (i + 1) % articles.length);
+    const prev = () => setIndex((i) => (i - 1 + articles.length) % articles.length);
 
     return (
-        <main className="pt-32 max-w-7xl mx-auto px-6 space-y-12">
-            <h1 className="text-4xl font-extrabold mb-6 text-center text-[#2E4A3C]">
-                Articles
-            </h1>
-            <div className="h-1 w-24 mx-auto mt-[-10px] bg-yellow-400 rounded-full" />
-            <p className="text-center text-gray-600 max-w-2xl mx-auto">
-                Stay updated with the latest notifications, strategies, and motivational articles.
-            </p>
+        <div className="bg-gray-50 min-h-screen py-16 px-6 flex flex-col items-center">
+            {/* Title */}
+            <motion.div
+                key={article.id + "-title"}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-12"
+            >
+                <h1 className="text-4xl font-extrabold text-[#2E4A3C] leading-tight">
+                    {article.title}
+                </h1>
+                {/* <div className="h-1 w-[50vw] mx-auto mt-2 bg-yellow-400 rounded-full" /> */}
+            </motion.div>
 
-            {/* Categories */}
-            <div className="flex overflow-x-auto space-x-3 mb-10 pb-2 no-scrollbar justify-center">
+            {/* Panels */}
+            <motion.div
+                key={article.id}
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-10 w-[80vw] max-w-6xl"
+            >
+                {article.sections.map((sec, i) => (
+                    <div key={i} className="bg-white shadow-lg rounded-xl p-10 hover:shadow-xl transition">
+                        <h2 className="text-2xl font-bold mb-2 text-[#2E4A3C]">{sec.heading}</h2>
+                        <div className="h-1 w-36 mb-5 bg-yellow-400 rounded-full" />
+                        {Array.isArray(sec.content) ? (
+                            sec.type === "steps" ? (
+                                <StepList items={sec.content} />
+                            ) : (
+                                <AccentList items={sec.content} />
+                            )
+                        ) : (
+                            <p className="text-gray-800 text-lg leading-relaxed">{sec.content}</p>
+                        )}
+                    </div>
+                ))}
+            </motion.div>
+
+            {/* Navigation */}
+            <div className="flex justify-center mt-14 gap-6">
                 <button
-                    className={`flex-shrink-0 px-5 py-2 rounded-full font-medium transition-all ${!currentCategory
-                        ? "bg-[#869C51] text-white shadow-md"
-                        : "bg-gray-200 hover:bg-green-100"
-                        }`}
-                    onClick={() => setCurrentCategory(null)}
+                    onClick={prev}
+                    className="flex items-center gap-2 px-3 py-3 rounded-full bg-gray-200 hover:bg-green-100 text-[#2E4A3C] font-semibold text-lg transition shadow-sm"
                 >
-                    All
+                    <ChevronLeft size={20} />
                 </button>
-                {categories.map((cat) => (
-                    <button
-                        key={cat}
-                        className={`flex-shrink-0 px-5 py-2 rounded-full font-medium transition-all ${currentCategory === cat
-                            ? "bg-[#869C51] text-white shadow-md"
-                            : "bg-gray-200 hover:bg-green-100"
-                            }`}
-                        onClick={() => setCurrentCategory(cat)}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
-            {/* Search */}
-            <div className="relative mb-12 max-w-md mx-auto">
-                <input
-                    type="text"
-                    placeholder="Search articles..."
-                    className="w-full rounded-full border border-gray-300 px-4 py-2 pl-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#869C51] focus:border-transparent transition"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            </div>
-
-            {/* Articles Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {displayedArticles.map((article) => (
-                    <motion.div
-                        key={article.id}
-                        className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all cursor-pointer flex flex-col"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <div className="h-40 bg-gray-100 rounded-lg mb-4"></div>
-                        <h2 className="font-semibold text-xl mb-2 text-[#2E4A3C]">{article.title}</h2>
-                        <p className="text-gray-600 mb-4 flex-grow">{article.body}</p>
-                        <span className="inline-block px-3 py-1 text-sm rounded-full bg-green-100 text-[#2E4A3C] font-medium self-start">
-                            {article.category}
-                        </span>
-                    </motion.div>
-                ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-12 mb-8 gap-3 flex-wrap">
                 <button
-                    className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-green-100 hover:text-[#2E4A3C] transition"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
+                    onClick={next}
+                    className="flex items-center gap-2 px-3 py-3 rounded-full bg-[#2E4A3C] text-white font-semibold text-lg shadow-md hover:opacity-90 transition"
                 >
-                    Prev
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i}
-                        className={`px-4 py-2 rounded-full border font-medium transition ${currentPage === i + 1
-                            ? "bg-[#869C51] text-white border-green-600 shadow-md"
-                            : "bg-white text-gray-600 border-gray-300 hover:bg-green-100 hover:text-[#2E4A3C]"
-                            }`}
-                        onClick={() => setCurrentPage(i + 1)}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-
-                <button
-                    className="px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-green-100 hover:text-[#2E4A3C] transition"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
+                    <ChevronRight size={20} />
                 </button>
             </div>
-        </main>
+        </div>
     );
 }

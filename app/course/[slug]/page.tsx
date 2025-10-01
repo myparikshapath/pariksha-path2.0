@@ -6,7 +6,7 @@ import {
   ExamContent,
   getExamContentByCode,
 } from "@/src/services/examContentService";
-import { Course, getCourseDetails, fetchAvailableCourses } from "@/src/services/courseService";
+import { Course, fetchAvailableCourses } from "@/src/services/courseService";
 import api from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -33,12 +33,13 @@ const CoursePage = () => {
         const rawSlug = String(slug ?? "").toLowerCase().trim();
 
         // robust slugifier — removes non-alphanumerics and collapses to hyphens
-        const slugify = (s?: any) =>
+        const slugify = (s?: string | number) =>
           String(s ?? "")
             .toLowerCase()
             .trim()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
+
 
         console.log("route slug:", rawSlug);
 

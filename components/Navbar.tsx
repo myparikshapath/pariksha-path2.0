@@ -89,7 +89,7 @@ export default function Navbar() {
       })),
     },
     { name: "Mock", href: "/mock" },
-    // { name: "Contact", href: "/contact" },
+    { name: "Blog", href: "/blog" },
   ];
 
   return (
@@ -156,7 +156,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.98 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-4` : `ml-[-75px]`
+                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-12` : `ml-[-60px]`
                         }`}
                     >
                       {/* LEFT panel - categories */}
