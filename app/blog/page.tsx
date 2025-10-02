@@ -278,12 +278,17 @@ function StepList({ items }: { items: string[] }) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="flex items-start gap-4"
+                    className="flex items-start gap-3 sm:gap-4"
                 >
-                    <div className="w-9 h-9 flex items-center justify-center rounded-full bg-[#2E4A3C] text-white font-semibold text-lg">
+                    {/* Number Circle */}
+                    <div className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-[#2E4A3C] text-white font-semibold text-sm sm:text-lg flex-shrink-0">
                         {i + 1}
                     </div>
-                    <p className="text-gray-800 text-lg leading-relaxed">{line}</p>
+
+                    {/* Text */}
+                    <p className="text-gray-800 text-base sm:text-lg leading-relaxed">
+                        {line}
+                    </p>
                 </motion.div>
             ))}
         </div>
@@ -319,12 +324,17 @@ export default function ArticlesPanels() {
                 initial={{ opacity: 0, x: 60 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
-                className="space-y-10 w-[80vw] max-w-6xl"
+                className="space-y-10 w-full max-w-6xl px-4 sm:px-6 lg:px-8"
             >
                 {article.sections.map((sec, i) => (
-                    <div key={i} className="bg-white shadow-lg rounded-xl p-10 hover:shadow-xl transition">
-                        <h2 className="text-2xl font-bold mb-2 text-[#2E4A3C]">{sec.heading}</h2>
-                        <div className="h-1 w-36 mb-5 bg-yellow-400 rounded-full" />
+                    <div
+                        key={i}
+                        className="bg-white shadow-lg rounded-xl p-6 sm:p-8 md:p-10 hover:shadow-xl transition"
+                    >
+                        <h2 className="text-xl sm:text-2xl font-bold mb-2 text-[#2E4A3C]">
+                            {sec.heading}
+                        </h2>
+                        <div className="h-1 w-24 sm:w-36 mb-5 bg-yellow-400 rounded-full" />
                         {Array.isArray(sec.content) ? (
                             sec.type === "steps" ? (
                                 <StepList items={sec.content} />
@@ -332,11 +342,14 @@ export default function ArticlesPanels() {
                                 <AccentList items={sec.content} />
                             )
                         ) : (
-                            <p className="text-gray-800 text-lg leading-relaxed">{sec.content}</p>
+                            <p className="text-gray-800 text-base sm:text-lg leading-relaxed">
+                                {sec.content}
+                            </p>
                         )}
                     </div>
                 ))}
             </motion.div>
+
 
             {/* Navigation */}
             <div className="flex justify-center mt-14 gap-6 items-center">
