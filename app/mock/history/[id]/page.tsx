@@ -113,13 +113,12 @@ export default function MockAttemptDetailsPage() {
     return (
       <div
         key={qa.question_id}
-        className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${
-          qa.is_correct
-            ? "border-green-500"
-            : selectedOption !== null
+        className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${qa.is_correct
+          ? "border-green-500"
+          : selectedOption !== null
             ? "border-red-500"
             : "border-gray-400"
-        }`}
+          }`}
       >
         {/* Question Header */}
         <div className="flex items-start justify-between mb-4">
@@ -129,13 +128,12 @@ export default function MockAttemptDetailsPage() {
             </h3>
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <span
-                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  qa.question.difficulty_level === "easy"
-                    ? "bg-green-100 text-green-800"
-                    : qa.question.difficulty_level === "medium"
+                className={`px-2 py-1 rounded-full text-xs font-medium ${qa.question.difficulty_level === "easy"
+                  ? "bg-green-100 text-green-800"
+                  : qa.question.difficulty_level === "medium"
                     ? "bg-yellow-100 text-yellow-800"
                     : "bg-red-100 text-red-800"
-                }`}
+                  }`}
               >
                 {qa.question.difficulty_level.toUpperCase()}
               </span>
@@ -181,27 +179,25 @@ export default function MockAttemptDetailsPage() {
             return (
               <div
                 key={optIndex}
-                className={`p-3 rounded-lg border-2 ${
-                  isCorrect
-                    ? "border-green-500 bg-green-50"
-                    : isSelected && !isCorrect
+                className={`p-3 rounded-lg border-2 ${isCorrect
+                  ? "border-green-500 bg-green-50"
+                  : isSelected && !isCorrect
                     ? "border-red-500 bg-red-50"
                     : isSelected
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 bg-white"
-                }`}
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 bg-white"
+                  }`}
               >
                 <div className="flex items-start space-x-3">
                   <span
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
-                      isCorrect
-                        ? "bg-green-500 text-white"
-                        : isSelected && !isCorrect
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${isCorrect
+                      ? "bg-green-500 text-white"
+                      : isSelected && !isCorrect
                         ? "bg-red-500 text-white"
                         : isSelected
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
                   >
                     {optionNumber}
                   </span>
@@ -252,15 +248,14 @@ export default function MockAttemptDetailsPage() {
                 : "Not answered"}
             </span>
             <span
-              className={`font-medium ${
-                isCorrect ? "text-green-600" : "text-red-600"
-              }`}
+              className={`font-medium ${isCorrect ? "text-green-600" : "text-red-600"
+                }`}
             >
               {isCorrect
                 ? "Correct"
                 : selectedOption !== null
-                ? "Incorrect"
-                : "Not attempted"}
+                  ? "Incorrect"
+                  : "Not attempted"}
             </span>
           </div>
         </div>
@@ -372,7 +367,7 @@ export default function MockAttemptDetailsPage() {
         </div>
       </div>
 
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           Section Performance
         </h2>
@@ -391,7 +386,7 @@ export default function MockAttemptDetailsPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-900 mb-4">

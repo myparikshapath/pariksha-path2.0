@@ -261,42 +261,6 @@ const MaterialDetailPage = () => {
 
                 <CardContent>
                   <div className="flex justify-end gap-2">
-                    {/* View Materials Button */}
-                    {/* <Link
-                                            href={`/admin/view-material/${params.slug}/${encodeURIComponent(section.name)}`}
-                                            passHref
-                                        >
-                                            <Button
-                                                asChild
-                                                size="sm"
-                                                variant="outline"
-                                                className="flex items-center gap-2"
-                                            >
-                                                <span>
-                                                    <BookOpen className="h-4 w-4 mr-1" />
-                                                    View Materials
-                                                </span>
-                                            </Button>
-                                        </Link> */}
-
-                    {/* Upload Material Button */}
-                    {/* <Link
-                                            href={`/admin/add-material/${params.slug}/${encodeURIComponent(section.name)}`}
-                                            passHref
-                                        >
-                                            <Button
-                                                asChild
-                                                size="sm"
-                                                variant="outline"
-                                                className="flex items-center gap-2"
-                                            >
-                                                <span>
-                                                    <Upload className="h-4 w-4 mr-1" />
-                                                    Upload Material
-                                                </span>
-                                            </Button>
-                                        </Link> */}
-
                     {/* Manage PDFs Button */}
                     <Link
                       href={`/admin/course/${params.slug}/${encodeURIComponent(

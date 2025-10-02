@@ -141,7 +141,7 @@ export default function MockResultPage() {
         </div>
 
         {/* Section Summary */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        {/* <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <span className="text-2xl">📚</span>
             Section Performance
@@ -197,7 +197,7 @@ export default function MockResultPage() {
               )
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Performance Insights */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">

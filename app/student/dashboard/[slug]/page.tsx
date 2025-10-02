@@ -189,7 +189,7 @@ export default function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 {course.thumbnail_url &&
-                isValidImageUrl(course.thumbnail_url) ? (
+                  isValidImageUrl(course.thumbnail_url) ? (
                   <div className="relative w-full h-40 mb-2">
                     <Image
                       src={course.thumbnail_url}
@@ -216,7 +216,7 @@ export default function StudentDashboard() {
                   <Button
                     variant="default"
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
-                    onClick={() => router.push(`/courses/${course.id}`)}
+                    onClick={() => router.push(`/student/course/${course.id}`)}
                   >
                     View Material
                   </Button>
