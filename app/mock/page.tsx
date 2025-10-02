@@ -188,7 +188,7 @@ export default function MockPage() {
               ))
             ) : (
               <p className="text-center col-span-3 text-gray-500">
-                No free tests found for "{search}"
+                No free tests found for &quot;{search}&quot;
               </p>
             )}
           </div>
