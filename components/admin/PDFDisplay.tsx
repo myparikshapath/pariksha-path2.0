@@ -53,7 +53,7 @@ const PDFDisplay: React.FC<PDFDisplayProps> = ({
     if (sizeInKB < 1024) {
       return `${sizeInKB} KB`;
     }
-    return `${(sizeInKB / 1024).toFixed(1)} MB`;
+    return `${(sizeInKB / 1024).toFixed(3)} MB`;
   };
 
   const formatDate = (dateString: string): string => {
