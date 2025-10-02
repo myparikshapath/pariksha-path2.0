@@ -63,7 +63,11 @@ const EditCoursePage = () => {
         is_active: courseData.is_active,
       });
 
-      setSections(courseData?.sections?.map(s => s.name) || []);
+      // Extract and filter section names, ensuring no null values
+      const sectionNames = (courseData?.sections || [])
+        .map(s => s?.name)
+        .filter((name): name is string => Boolean(name && name.trim()));
+      setSections(sectionNames);
     } catch (e: unknown) {
       console.error('Error loading course:', e);
       setError(e instanceof Error ? e.message : "Failed to load course");
@@ -89,6 +93,7 @@ const EditCoursePage = () => {
 
   const addSection = () => {
     if (newSection.trim() && !sections.includes(newSection.trim())) {
+      // Add the new section to the existing sections array
       setSections([...sections, newSection.trim()]);
       setNewSection("");
     }
@@ -104,9 +109,11 @@ const EditCoursePage = () => {
 
     setSaving(true);
     try {
+      // Filter out any null values before sending to API
+      const filteredSections = sections.filter(s => s && s.trim());
       await updateCourse(courseId, {
         ...formData,
-        sections,
+        sections: filteredSections,
       });
       router.push("/admin/add-exam");
     } catch (error) {
