@@ -14,7 +14,6 @@ type Article = {
     title: string;
     sections: Section[];
 };
-
 const articles: Article[] = [
     {
         id: 1,
@@ -112,7 +111,143 @@ const articles: Article[] = [
             },
         ],
     },
+    {
+        id: 3,
+        title: "Your Struggles Today Will Become Your Strength Tomorrow",
+        sections: [
+            {
+                heading: "Introduction",
+                content:
+                    "Every student faces struggles during exam preparation – sleepless nights, stress, and self-doubt. But these struggles are not wasted; they become the foundation of your strength.",
+            },
+            {
+                heading: "Struggles Make You Stronger",
+                content: [
+                    "Struggles teach patience.",
+                    "They prepare you for challenges in life.",
+                    "They shape your mental and emotional strength.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "Examples from Great Personalities",
+                content: [
+                    "Dr. APJ Abdul Kalam faced many failures before becoming 'Missile Man of India.'",
+                    "Thomas Edison failed over 1000 times before inventing the bulb.",
+                    "Every successful person has a story of struggles.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "How to Handle Struggles",
+                content: [
+                    "Stay Positive – Struggles are temporary.",
+                    "Journal Your Journey – Write down your progress.",
+                    "Practice Meditation – Keep your mind calm.",
+                    "Never Give Up – Remember why you started.",
+                ],
+                type: "steps",
+            },
+            {
+                heading: "Conclusion",
+                content:
+                    "Your struggles are not signs of weakness, but signs of growth. What feels tough today will become your greatest strength tomorrow.",
+            },
+        ],
+    },
+    {
+        id: 4,
+        title: "Hard Work vs Smart Work – Which One Wins in Exams?",
+        sections: [
+            {
+                heading: "Introduction",
+                content:
+                    "When it comes to exam preparation, students often wonder: should I work hard or work smart? The truth is, both are important, but in different ways.",
+            },
+            {
+                heading: "Hard Work",
+                content:
+                    "Hard work means consistency, discipline, and dedication. It is about putting in regular effort, staying focused, and never giving up.",
+            },
+            {
+                heading: "Smart Work",
+                content:
+                    "Smart work means studying with planning and prioritizing. It includes learning techniques like time management, revision strategies, and focusing on important topics first.",
+            },
+            {
+                heading: "Examples from Toppers",
+                content: [
+                    "Many toppers study fewer hours than others but with proper planning.",
+                    "They focus on quality, not just quantity.",
+                    "They balance hard work with smart techniques.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "Conclusion",
+                content:
+                    "Hard work builds discipline, while smart work gives direction. A balance of both is the real formula for success in exams.",
+            },
+        ],
+    },
+    {
+        id: 5,
+        title: "Why Self-Belief is Your Strongest Weapon",
+        sections: [
+            {
+                heading: "Introduction",
+                content:
+                    "Exams test more than just your knowledge – they test your confidence and belief in yourself. Even the brightest students can underperform if they lack self-belief, while average students can achieve greatness by trusting their abilities.",
+            },
+            {
+                heading: "The Power of Self-Belief",
+                content:
+                    "Self-belief is the mindset that says, 'Yes, I can do it.' When you believe in yourself, challenges look smaller, problems seem solvable, and exams feel like opportunities instead of threats.",
+            },
+            {
+                heading: "Why Students Lose Self-Belief",
+                content: [
+                    "Fear of failure",
+                    "Comparing with others",
+                    "Pressure from parents or society",
+                    "Past mistakes or low scores",
+                ],
+                type: "list",
+            },
+            {
+                heading: "How Self-Belief Impacts Success",
+                content: [
+                    "A confident student walks into the exam hall with a calm mind and performs better.",
+                    "Self-belief reduces stress and boosts focus.",
+                    "It helps you stay consistent, even when the journey is tough.",
+                ],
+                type: "list",
+            },
+            {
+                heading: "Ways to Build Self-Belief",
+                content: [
+                    "Positive Affirmations – Repeat daily: 'I am capable. I can do this.'",
+                    "Visualize Success – Imagine yourself writing exams with confidence.",
+                    "Stop Comparisons – Focus on your own growth, not others.",
+                    "Learn from Mistakes – Treat them as lessons, not setbacks.",
+                    "Celebrate Progress – Acknowledge even small achievements.",
+                ],
+                type: "steps",
+            },
+            {
+                heading: "Real-Life Example",
+                content:
+                    "There are countless stories of students who were considered 'average' but cleared tough exams because they trusted themselves. Self-belief can turn weakness into strength and doubts into determination.",
+            },
+            {
+                heading: "Conclusion",
+                content:
+                    "Your knowledge, preparation, and notes matter, but your strongest weapon will always be your belief in yourself. When you enter the exam hall with confidence, half the battle is already won. ✨ Remember: If you believe you can, you are already halfway there.",
+            },
+        ],
+    },
 ];
+
 
 // --- Modern Renderers ---
 
