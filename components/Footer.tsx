@@ -17,12 +17,13 @@ export default function Footer() {
                     <Image
                         src="/webLogo.png"
                         alt="ParikshaPath Logo"
-                        // fill
-                        height={300}
-                        width={300}
+                        width={180}        // apne hisaab se set karo
+                        height={0}         // ignore ho jayega
+                        style={{ height: "auto" }}
                         className="object-contain pb-4"
-                        priority
+                    // priority
                     />
+
                     {/* <h2 className="text-2xl font-bold text-white mb-4">Pariksha Path</h2> */}
                     <p className="text-gray-300">
                         Your trusted platform for exam preparation. We provide courses, mock tests,
