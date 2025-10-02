@@ -11,8 +11,8 @@ if (typeof window !== "undefined" && !localStorage.getItem("access_token")) {
 }
 
 const api = axios.create({
-	baseURL: "http://localhost:8000/api/v1",
-	// baseURL: "https://pariksha-path-backend.onrender.com/api/v1",
+	// baseURL: "http://localhost:8000/api/v1",
+	baseURL: "https://pariksha-path-backend.onrender.com/api/v1",
 	headers: {
 		"Content-Type": "application/json",
 		// Add a default Authorization header for all requests

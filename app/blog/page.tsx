@@ -339,13 +339,19 @@ export default function ArticlesPanels() {
             </motion.div>
 
             {/* Navigation */}
-            <div className="flex justify-center mt-14 gap-6">
+            <div className="flex justify-center mt-14 gap-6 items-center">
                 <button
                     onClick={prev}
                     className="flex items-center gap-2 px-3 py-3 rounded-full bg-gray-200 hover:bg-green-100 text-[#2E4A3C] font-semibold text-lg transition shadow-sm"
                 >
                     <ChevronLeft size={20} />
                 </button>
+
+                {/* 👇 Status indicator */}
+                <span className="text-[#2E4A3C] font-medium text-lg">
+                    {index + 1} / {articles.length}
+                </span>
+
                 <button
                     onClick={next}
                     className="flex items-center gap-2 px-3 py-3 rounded-full bg-[#2E4A3C] text-white font-semibold text-lg shadow-md hover:opacity-90 transition"
@@ -353,6 +359,7 @@ export default function ArticlesPanels() {
                     <ChevronRight size={20} />
                 </button>
             </div>
+
         </div>
     );
 }

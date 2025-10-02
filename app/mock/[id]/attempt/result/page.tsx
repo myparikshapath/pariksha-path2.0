@@ -236,14 +236,14 @@ export default function MockResultPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             onClick={() => router.push(`/mock/${id}/attempt`)}
-            className="px-8 py-3 text-lg"
+            className="px-8 py-5 text-md bg-blue-400 hover:bg-blue-500 cursor-pointer text-white"
           >
             Retake Test
           </Button>
           <Button
             variant="ghost"
             onClick={() => router.push("/mock")}
-            className="px-8 py-3 text-lg"
+            className="px-8 py-5 text-md bg-green-400 hover:bg-green-500 cursor-pointer text-white"
           >
             Browse More Mocks
           </Button>

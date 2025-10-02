@@ -13,6 +13,7 @@ import {
 } from "@/src/services/courseService";
 import api from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 // Define Razorpay types
 interface RazorpaySuccessResponse {
@@ -299,25 +300,19 @@ const CoursePage = () => {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          {(slug as string).replace(/-/g, " ").toUpperCase()}
+          Page Not Found
         </h1>
         <h3 className="text-lg font-medium text-red-600 mb-2">
-          {error || "Exam content not found"}
+          This exam does not exist.
         </h3>
         <p className="text-gray-600 mb-4">
-          {error
-            ? "Failed to load exam content"
-            : "No exam content has been added yet."}
-        </p>
-        <p className="text-sm text-gray-500">
-          Admin can add exam information at:{" "}
-          <code className="bg-gray-100 px-2 py-1 rounded">
-            /admin/exam/{slug}
-          </code>
+          Please check the URL or go back to <Link href=
+            "/" className="text-[#2E4A3C] underline">Home</Link>.
         </p>
       </div>
     );
   }
+
 
   const renderSectionContent = (section: {
     header: string;
@@ -395,8 +390,8 @@ const CoursePage = () => {
           onClick={handleBuyNow}
           disabled={isProcessing}
           className={`px-10 py-3 text-xl font-bold rounded-xl shadow-2xl transition-all duration-300 ease-in-out ${isProcessing
-              ? "opacity-60 cursor-not-allowed"
-              : "bg-[#2d8a5b] hover:scale-105 hover:shadow-green-400/50 text-white"
+            ? "opacity-60 cursor-not-allowed"
+            : "bg-[#2d8a5b] hover:scale-105 hover:shadow-green-400/50 text-white"
             }`}
         >
           {isProcessing ? "Processing…" : "🚀 Buy Now"}

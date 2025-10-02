@@ -158,19 +158,19 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.98 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1600px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-12` : `ml-[-60px]`
+                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1250px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-12` : `ml-[-60px]`
                         }`}
                     >
                       {/* LEFT panel - categories */}
-                      <div className="w-[28%] max-w-[360px] border-r border-gray-100 overflow-y-auto bg-gradient-to-b from-green-50 to-green-100">
+                      <div className="w-[28%] max-w-[300px] border-r border-gray-100 overflow-hidden">
                         {link.dropdown.map((group: DropdownGroup, i) => (
                           <motion.button
                             key={i}
                             onClick={() => setActiveCategory(group.category)}
-                            className={`w-full text-left px-5 py-3 text-lg font-bold transition-all duration-300 rounded-r-full
+                            className={`w-full text-left px-5 py-3 text-lg font-bold transition-all duration-300 
                 ${activeCategory === group.category
-                                ? "bg-green-100 text-green-800 shadow-inner"
-                                : "text-gray-700 hover:bg-green-50 hover:text-green-700"
+                                ? "bg-yellow-400 text-gray-700 shadow-inner"
+                                : "text-gray-700 hover:text-gray-800 hover:bg-yellow-400"
                               }`}
                             whileHover={{ x: 4 }}
                           >
@@ -186,19 +186,19 @@ export default function Navbar() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.25 }}
-                        className="flex-1 p-7 overflow-y-auto"
+                        className="flex-1 p-4 overflow-y-auto"
                       >
                         {link.dropdown
                           .filter((g) => g.category === activeCategory)
                           .map((group, gi) => (
                             <div key={gi} className="space-y-8">
-                              <h3 className="text-2xl font-extrabold text-green-900">
+                              <h3 className="text-2xl font-extrabold text-gray-800">
                                 {group.category}
                               </h3>
 
                               {group.items.map((sub, si) => (
                                 <section key={si}>
-                                  <h4 className="text-xl font-semibold text-green-800 mb-4">
+                                  <h4 className="text-xl font-semibold text-gray-600 mb-4">
                                     {sub.subCategory}
                                   </h4>
 
@@ -218,7 +218,7 @@ export default function Navbar() {
                                           <Link
                                             onClick={() => setHoveredDropdown(null)}
                                             href={`/course/${slugify(ex)}`}
-                                            className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
+                                            className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-500 shadow-sm transition-all"
                                           >
                                             {ex}
                                           </Link>
@@ -231,7 +231,7 @@ export default function Navbar() {
                                       {(sub.exams as ExamStateGroup[]).map(
                                         (subState, sti) => (
                                           <div key={sti}>
-                                            <div className="text-lg font-bold text-gray-900 mb-3">
+                                            <div className="text-lg font-bold text-gray-700 mb-3">
                                               {subState.state}
                                             </div>
                                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
@@ -252,7 +252,7 @@ export default function Navbar() {
                                                     href={`/course/${slugify(
                                                       ex
                                                     )}`}
-                                                    className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-green-400 hover:text-green-900 shadow-sm transition-all"
+                                                    className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-yellow-400 hover:text-yellow-500 shadow-sm transition-all"
                                                   >
                                                     {ex}
                                                   </Link>
@@ -289,12 +289,13 @@ export default function Navbar() {
           )}
 
           {isLoggedIn === true ? (
-            <button
-              onClick={logout}
-              className="bg-red-600 text-white px-8 py-2 rounded font-bold hover:bg-red-700 transition shadow-xl transform hover:-translate-y-1 hover:scale-100 cursor-pointer"
-            >
-              Logout
-            </button>
+            <Link href="/">
+              <button
+                onClick={logout}
+                className="bg-red-600 text-white px-8 py-2 rounded font-bold hover:bg-red-700 transition shadow-xl transform hover:-translate-y-1 hover:scale-100 cursor-pointer"
+              >
+                Logout
+              </button></Link>
           ) : (
             <Link
               href="/login"

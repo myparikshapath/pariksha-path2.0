@@ -342,6 +342,7 @@ export default function Home() {
           ].map((field) => (
             <div key={field.name} className="relative mb-5">
               <input
+                id={field.name} // 👈 id added
                 type={field.type}
                 name={field.name}
                 value={form[field.name as keyof typeof form]}
@@ -351,6 +352,7 @@ export default function Home() {
                 className="peer w-full border border-gray-300 rounded-xl px-4 pt-5 pb-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
               />
               <label
+                htmlFor={field.name} // 👈 link label to input
                 className="absolute left-4 top-2 text-gray-400 text-sm transition-all
           peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
           peer-focus:top-2 peer-focus:text-yellow-500 peer-focus:text-sm"
@@ -362,6 +364,7 @@ export default function Home() {
 
           <div className="relative">
             <textarea
+              id="message"
               name="message"
               value={form.message}
               onChange={handleChange}
@@ -371,6 +374,7 @@ export default function Home() {
               className="peer w-full border border-gray-300 rounded-xl px-4 pt-5 pb-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition resize-none"
             />
             <label
+              htmlFor="message"
               className="absolute left-4 top-2 text-gray-400 text-sm transition-all
         peer-placeholder-shown:top-5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400
         peer-focus:top-2 peer-focus:text-yellow-500 peer-focus:text-sm"

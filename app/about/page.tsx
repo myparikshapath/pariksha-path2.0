@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { UserCheck, BookOpenCheck, Sprout } from "lucide-react";
 
 export default function About() {
     return (
@@ -46,9 +47,21 @@ export default function About() {
                 <div className="w-52 h-1 bg-yellow-400 mx-auto mb-12 mt-2 rounded"></div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     {[
-                        { title: "Expert Mentors", desc: "Our educators are experienced professionals who provide guidance tailored to each student’s needs." },
-                        { title: "Personalized Learning", desc: "We design study plans and strategies that focus on individual strengths and areas for improvement." },
-                        { title: "Holistic Development", desc: "Along with academics, we focus on building confidence, time management, and mental resilience." }
+                        {
+                            title: "Expert Mentors",
+                            desc: "Our educators are experienced professionals who provide guidance tailored to each student’s needs.",
+                            icon: <UserCheck className="w-12 h-12 text-yellow-500" />,
+                        },
+                        {
+                            title: "Personalized Learning",
+                            desc: "We design study plans and strategies that focus on individual strengths and areas for improvement.",
+                            icon: <BookOpenCheck className="w-12 h-12 text-yellow-500" />,
+                        },
+                        {
+                            title: "Holistic Development",
+                            desc: "Along with academics, we focus on building confidence, time management, and mental resilience.",
+                            icon: <Sprout className="w-12 h-12 text-yellow-500" />,
+                        },
                     ].map((item, idx) => (
                         <motion.div
                             key={idx}
@@ -57,8 +70,8 @@ export default function About() {
                             viewport={{ once: true }}
                             className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center hover:shadow-xl transition-all duration-300"
                         >
-                            <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-full mb-6 flex items-center justify-center text-white font-bold text-xl">
-                                {idx + 1}
+                            <div className="w-20 h-20 bg-yellow-100 rounded-full mb-6 flex items-center justify-center">
+                                {item.icon}
                             </div>
                             <h3 className="font-semibold text-lg mb-2 text-[#2E4A3C]">{item.title}</h3>
                             <p className="text-gray-600 text-sm">{item.desc}</p>
@@ -66,8 +79,6 @@ export default function About() {
                     ))}
                 </div>
             </section>
-
-
 
             {/* Mission Statement */}
             <section className="mt-20 mb-16">
@@ -82,7 +93,7 @@ export default function About() {
                     </h3>
                     <p className="text-green-100 max-w-2xl text-center md:text-left">
                         To empower students with the knowledge, guidance, and confidence to excel in competitive exams.
-                        We aim to nurture <span className="text-yellow-300 font-semibold">talent, discipline, and critical thinking</span>
+                        We aim to nurture <span className="text-yellow-300 font-semibold">talent, discipline, and critical thinking </span>
                         in every learner, fostering both academic and personal growth.
                     </p>
                 </motion.div>

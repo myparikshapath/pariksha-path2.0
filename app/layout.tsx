@@ -31,20 +31,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <>
-          <ScrollToTop />
-          <AuthProvider>
-            <Navbar />
-            <div className="mt-20">
-              {children}
-            </div>
-          </AuthProvider>
+        <ScrollToTop />
+        <AuthProvider>
+          <Navbar />
+          {/* yeh main content stretch karega */}
+          <main className="flex-grow mt-20">
+            {children}
+          </main>
           <Footer />
           <FloatingContact />
-        </>
+        </AuthProvider>
       </body>
-    </html >
+    </html>
   );
 }
