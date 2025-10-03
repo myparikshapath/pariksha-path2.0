@@ -158,10 +158,10 @@
 //     return ctx;
 // };
 
-
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "@/utils/api";
+import Loader from "@/components/loader";
 
 interface User {
     name: string;
@@ -185,9 +185,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [role, setRole] = useState<"student" | "admin" | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showLoader, setShowLoader] = useState(true); // control loader visibility
 
     const fetchUser = async () => {
-        setLoading(true);
         try {
             const token = localStorage.getItem("access_token");
             const storedRole = localStorage.getItem("user_role") as
@@ -200,7 +200,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setRole(storedRole);
 
                 const res = await api.get("/payments/user-data");
-                // ensure shape: adjust if backend wraps user
                 const userData = res.data?.user ?? res.data;
                 setUser(userData ?? null);
             } else {
@@ -214,18 +213,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setRole(null);
             setUser(null);
         } finally {
-            setLoading(false);
+            // Ensure loader shows at least 3–4 seconds
+            setTimeout(() => {
+                setShowLoader(false);
+                setLoading(false);
+            }, 4000);
         }
     };
 
     useEffect(() => {
-        // This component is client-only (use client), so localStorage is available
         fetchUser();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (isLoggedIn === null || loading) {
-        return <div>Loading...</div>;
+    // Show full-screen loader while fetching user or during fixed delay
+    if (showLoader || isLoggedIn === null || loading) {
+        return <Loader />;
     }
 
     const login = (token: string, role: "student" | "admin") => {
