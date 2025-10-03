@@ -1,3 +1,5 @@
+import api from '@/utils/api';
+
 export interface ExamInfoSection {
   id: string;
   header: string;
@@ -19,25 +21,17 @@ export interface ExamContent {
   updated_at: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export async function getExamContentByCode(
   examCode: string
 ): Promise<ExamContent | null> {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/exam-contents/${encodeURIComponent(examCode)}`
-    );
+    const response = await api.get(`/exam-contents/${encodeURIComponent(examCode)}`);
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error(`Failed to fetch exam content: ${response.statusText}`);
+    if (response.status === 404) {
+      return null;
     }
 
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
     console.error("Error fetching exam content:", error);
     throw error;
@@ -46,14 +40,8 @@ export async function getExamContentByCode(
 
 export async function getAllExamContents(): Promise<ExamContent[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/exam-contents/`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch exam contents: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await api.get(`/exam-contents/`);
+    return response.data;
   } catch (error) {
     console.error("Error fetching exam contents:", error);
     throw error;
