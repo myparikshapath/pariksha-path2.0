@@ -13,7 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 export default function Footer() {
     const phoneNumber = "+919992266559";
-    const email = "myparikshapath@gmai.com";
+    const email = "myparikshapath@gmail.com";
     const whatsappNumber = "919992266559";
 
     const pathname = usePathname();
