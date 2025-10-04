@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "@/utils/api";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { AxiosError } from "axios";
 
 interface Student {
@@ -27,14 +27,24 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const limit = 8;
 
-  const fetchStudents = async (pageNumber = 1) => {
+  // 🔍 Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  const fetchStudents = async (pageNumber = 1, searchTerm = "") => {
     try {
       setLoading(true);
       const res = await api.get("/admin/students", {
-        params: { page: pageNumber, limit },
+        params: { page: pageNumber, limit, search: searchTerm },
       });
       setStudents(res.data.data);
       setPagination(res.data.pagination);
@@ -51,10 +61,10 @@ export default function StudentsPage() {
     if (!confirm("Deactivate this student?")) return;
     try {
       await api.delete(`/admin/students/${id}`);
-      fetchStudents(page);
+      fetchStudents(page, debouncedSearch);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
-      alert(err.response?.data?.message || err.message || "Failed to fetch students");
+      alert(err.response?.data?.message || err.message || "Failed to deactivate student");
     }
   };
 
@@ -62,27 +72,43 @@ export default function StudentsPage() {
     if (!confirm("Activate this student?")) return;
     try {
       await api.put(`/admin/students/${id}`, { is_active: true });
-      fetchStudents(page);
+      fetchStudents(page, debouncedSearch);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
-      alert(err.response?.data?.message || err.message || "Failed to fetch students");
+      alert(err.response?.data?.message || err.message || "Failed to activate student");
     }
   };
 
   useEffect(() => {
-    fetchStudents(1);
-  }, []);
+    fetchStudents(1, debouncedSearch);
+  }, [debouncedSearch]);
 
   return (
-    <div className="p-6 md:p-10 mt-16">
+    <div className="p-6 md:p-10">
       {/* Heading */}
       <h1 className="text-3xl font-bold text-center text-[#2E4A3C] mb-2">
         Students
       </h1>
       <div className="h-1 w-24 mx-auto bg-yellow-400 rounded-full mb-8" />
 
+      {/* 🔍 Search Bar */}
+      <div className="flex justify-center mb-8 ">
+        <div className="relative w-full max-w-10xl">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-700 focus:border-transparent transition text-gray-700"
+          />
+        </div>
+      </div>
+
       {loading ? (
         <p className="text-gray-600 text-center">Loading...</p>
+      ) : students.length === 0 ? (
+        <p className="text-gray-600 text-center">No students found.</p>
       ) : (
         <>
           {/* Mobile Cards */}
@@ -190,14 +216,13 @@ export default function StudentsPage() {
             </table>
           </div>
 
-
           {/* Pagination */}
-          {pagination && (
+          {pagination && pagination.total_pages > 1 && (
             <div className="flex justify-center items-center gap-3 mt-10">
               {/* Prev Button */}
               <button
                 disabled={page === 1}
-                onClick={() => fetchStudents(page - 1)}
+                onClick={() => fetchStudents(page - 1, debouncedSearch)}
                 className="p-2 rounded-full bg-gray-200 text-gray-700 shadow-sm disabled:opacity-50 
       hover:bg-gray-300 hover:scale-105 transition flex items-center justify-center"
               >
@@ -208,7 +233,7 @@ export default function StudentsPage() {
               {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((num) => (
                 <button
                   key={num}
-                  onClick={() => fetchStudents(num)}
+                  onClick={() => fetchStudents(num, debouncedSearch)}
                   className={`px-4 py-2 rounded-full font-medium shadow-sm transition-transform hover:scale-105 
           ${page === num
                       ? "bg-[#2E4A3C] text-white shadow-md"
@@ -222,7 +247,7 @@ export default function StudentsPage() {
               {/* Next Button */}
               <button
                 disabled={page === pagination.total_pages}
-                onClick={() => fetchStudents(page + 1)}
+                onClick={() => fetchStudents(page + 1, debouncedSearch)}
                 className="p-2 rounded-full bg-gray-200 text-gray-700 shadow-sm disabled:opacity-50 
       hover:bg-gray-300 hover:scale-105 transition flex items-center justify-center"
               >
@@ -230,7 +255,6 @@ export default function StudentsPage() {
               </button>
             </div>
           )}
-
         </>
       )}
     </div>

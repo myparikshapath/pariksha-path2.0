@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function AdminDashboard() {
   return (
-    <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 pt-28">
+    <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 pt-20">
       <div className="w-full mx-auto bg-white shadow-xl 
       rounded-2xl p-4 sm:p-6 lg:p-8">
         {/* Header */}

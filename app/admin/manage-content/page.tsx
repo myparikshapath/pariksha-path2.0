@@ -77,7 +77,7 @@ export default function AdminExamsPage() {
     );
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-6 max-w-7xl mx-20">
             <h1 className="text-3xl font-bold mb-6 text-green-900">Manage Exam Content</h1>
 
             {/* Back Button */}

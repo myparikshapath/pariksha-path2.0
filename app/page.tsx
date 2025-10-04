@@ -282,7 +282,7 @@ export default function Home() {
         >
           <div
             ref={marqueeRef}
-            className="flex gap-6 min-w-max"
+            className="flex gap-0 min-w-max"
             style={{ transform: `translateX(${offset}px)` }}
           >
             {[...testimonials, ...testimonials].map((item, idx) => (

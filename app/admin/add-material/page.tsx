@@ -106,7 +106,7 @@ const AddExam = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-20 py-8">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">Available Courses</h1>
                 <div className="flex gap-3">
@@ -145,7 +145,7 @@ const AddExam = () => {
 
             <div className="mt-8">
                 {loading ? (
-                    <div className="flex justify-center items-center py-12">
+                    <div className="flex justify-center items-center  py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                         <span className="ml-2 text-gray-600">Loading courses...</span>
                     </div>
