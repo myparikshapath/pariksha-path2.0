@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 interface Section {
   name: string;
   order: number;
-  question_count: number;
+  question_count?: number;
+  questions?: { id: string }[];
 }
 
 interface SectionNavigationProps {
@@ -28,11 +29,12 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
         {sections.map((section, index) => {
           const isActive = index === currentSectionIndex;
           const answeredCount = answeredCounts[section.name] || 0;
+          const questionTotal = section.questions?.length ?? section.question_count ?? 0;
           const progressPercentage =
-            section.question_count > 0
+            questionTotal > 0
               ? Math.min(
                   100,
-                  Math.round((answeredCount / 10) * 100)
+                  Math.round((answeredCount / questionTotal) * 100)
                 )
               : 0;
 
@@ -50,7 +52,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({
               <div className="flex items-center gap-2">
                 <span>{section.name}</span>
                 <span className="text-xs text-gray-500">
-                  ({answeredCount}/{section.question_count})
+                  ({answeredCount}/{questionTotal})
                 </span>
               </div>
 
