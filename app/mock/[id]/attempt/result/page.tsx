@@ -140,65 +140,6 @@ export default function MockResultPage() {
           />
         </div>
 
-        {/* Section Summary */}
-        {/* <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span className="text-2xl">📚</span>
-            Section Performance
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(results.section_summaries || []).map(
-              (s: SectionSummary, idx: number) => (
-                <div
-                  key={idx}
-                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-gray-900">{s.section}</h3>
-                    <span className="text-sm text-gray-500 bg-white px-2 py-1 rounded-full">
-                      {s.attempted}/{s.total}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Correct:</span>
-                      <span className="font-medium text-green-600">
-                        {s.correct}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Accuracy:</span>
-                      <span
-                        className={`font-medium ${
-                          s.accuracy >= 0.7
-                            ? "text-green-600"
-                            : s.accuracy >= 0.5
-                            ? "text-yellow-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {Math.round((s.accuracy || 0) * 100)}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-500 ${
-                          s.accuracy >= 0.7
-                            ? "bg-green-500"
-                            : s.accuracy >= 0.5
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
-                        style={{ width: `${(s.accuracy || 0) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        </div> */}
-
         {/* Performance Insights */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -211,8 +152,10 @@ export default function MockResultPage() {
                 Time Management
               </h3>
               <p className="text-sm text-blue-700">
-                You spent {Math.floor((results.time_spent_seconds || 0) / 60)}{" "}
-                minutes on this test.
+                {/* You spent {Math.floor((results.time_spent_seconds || 0) / 60)}{" "}
+                minutes on this test. */}
+                You spent {Math.floor(results.time_spent_seconds / 60)} minute(s){" "}
+                {results.time_spent_seconds % 60} seconds on this test.
                 {results.time_spent_seconds &&
                   results.time_spent_seconds < 1800 &&
                   " Great time management!"}

@@ -323,7 +323,7 @@ export default function MockAttemptDetailsPage() {
             {attemptDetails.course.title}
           </h3>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            {formatDate(attemptDetails.date)}
+            {formatDate(attemptDetails.date) }
           </p>
         </div>
         <div className="border-t border-gray-200">
