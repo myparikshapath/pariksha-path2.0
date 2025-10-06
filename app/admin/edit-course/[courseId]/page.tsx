@@ -132,8 +132,10 @@ const EditCoursePage = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading course...</span>
+          <div className="p-4 rounded-full bg-emerald-100">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+          </div>
+          <span className="ml-3 text-slate-600 text-lg font-medium">Loading course...</span>
         </div>
       </div>
     );
@@ -145,8 +147,7 @@ const EditCoursePage = () => {
         <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={handleBack}
-            variant="outline"
-            className="flex items-center gap-2"
+             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Courses
@@ -169,18 +170,53 @@ const EditCoursePage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="mb-8">
         <Button
           onClick={handleBack}
-          variant="outline"
-          className="flex items-center gap-2"
+           className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Courses
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Course</h1>
-          <p className="text-gray-600">Update course details and sections</p>
+
+        <div className="mt-6">
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl shadow-lg border border-emerald-200/50 p-8 backdrop-blur-sm">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold text-slate-900 mb-3">
+                  Edit Course
+                </h1>
+                <p className="text-lg text-slate-600">
+                  Update course details, pricing, and sections
+                </p>
+                {course && (
+                  <div className="mt-3 flex items-center gap-4 text-sm">
+                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full">
+                      {course.code}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full ${course.is_active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                      {course.is_active !== false ? 'Active' : 'Inactive'}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full ${course.is_free ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {course.is_free ? 'Free' : `₹${course.price?.toFixed(2) || '0'}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 flex-wrap">
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-emerald-200/50">
+                  <span className="text-sm text-slate-600">Sections: </span>
+                  <span className="font-semibold text-emerald-700">{sections.length}</span>
+                </div>
+                {course && !course.is_free && (course.discount_percent || 0) > 0 && (
+                  <div className="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-green-700">
+                    Save ₹{((course.price || 0) * (course.discount_percent || 0) / 100).toFixed(0)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -202,11 +238,14 @@ const EditCoursePage = () => {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Basic Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
@@ -214,6 +253,7 @@ const EditCoursePage = () => {
                   id="title"
                   value={formData.title || ""}
                   onChange={(e) => handleInputChange("title", e.target.value)}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                   required
                 />
               </div>
@@ -227,6 +267,7 @@ const EditCoursePage = () => {
                   value={formData.price || 0}
                   onChange={(e) => handleInputChange("price", parseFloat(e.target.value))}
                   disabled={formData.is_free}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -236,6 +277,7 @@ const EditCoursePage = () => {
                   id="thumbnail_url"
                   value={formData.thumbnail_url || ""}
                   onChange={(e) => handleInputChange("thumbnail_url", e.target.value)}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
 
@@ -245,6 +287,7 @@ const EditCoursePage = () => {
                   id="icon_url"
                   value={formData.icon_url || ""}
                   onChange={(e) => handleInputChange("icon_url", e.target.value)}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
 
@@ -254,6 +297,7 @@ const EditCoursePage = () => {
                   id="banner_url"
                   value={formData.banner_url || ""}
                   onChange={(e) => handleInputChange("banner_url", e.target.value)}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
 
@@ -263,6 +307,7 @@ const EditCoursePage = () => {
                   id="tagline"
                   value={formData.tagline || ""}
                   onChange={(e) => handleInputChange("tagline", e.target.value)}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
 
@@ -276,6 +321,7 @@ const EditCoursePage = () => {
                   max="100"
                   value={formData.discount_percent || 0}
                   onChange={(e) => handleInputChange("discount_percent", parseFloat(e.target.value))}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
 
@@ -286,6 +332,7 @@ const EditCoursePage = () => {
                   type="number"
                   value={formData.priority_order || 0}
                   onChange={(e) => handleInputChange("priority_order", parseInt(e.target.value))}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
             </div>
@@ -296,47 +343,81 @@ const EditCoursePage = () => {
                 id="description"
                 value={formData.description || ""}
                 onChange={(e) => handleInputChange("description", e.target.value)}
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200 min-h-[120px]"
                 rows={4}
                 required
               />
             </div>
 
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_free"
-                  checked={formData.is_free || false}
-                  onCheckedChange={(checked) => handleInputChange("is_free", checked)}
-                />
-                <Label htmlFor="is_free">Free Course</Label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={formData.is_free || false}
+                    onChange={(e) => handleInputChange("is_free", e.target.checked)}
+                  />
+                  <div
+                    className={`w-16 h-8 rounded-full transition-colors duration-300 ${
+                      formData.is_free ? "bg-emerald-500" : "bg-slate-300"
+                    }`}
+                  ></div>
+                  <div
+                    className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                      formData.is_free ? "translate-x-8" : ""
+                    }`}
+                  ></div>
+                </label>
+                <Label htmlFor="is_free" className="font-medium">Free Course</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active !== false}
-                  onCheckedChange={(checked) => handleInputChange("is_active", checked)}
-                />
-                <Label htmlFor="is_active">Active</Label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={formData.is_active !== false}
+                    onChange={(e) => handleInputChange("is_active", e.target.checked)}
+                  />
+                  <div
+                    className={`w-16 h-8 rounded-full transition-colors duration-300 ${
+                      formData.is_active !== false ? "bg-emerald-500" : "bg-slate-300"
+                    }`}
+                  ></div>
+                  <div
+                    className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                      formData.is_active !== false ? "translate-x-8" : ""
+                    }`}
+                  ></div>
+                </label>
+                <Label htmlFor="is_active" className="font-medium">Active</Label>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        {/* Sections */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sections</CardTitle>
+        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Sections
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="flex gap-2">
               <Input
                 value={newSection}
                 onChange={(e) => setNewSection(e.target.value)}
                 placeholder="e.g., Physics, Chemistry, Mathematics"
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSection())}
               />
-              <Button type="button" onClick={addSection} size="sm">
+              <Button
+                type="button"
+                onClick={addSection}
+                size="sm"
+                className="bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-4"
+              >
                 Add
               </Button>
             </div>
@@ -348,13 +429,13 @@ const EditCoursePage = () => {
                   {sections.map((section, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-sm"
+                      className="flex items-center gap-1 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md text-sm border border-emerald-200"
                     >
                       {section}
                       <button
                         type="button"
                         onClick={() => removeSection(index)}
-                        className="text-blue-600 hover:text-blue-800 ml-1"
+                        className="text-emerald-600 hover:text-emerald-800 ml-1 hover:bg-emerald-200 rounded-full p-0.5 transition-colors"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -367,14 +448,31 @@ const EditCoursePage = () => {
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={handleBack}>
+        <div className="flex justify-end gap-4 pt-6 border-t border-slate-200">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleBack}
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-6 py-3 shadow-sm transition-all duration-200"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={saving}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
+          <Button
+            type="submit"
+            disabled={saving}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save Changes
+              </>
+            )}
           </Button>
         </div>
       </form>
@@ -383,3 +481,4 @@ const EditCoursePage = () => {
 };
 
 export default EditCoursePage;
+    

@@ -69,8 +69,7 @@ const CourseDetailPage = () => {
         <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={handleBackClick}
-            variant="outline"
-            className="flex items-center gap-2"
+             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Courses
@@ -97,7 +96,6 @@ const CourseDetailPage = () => {
       <div className="flex items-center gap-4 mb-8">
         <Button
           onClick={handleBackClick}
-          variant="outline"
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />

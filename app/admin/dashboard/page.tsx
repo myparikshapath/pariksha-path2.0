@@ -5,8 +5,10 @@ import Link from "next/link";
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 pt-20">
-      <div className="w-full mx-auto bg-white shadow-xl 
-      rounded-2xl p-4 sm:p-6 lg:p-8">
+      <div
+        className="w-full mx-auto bg-white shadow-xl 
+      rounded-2xl p-4 sm:p-6 lg:p-8"
+      >
         {/* Header */}
         <header className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#2E4A3C] text-center">
@@ -23,9 +25,8 @@ export default function AdminDashboard() {
           <Link
             href="/admin/users"
             className="bg-[#2E4A3C] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
-
           >
-            <h2 className="text-lg font-semibold">Users</h2>
+            <h2 className="text-lg font-semibold">Manage Users</h2>
             <p className="text-sm">Manage registered users</p>
           </Link>
           {/* </div> */}
@@ -46,20 +47,21 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold">Analytics</h2>
             <p className="text-sm">Track usage & performance</p>
           </div> */}
-          <Link href="/admin/add-exam"
+          <Link
+            href="/admin/add-exam"
             className="bg-emerald-700 text-white p-6
            rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
-            <h2 className="text-lg font-semibold">Add Exam</h2>
-            <p className="text-sm">Add new exam</p>
+            <h2 className="text-lg font-semibold">Manage Exams</h2>
+            <p className="text-sm">Add new exams, material and questions.</p>
           </Link>
-          <Link href="/admin/add-material"
+          {/* <Link href="/admin/add-material"
             className="bg-green-600 text-white p-6
            rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"
           >
             <h2 className="text-lg font-semibold">Add Material</h2>
             <p className="text-sm">Add Study Material</p>
-          </Link>
+          </Link> */}
           <Link
             href="/admin/manage-content"
             className="bg-emerald-900 text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between"

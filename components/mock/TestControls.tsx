@@ -40,7 +40,6 @@ const TestControls: React.FC<TestControlsProps> = ({
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <Button
           onClick={onPrevious}
-          variant="outline"
           size="lg"
           disabled={isFirstQuestion}
           className="gap-1 flex-1 sm:flex-initial"

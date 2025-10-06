@@ -634,7 +634,7 @@ export default function MockTestAttemptPage() {
           <p className="text-gray-600 mb-4">{error}</p>
           <Button
             onClick={() => window.history.back()}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Mock Tests
@@ -882,7 +882,6 @@ export default function MockTestAttemptPage() {
             </div>
             <div className="flex gap-3">
               <Button
-                variant="outline"
                 size="sm"
                 onClick={() => window.history.back()}
                 className="px-6"

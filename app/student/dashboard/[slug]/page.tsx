@@ -11,10 +11,10 @@ import { Course } from "@/src/services/courseService";
 import Image from "next/image";
 
 // Dynamically import CoursesSection with no SSR
-const CoursesSection = dynamic(
-  () => import("@/src/components/courses/CoursesSection"),
-  { ssr: false }
-);
+// const CoursesSection = dynamic(
+//   () => import("@/src/components/courses/CoursesSection"),
+//   { ssr: false }
+// );
 
 // Types
 interface UserData {
@@ -41,7 +41,7 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
+  // const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
 
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
 

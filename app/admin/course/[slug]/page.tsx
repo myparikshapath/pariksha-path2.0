@@ -49,6 +49,7 @@ const CourseDetailPage = () => {
 
   const [isEditingSection, setIsEditingSection] = useState<string | null>(null);
   const [tempQuestionCount, setTempQuestionCount] = useState<string>("0");
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   const handleUploadQuestions = (section: string) => {
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
@@ -149,8 +150,7 @@ const CourseDetailPage = () => {
         <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={handleBackClick}
-            variant="outline"
-            className="flex items-center gap-2"
+             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Courses
@@ -176,8 +176,7 @@ const CourseDetailPage = () => {
       <div className="flex items-center gap-4 mb-8">
         <Button
           onClick={handleBackClick}
-          variant="outline"
-          className="flex items-center gap-2"
+           className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Courses
@@ -186,39 +185,47 @@ const CourseDetailPage = () => {
 
       {/* Course Info */}
       <div className="mb-8">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
+        <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl shadow-lg border border-slate-200/50 p-8 backdrop-blur-sm">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-6 gap-6">
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-slate-900 mb-3 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text ">{course.title}</h1>
               {course.sub_category && (
-                <p className="text-lg text-gray-600 mb-2">{course.sub_category}</p>
+                <p className="text-xl text-slate-600 mb-3 font-medium">{course.sub_category}</p>
               )}
               {course.code && (
-                <p className="text-sm text-gray-500">Course Code: {course.code}</p>
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm font-mono">
+                  <span className="opacity-75">Code:</span> {course.code}
+                </div>
               )}
             </div>
-            <div className="text-left md:text-right">
-              <div className="flex items-center gap-2 text-2xl font-bold text-gray-900 mb-2">
-                <DollarSign className="h-6 w-6" />
+            <div className="text-left lg:text-right">
+              <div className="flex items-center gap-3 text-3xl font-bold text-emerald-600 mb-2">
+                <div className="p-2 rounded-full bg-emerald-100">
+                  <DollarSign className="h-8 w-8" />
+                </div>
                 {course.is_free ? "Free" : `Rs.${course.price.toFixed(2)}`}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-slate-500 font-medium">
                 {course.is_free ? "No payment required" : "One-time payment"}
               </div>
             </div>
           </div>
-          {course.description && <p className="text-gray-700 mb-4">{course.description}</p>}
+          {course.description && <p className="text-slate-700 text-lg leading-relaxed mb-6">{course.description}</p>}
 
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              <span>
+          <div className="flex flex-wrap items-center gap-6 text-sm">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm">
+              <div className="p-2 rounded-full bg-blue-100">
+                <BookOpen className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="font-semibold text-slate-700">
                 {Array.isArray(course.sections) ? course.sections.length : 0} Sections
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <span>Self-paced</span>
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm">
+              <div className="p-2 rounded-full bg-amber-100">
+                <Clock className="h-5 w-5 text-amber-600" />
+              </div>
+              <span className="font-semibold text-slate-700">Self-paced</span>
             </div>
           </div>
         </div>
@@ -226,65 +233,75 @@ const CourseDetailPage = () => {
 
       {/* Sections Grid */}
       <div>
-        <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-          <h2 className="text-2xl font-bold text-gray-900">Course Sections</h2>
-          <Button onClick={handleAddSection} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+        <div className="flex justify-between itemscenter mb-8 flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-3xl font-bold text-slate-900">Course Sections</h2>
+            <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+              {Array.isArray(course.sections) ? course.sections.length : 0} sections
+            </div>
+          </div>
+          <Button onClick={handleAddSection} className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+            <Plus className="h-5 w-5" />
             Add Section
           </Button>
         </div>
 
         {!course.sections || course.sections.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-lg">
-            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">No sections available for this course yet.</p>
-            <Button onClick={handleAddSection} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
+          <div className="text-center py-16 border-2 border-dashed border-slate-300 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50">
+            <div className="p-4 rounded-full bg-blue-100 w-fit mx-auto mb-6">
+              <BookOpen className="h-16 w-16 text-blue-500" />
+            </div>
+            <p className="text-slate-600 text-lg mb-6 font-medium">No sections available for this course yet.</p>
+            <Button onClick={handleAddSection} className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3">
+              <Plus className="h-5 w-5" />
               Add First Section
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-8">
             {course.sections.map((section, index) => (
               <Card
                 key={index}
-                className="hover:shadow-md transition-all cursor-pointer p-4 flex flex-col"
+                className="group hover:shadow-2xl transition-all duration-300 cursor-pointer bg-white border-0 shadow-lg hover:-translate-y-1 backdrop-blur-sm bg-gradient-to-br from-white to-slate-50/50"
               >
-                <CardHeader className="pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-blue-600">{index + 1}</span>
+                <CardHeader className="pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-slate-200/50 min-h-[80px]">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg">{index + 1}</span>
                     </div>
-                    <CardTitle className="text-lg sm:text-base md:text-lg flex-1">{section.name}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-emerald-700 transition-colors flex-1">{section.name}</CardTitle>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <DropdownMenu>
+                    <DropdownMenu open={dropdownOpen === section.name} onOpenChange={(open) => setDropdownOpen(open ? section.name : null)}>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-white/50 transition-colors">
+                          <MoreVertical className="h-5 w-5 text-slate-600" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditSection(section.name)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Rename
+                      <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl min-w-[160px]">
+                        <DropdownMenuItem onClick={() => handleEditSection(section.name)} className="hover:bg-emerald-50 cursor-pointer py-3 px-4">
+                          <Edit className="mr-3 h-4 w-4 text-emerald-600" />
+                          <span className="font-medium">Rename</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteSection(section.name)}
-                          className="text-red-600"
+                          className="text-red-600 hover:bg-red-50 cursor-pointer py-3 px-4"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          <Trash2 className="mr-3 h-4 w-4" />
+                          <span className="font-medium">Delete</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
                 </CardHeader>
 
-                <CardContent className="flex flex-col gap-4">
+                <CardContent className="flex flex-col gap-6 p-6">
                   {/* Number of Questions */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <label className="text-sm text-gray-700">Questions:</label>
+                  <div className="flex items-center gap-3 flex-wrap p-3 rounded-lg bg-slate-50/50 border border-slate-200/50">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      Questions:
+                    </label>
                     {isEditingSection === section.name ? (
                       <div className="flex items-center gap-2 flex-wrap">
                         <input
@@ -292,10 +309,10 @@ const CourseDetailPage = () => {
                           min={0}
                           value={tempQuestionCount}
                           onChange={(e) => setTempQuestionCount(e.target.value)}
-                          className="border rounded px-2 py-1 w-20 text-sm"
+                          className="border border-blue-200 rounded-lg px-3 py-2 w-20 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                         />
                         <button
-                          className="p-1 rounded bg-green-500 text-white hover:bg-green-600"
+                          className="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors shadow-sm"
                           onClick={async () => {
                             if (tempQuestionCount && course) {
                               try {
@@ -316,7 +333,7 @@ const CourseDetailPage = () => {
                           <Check className="h-4 w-4" />
                         </button>
                         <button
-                          className="p-1 rounded bg-gray-300 hover:bg-gray-400"
+                          className="p-2 rounded-lg bg-slate-200 hover:bg-slate-300 transition-colors"
                           onClick={() => setIsEditingSection(null)}
                         >
                           <X className="h-4 w-4" />
@@ -324,58 +341,55 @@ const CourseDetailPage = () => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-gray-800">{section.question_count || 0}</span>
+                        <span className="text-lg font-bold text-slate-800 px-2 py-1 rounded bg-white border border-slate-200">{section.question_count || 0}</span>
                         <button
-                          className="p-1 rounded hover:bg-gray-200"
+                          className="p-2 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
                           onClick={(e) => {
                             setIsEditingSection(section.name);
                             setTempQuestionCount(section.question_count.toString() || "0");
                             e.stopPropagation();
                           }}
                         >
-                          <Edit className="h-4 w-4 text-gray-600" />
+                          <Edit className="h-4 w-4 text-slate-600" />
                         </button>
                       </div>
                     )}
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex flex-wrap gap-3">
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 flex-1 min-w-[120px] border-slate-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleViewQuestions(section.name);
                       }}
                     >
                       <Eye className="h-4 w-4" />
-                      View Questions
+                      <span className="font-medium">View Questions</span>
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 flex-1 min-w-[120px] border-slate-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleUploadQuestions(section.name);
                       }}
                     >
                       <Upload className="h-4 w-4" />
-                      Upload Questions
+                      <span className="font-medium">Upload Questions</span>
                     </Button>
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 flex-1 min-w-[120px] border-slate-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleManagePDFs(section.name);
                       }}
                     >
                       <FileText className="h-4 w-4" />
-                      Manage PDFs
+                      <span className="font-medium">Manage PDFs</span>
                     </Button>
                   </div>
                 </CardContent>
