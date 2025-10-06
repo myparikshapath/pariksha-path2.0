@@ -190,7 +190,7 @@ const MaterialDetailPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">Course Sections</h2>
           <Button
             onClick={handleAddSection}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800"
           >
             <Plus className="h-4 w-4" />
             Add Section

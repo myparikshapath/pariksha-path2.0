@@ -36,7 +36,7 @@ const DeleteCourseDialog = ({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-white border-2 border-[#869C51] shadow-xl">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Course</AlertDialogTitle>
           <AlertDialogDescription>
@@ -49,7 +49,7 @@ const DeleteCourseDialog = ({
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={loading}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-[#869C51] hover:bg-[#2E4A3C] text-white"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Delete Course
