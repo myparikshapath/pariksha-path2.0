@@ -199,13 +199,13 @@ const AddExam = () => {
                 onClick={() => handleCourseClick(course)}
               >
                 <CardHeader className="pb-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
-                  <div className="flex justify-between items-start gap-4">
+                  <div className="flex justify-between items-center -mb-4 ">
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-emerald-700 transition-colors mb-2 line-clamp-2">
+                      <CardTitle className="text-xl mt-4 font-bold text-slate-900 group-hover:text-emerald-700 transition-colors mb-2 line-clamp-2">
                         {course.title}
                       </CardTitle>
                       {course.sub_category && (
-                        <p className="text-sm text-slate-600 font-medium mb-1">
+                        <p className="text-sm text-slate-600 font-medium mb-2">
                           {course.sub_category}
                         </p>
                       )}
