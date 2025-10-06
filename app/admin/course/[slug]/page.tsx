@@ -6,7 +6,7 @@ import {
   fetchAvailableCourses,
   deleteSectionFromCourse,
   updateSectionQuestionCount,
-  Course
+  Course,
 } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ import {
   X,
   MoreVertical,
   FileText,
-  Eye
+  Eye,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -60,7 +60,9 @@ const CourseDetailPage = () => {
   };
 
   const handleManagePDFs = (section: string) => {
-    router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}/pdfs`);
+    router.push(
+      `/admin/course/${params.slug}/${encodeURIComponent(section)}/pdfs`
+    );
   };
 
   const loadCourse = useCallback(async () => {
@@ -103,7 +105,9 @@ const CourseDetailPage = () => {
 
   const handleEditSection = (sectionName: string) => {
     if (!course) return;
-    router.push(`/admin/edit-section/${course.id}/${encodeURIComponent(sectionName)}`);
+    router.push(
+      `/admin/edit-section/${course.id}/${encodeURIComponent(sectionName)}`
+    );
   };
 
   const handleDeleteSection = (sectionName: string) => {
@@ -122,7 +126,9 @@ const CourseDetailPage = () => {
       setDeletingSection(null);
     } catch (error: unknown) {
       console.error("Error deleting section:", error);
-      setError(error instanceof Error ? error.message : "Failed to delete section");
+      setError(
+        error instanceof Error ? error.message : "Failed to delete section"
+      );
     } finally {
       setOperationLoading(false);
     }
@@ -150,7 +156,7 @@ const CourseDetailPage = () => {
         <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={handleBackClick}
-             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Courses
@@ -163,7 +169,8 @@ const CourseDetailPage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course you&apos;re looking for doesn&apos;t exist or has been removed.
+            The course you&apos;re looking for doesn&apos;t exist or has been
+            removed.
           </p>
         </div>
       </div>
@@ -176,7 +183,7 @@ const CourseDetailPage = () => {
       <div className="flex items-center gap-4 mb-8">
         <Button
           onClick={handleBackClick}
-           className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
+          className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Courses
@@ -188,9 +195,13 @@ const CourseDetailPage = () => {
         <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl shadow-lg border border-slate-200/50 p-8 backdrop-blur-sm">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-6 gap-6">
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-slate-900 mb-3 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text ">{course.title}</h1>
+              <h1 className="text-4xl font-bold text-slate-900 mb-3 bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text ">
+                {course.title}
+              </h1>
               {course.sub_category && (
-                <p className="text-xl text-slate-600 mb-3 font-medium">{course.sub_category}</p>
+                <p className="text-xl text-slate-600 mb-3 font-medium">
+                  {course.sub_category}
+                </p>
               )}
               {course.code && (
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm font-mono">
@@ -210,7 +221,11 @@ const CourseDetailPage = () => {
               </div>
             </div>
           </div>
-          {course.description && <p className="text-slate-700 text-lg leading-relaxed mb-6">{course.description}</p>}
+          {course.description && (
+            <p className="text-slate-700 text-lg leading-relaxed mb-6">
+              {course.description}
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center gap-6 text-sm">
             <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm">
@@ -218,14 +233,9 @@ const CourseDetailPage = () => {
                 <BookOpen className="h-5 w-5 text-blue-600" />
               </div>
               <span className="font-semibold text-slate-700">
-                {Array.isArray(course.sections) ? course.sections.length : 0} Sections
+                {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
+                Sections
               </span>
-            </div>
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm">
-              <div className="p-2 rounded-full bg-amber-100">
-                <Clock className="h-5 w-5 text-amber-600" />
-              </div>
-              <span className="font-semibold text-slate-700">Self-paced</span>
             </div>
           </div>
         </div>
@@ -235,12 +245,18 @@ const CourseDetailPage = () => {
       <div>
         <div className="flex justify-between itemscenter mb-8 flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-3xl font-bold text-slate-900">Course Sections</h2>
+            <h2 className="text-3xl font-bold text-slate-900">
+              Course Sections
+            </h2>
             <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-              {Array.isArray(course.sections) ? course.sections.length : 0} sections
+              {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
+              sections
             </div>
           </div>
-          <Button onClick={handleAddSection} className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+          <Button
+            onClick={handleAddSection}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          >
             <Plus className="h-5 w-5" />
             Add Section
           </Button>
@@ -251,8 +267,13 @@ const CourseDetailPage = () => {
             <div className="p-4 rounded-full bg-blue-100 w-fit mx-auto mb-6">
               <BookOpen className="h-16 w-16 text-blue-500" />
             </div>
-            <p className="text-slate-600 text-lg mb-6 font-medium">No sections available for this course yet.</p>
-            <Button onClick={handleAddSection} className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3">
+            <p className="text-slate-600 text-lg mb-6 font-medium">
+              No sections available for this course yet.
+            </p>
+            <Button
+              onClick={handleAddSection}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3"
+            >
               <Plus className="h-5 w-5" />
               Add First Section
             </Button>
@@ -267,21 +288,40 @@ const CourseDetailPage = () => {
                 <CardHeader className="pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-slate-200/50 min-h-[80px]">
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-lg">{index + 1}</span>
+                      <span className="text-white font-bold text-lg">
+                        {index + 1}
+                      </span>
                     </div>
-                    <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-emerald-700 transition-colors flex-1">{section.name}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-slate-900 group-hover:text-emerald-700 transition-colors flex-1">
+                      {section.name}
+                    </CardTitle>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <DropdownMenu open={dropdownOpen === section.name} onOpenChange={(open) => setDropdownOpen(open ? section.name : null)}>
+                    <DropdownMenu
+                      open={dropdownOpen === section.name}
+                      onOpenChange={(open) =>
+                        setDropdownOpen(open ? section.name : null)
+                      }
+                    >
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-10 w-10 p-0 hover:bg-white/50 transition-colors">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 w-10 p-0 hover:bg-white/50 transition-colors"
+                        >
                           <MoreVertical className="h-5 w-5 text-slate-600" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl min-w-[160px]">
-                        <DropdownMenuItem onClick={() => handleEditSection(section.name)} className="hover:bg-emerald-50 cursor-pointer py-3 px-4">
+                      <DropdownMenuContent
+                        align="end"
+                        className="bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl min-w-[160px]"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => handleEditSection(section.name)}
+                          className="hover:bg-emerald-50 cursor-pointer py-3 px-4"
+                        >
                           <Edit className="mr-3 h-4 w-4 text-emerald-600" />
-                          <span className="font-medium">Rename</span>
+                          <span className="font-medium">Edit Section</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteSection(section.name)}
@@ -324,7 +364,10 @@ const CourseDetailPage = () => {
                                 await loadCourse();
                                 setIsEditingSection(null);
                               } catch (err) {
-                                console.error("Failed to update question count", err);
+                                console.error(
+                                  "Failed to update question count",
+                                  err
+                                );
                                 setError("Failed to update question count");
                               }
                             }
@@ -341,12 +384,16 @@ const CourseDetailPage = () => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-lg font-bold text-slate-800 px-2 py-1 rounded bg-white border border-slate-200">{section.question_count || 0}</span>
+                        <span className="text-lg font-bold text-slate-800 px-2 py-1 rounded bg-white border border-slate-200">
+                          {section.question_count || 0}
+                        </span>
                         <button
                           className="p-2 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
                           onClick={(e) => {
                             setIsEditingSection(section.name);
-                            setTempQuestionCount(section.question_count.toString() || "0");
+                            setTempQuestionCount(
+                              section.question_count.toString() || "0"
+                            );
                             e.stopPropagation();
                           }}
                         >

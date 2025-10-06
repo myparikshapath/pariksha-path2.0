@@ -6,24 +6,14 @@ import {
   updateSectionInCourse,
   deleteSectionFromCourse,
   getCourseDetails,
-  Course
+  Course,
+  Section,
 } from "@/src/services/courseService";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-  Save,
-  Trash2
-} from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Save, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +31,10 @@ const EditSectionPage = () => {
   const courseId = params.courseId as string;
   const sectionName = decodeURIComponent(params.sectionName as string);
 
+  console.log("EditSectionPage - URL params:", params);
+  console.log("EditSectionPage - courseId:", courseId);
+  console.log("EditSectionPage - sectionName:", sectionName);
+
   const [course, setCourse] = useState<Course | null>(null);
   const [newSectionName, setNewSectionName] = useState(sectionName);
   const [loading, setLoading] = useState(true);
@@ -49,27 +43,103 @@ const EditSectionPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-
   const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
+      console.log("Loading course with ID:", courseId);
+      console.log("Section name:", sectionName);
+
       const courseData = await getCourseDetails(courseId);
+      console.log("Course data loaded:", courseData);
+      console.log("Course sections:", courseData.sections);
+      console.log("Course sections type:", typeof courseData.sections);
+      console.log("Course sections length:", courseData.sections?.length);
+
+      // Debug: Check each section individually
+      if (courseData.sections) {
+        courseData.sections.forEach((section, index) => {
+          console.log(`Section ${index}:`, section);
+          console.log(`Section ${index} type:`, typeof section);
+          console.log(`Section ${index} name:`, section?.name);
+          console.log(
+            `Section ${index} has name:`,
+            !!(section && section.name)
+          );
+        });
+      }
+
       setCourse(courseData);
 
-      // Check if section exists
-      if (!courseData.sections?.some(s => s.name)) {
-        setError(`Section "${sectionName}" not found in this course`);
+      // Check if section exists using multiple approaches
+      let validSections: Array<{ name: string }> = [];
+
+      // Handle both string sections and object sections
+      if (courseData.sections && courseData.sections.length > 0) {
+        // Type guard to check if sections are strings or objects
+        const firstSection = courseData.sections[0];
+
+        if (typeof firstSection === "string") {
+          // Sections are stored as strings - convert to objects
+          validSections = (courseData.sections as unknown as string[]).map(
+            (sectionName: string, index: number) => ({
+              name: sectionName,
+              description: `Section ${index + 1}: ${sectionName}`,
+              order: index + 1,
+              question_count: 0,
+              is_active: true,
+            })
+          );
+        } else if (firstSection && typeof firstSection === "object" && "name" in firstSection) {
+          // Sections are proper objects - filter valid ones
+          validSections = (courseData.sections as Section[]).filter((s) => s && s.name);
+        }
+      }
+
+      console.log("Valid sections count:", validSections.length);
+      console.log(
+        "Valid sections:",
+        validSections.map((s) => s.name)
+      );
+
+      // Exact match
+      const exactMatch = validSections.find((s) => s.name === sectionName);
+
+      // Case-insensitive match
+      const caseInsensitiveMatch = validSections.find(
+        (s) => s.name.toLowerCase() === sectionName.toLowerCase()
+      );
+
+      console.log("Exact match:", exactMatch?.name);
+      console.log("Case insensitive match:", caseInsensitiveMatch?.name);
+
+      if (!exactMatch) {
+        if (caseInsensitiveMatch) {
+          setError(
+            `Section "${sectionName}" not found (case-sensitive). Did you mean "${caseInsensitiveMatch.name}"?`
+          );
+        } else if (validSections.length === 0) {
+          setError(
+            `Section "${sectionName}" not found. This course has no valid sections. Course sections: ${JSON.stringify(
+              courseData.sections
+            )}`
+          );
+        } else {
+          setError(
+            `Section "${sectionName}" not found in this course. Available sections: ${validSections
+              .map((s) => s.name)
+              .join(", ")}`
+          );
+        }
       }
     } catch (e: unknown) {
-      console.error('Error loading course:', e);
+      console.error("Error loading course:", e);
       setError(e instanceof Error ? e.message : "Failed to load course");
     } finally {
       setLoading(false);
     }
   }, [courseId, sectionName]);
-
 
   useEffect(() => {
     if (courseId) {
@@ -84,10 +154,16 @@ const EditSectionPage = () => {
     setSaving(true);
     try {
       await updateSectionInCourse(courseId, sectionName, newSectionName.trim());
-      router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
+      router.push(
+        `/admin/course/${
+          course.code?.toLowerCase().replace(/\s+/g, "-") || course.id
+        }`
+      );
     } catch (error: unknown) {
       console.error("Error updating section:", error);
-      setError(error instanceof Error ? error.message : "Failed to update section");
+      setError(
+        error instanceof Error ? error.message : "Failed to update section"
+      );
     } finally {
       setSaving(false);
     }
@@ -99,10 +175,16 @@ const EditSectionPage = () => {
     setDeleting(true);
     try {
       await deleteSectionFromCourse(courseId, sectionName);
-      router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
+      router.push(
+        `/admin/course/${
+          course.code?.toLowerCase().replace(/\s+/g, "-") || course.id
+        }`
+      );
     } catch (error: unknown) {
       console.error("Error deleting section:", error);
-      setError(error instanceof Error ? error.message : "Failed to delete section");
+      setError(
+        error instanceof Error ? error.message : "Failed to delete section"
+      );
     } finally {
       setDeleting(false);
       setDeleteDialogOpen(false);
@@ -111,7 +193,11 @@ const EditSectionPage = () => {
 
   const handleBack = () => {
     if (course) {
-      router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
+      router.push(
+        `/admin/course/${
+          course.code?.toLowerCase().replace(/\s+/g, "-") || course.id
+        }`
+      );
     } else {
       router.push("/admin/add-exam");
     }
@@ -124,7 +210,9 @@ const EditSectionPage = () => {
           <div className="p-4 rounded-full bg-emerald-100">
             <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
           </div>
-          <span className="ml-3 text-slate-600 text-lg font-medium">Loading section...</span>
+          <span className="ml-3 text-slate-600 text-lg font-medium">
+            Loading section...
+          </span>
         </div>
       </div>
     );
@@ -149,7 +237,8 @@ const EditSectionPage = () => {
             {error || "Section not found"}
           </h2>
           <p className="text-gray-600">
-            The section you&apos;re trying to edit doesn&apos;t exist or has been removed.
+            The section you&apos;re trying to edit doesn&apos;t exist or has
+            been removed.
           </p>
         </div>
       </div>
@@ -193,7 +282,9 @@ const EditSectionPage = () => {
               <div className="flex gap-3 flex-wrap">
                 <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-emerald-200/50">
                   <span className="text-sm text-slate-600">Current: </span>
-                  <span className="font-semibold text-emerald-700">{sectionName}</span>
+                  <span className="font-semibold text-emerald-700">
+                    {sectionName}
+                  </span>
                 </div>
               </div>
             </div>
@@ -238,7 +329,10 @@ const EditSectionPage = () => {
                   required
                 />
                 <p className="text-sm text-slate-500">
-                  Current name: <span className="font-medium text-slate-700">{sectionName}</span>
+                  Current name:{" "}
+                  <span className="font-medium text-slate-700">
+                    {sectionName}
+                  </span>
                 </p>
               </div>
 
@@ -265,7 +359,12 @@ const EditSectionPage = () => {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={saving || deleting || !newSectionName.trim() || newSectionName.trim() === sectionName}
+                    disabled={
+                      saving ||
+                      deleting ||
+                      !newSectionName.trim() ||
+                      newSectionName.trim() === sectionName
+                    }
                     className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? (
@@ -293,12 +392,16 @@ const EditSectionPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Section</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the section &quot;{sectionName}&quot;? This action will remove
-              the section and all its associated questions. This action cannot be undone.
+              Are you sure you want to delete the section &quot;{sectionName}
+              &quot;? This action will remove the section and all its associated
+              questions. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="bg-slate-100 hover:bg-slate-200 text-slate-700">
+            <AlertDialogCancel
+              disabled={deleting}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

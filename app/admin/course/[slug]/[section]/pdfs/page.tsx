@@ -15,7 +15,11 @@ import PDFUpload from "@/components/admin/PDFUpload";
 import PDFDisplay from "@/components/admin/PDFDisplay";
 import { toast } from "react-hot-toast";
 import api from "@/utils/api";
-import { fetchAvailableCourses, Course, Section } from "@/src/services/courseService";
+import {
+  fetchAvailableCourses,
+  Course,
+  Section,
+} from "@/src/services/courseService";
 
 interface PDFFile {
   id: string;
@@ -50,9 +54,10 @@ const SectionPDFsPage = () => {
       const courses = await fetchAvailableCourses();
       console.log("All courses:", courses);
       console.log("Looking for course slug:", courseSlug);
-      
+
       const foundCourse = courses.find((c: Course) => {
-        const courseSlugFromCode = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
+        const courseSlugFromCode =
+          c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
         console.log("Checking course:", c.title, "slug:", courseSlugFromCode);
         return courseSlugFromCode === courseSlug;
       });
@@ -63,10 +68,10 @@ const SectionPDFsPage = () => {
       }
 
       // Check if section exists
-      const sectionExists = foundCourse.sections?.some((s: Section) => 
-        s.name?.toLowerCase() === sectionName.toLowerCase()
+      const sectionExists = foundCourse.sections?.some(
+        (s: Section) => s.name?.toLowerCase() === sectionName.toLowerCase()
       );
-      
+
       if (!sectionExists) {
         setError(`Section "${sectionName}" not found in course`);
         return;
@@ -77,7 +82,9 @@ const SectionPDFsPage = () => {
       // Get section files
       try {
         const filesResponse = await api.get(
-          `/admin/sections/${foundCourse.id}/${encodeURIComponent(sectionName)}/files`
+          `/admin/sections/${foundCourse.id}/${encodeURIComponent(
+            sectionName
+          )}/files`
         );
         console.log("Files response:", filesResponse.data);
         setFiles(filesResponse.data.data.files || []);
@@ -106,7 +113,9 @@ const SectionPDFsPage = () => {
     if (!course) return;
     try {
       await api.delete(
-        `/admin/sections/${course.id}/${encodeURIComponent(sectionName)}/files/${fileId}`
+        `/admin/sections/${course.id}/${encodeURIComponent(
+          sectionName
+        )}/files/${fileId}`
       );
 
       const updatedFiles = files.filter((file) => file.id !== fileId);
@@ -141,7 +150,7 @@ const SectionPDFsPage = () => {
         <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={handleBack}
-             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Course
@@ -154,8 +163,8 @@ const SectionPDFsPage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course or section you&apos;re looking for doesn&apos;t exist or has been
-            removed.
+            The course or section you&apos;re looking for doesn&apos;t exist or
+            has been removed.
           </p>
         </div>
       </div>
@@ -165,14 +174,14 @@ const SectionPDFsPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
+      <Button
+        onClick={handleBack}
+        className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Course
+      </Button>
       <div className="flex items-center gap-4 mb-8">
-        <Button
-          onClick={handleBack}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Course
-        </Button>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             PDF Management - {sectionName}
