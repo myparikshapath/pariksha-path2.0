@@ -266,7 +266,6 @@ const SectionQuestionsPage = () => {
     return (
       <div className="flex justify-center items-center gap-2 mt-8">
         <Button
-          variant="outline"
           size="sm"
           onClick={() => handlePageChange(pagination.page - 1)}
           disabled={pagination.page === 1}
@@ -275,7 +274,6 @@ const SectionQuestionsPage = () => {
         </Button>
         {pages}
         <Button
-          variant="outline"
           size="sm"
           onClick={() => handlePageChange(pagination.page + 1)}
           disabled={pagination.page === pagination.total_pages}
@@ -327,7 +325,6 @@ const SectionQuestionsPage = () => {
       <div className="mb-8">
         <Button
           onClick={() => router.back()}
-          variant="outline"
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -405,7 +402,6 @@ const SectionQuestionsPage = () => {
 
               {(filters.difficulty || filters.topic) && (
                 <Button
-                  variant="outline"
                   onClick={() => {
                     setFilters({ difficulty: "", topic: "" });
                     setPagination((prev) => ({ ...prev, page: 1 }));

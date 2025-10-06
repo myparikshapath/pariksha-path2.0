@@ -184,7 +184,7 @@ const PDFDisplay: React.FC<PDFDisplayProps> = ({
                 <div className="flex space-x-2 mt-4">
                   <Button
                     size="sm"
-                    variant="outline"
+                     
                     onClick={() => handleView(fixDoSpacesUrl(file.file_url))}
                     className="flex-1"
                   >
@@ -193,7 +193,7 @@ const PDFDisplay: React.FC<PDFDisplayProps> = ({
                   </Button>
                   <Button
                     size="sm"
-                    variant="outline"
+                     
                     onClick={() =>
                       handleDownload(fixDoSpacesUrl(file.file_url), file.original_filename)
                     }

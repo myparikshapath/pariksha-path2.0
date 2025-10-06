@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import api from "@/utils/api";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, ArrowLeft } from "lucide-react";
 import { AxiosError } from "axios";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface Student {
   id: string;
@@ -23,6 +25,7 @@ interface Pagination {
 }
 
 export default function StudentsPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -51,7 +54,9 @@ export default function StudentsPage() {
       setPage(pageNumber);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
-      alert(err.response?.data?.message || err.message || "Failed to fetch students");
+      alert(
+        err.response?.data?.message || err.message || "Failed to fetch students"
+      );
     } finally {
       setLoading(false);
     }
@@ -64,7 +69,11 @@ export default function StudentsPage() {
       fetchStudents(page, debouncedSearch);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
-      alert(err.response?.data?.message || err.message || "Failed to deactivate student");
+      alert(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to deactivate student"
+      );
     }
   };
 
@@ -75,7 +84,11 @@ export default function StudentsPage() {
       fetchStudents(page, debouncedSearch);
     } catch (error) {
       const err = error as AxiosError<{ message?: string }>;
-      alert(err.response?.data?.message || err.message || "Failed to activate student");
+      alert(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to activate student"
+      );
     }
   };
 
@@ -90,7 +103,13 @@ export default function StudentsPage() {
         Students
       </h1>
       <div className="h-1 w-24 mx-auto bg-yellow-400 rounded-full mb-8" />
-
+      <Button
+        onClick={() => router.back()}
+        className="mb-6 flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full px-4 py-2 shadow-sm"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Dashboard
+      </Button>
       {/* 🔍 Search Bar */}
       <div className="flex justify-center mb-8 ">
         <div className="relative w-full max-w-10xl">
@@ -169,17 +188,22 @@ export default function StudentsPage() {
                   <th className="px-6 py-3 text-left font-semibold">Email</th>
                   <th className="px-6 py-3 text-left font-semibold">Phone</th>
                   <th className="px-6 py-3 text-left font-semibold">Status</th>
-                  <th className="px-6 py-3 text-center font-semibold">Action</th>
+                  <th className="px-6 py-3 text-center font-semibold">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((s, idx) => (
                   <tr
                     key={s.id}
-                    className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-green-50 transition`}
+                    className={`${
+                      idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } hover:bg-green-50 transition`}
                   >
-                    <td className="px-6 py-3 font-medium text-gray-800">{s.name}</td>
+                    <td className="px-6 py-3 font-medium text-gray-800">
+                      {s.name}
+                    </td>
                     <td className="px-6 py-3 text-gray-700">{s.email}</td>
                     <td className="px-6 py-3 text-gray-700">{s.phone}</td>
                     <td className="px-6 py-3">
@@ -230,15 +254,19 @@ export default function StudentsPage() {
               </button>
 
               {/* Page Numbers */}
-              {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((num) => (
+              {Array.from(
+                { length: pagination.total_pages },
+                (_, i) => i + 1
+              ).map((num) => (
                 <button
                   key={num}
                   onClick={() => fetchStudents(num, debouncedSearch)}
                   className={`px-4 py-2 rounded-full font-medium shadow-sm transition-transform hover:scale-105 
-          ${page === num
-                      ? "bg-[#2E4A3C] text-white shadow-md"
-                      : "bg-gray-100 text-gray-700 hover:bg-green-100"
-                    }`}
+          ${
+            page === num
+              ? "bg-[#2E4A3C] text-white shadow-md"
+              : "bg-gray-100 text-gray-700 hover:bg-green-100"
+          }`}
                 >
                   {num}
                 </button>

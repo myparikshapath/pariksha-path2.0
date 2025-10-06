@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createCourse, CreateCourseRequest } from "@/src/services/courseService";
+import {
+  createCourse,
+  CreateCourseRequest,
+} from "@/src/services/courseService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,14 +62,14 @@ export default function NewExamPage() {
     field: K,
     value: CreateCourseRequest[K]
   ) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const addSection = () => {
     if (newSection.trim() && !sections.includes(newSection.trim())) {
       const updatedSections = [...sections, newSection.trim()];
       setSections(updatedSections);
-      setFormData(prev => ({ ...prev, sections: updatedSections }));
+      setFormData((prev) => ({ ...prev, sections: updatedSections }));
       setNewSection("");
     }
   };
@@ -74,7 +77,7 @@ export default function NewExamPage() {
   const removeSection = (index: number) => {
     const updatedSections = sections.filter((_, i) => i !== index);
     setSections(updatedSections);
-    setFormData(prev => ({ ...prev, sections: updatedSections }));
+    setFormData((prev) => ({ ...prev, sections: updatedSections }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,16 +88,21 @@ export default function NewExamPage() {
     try {
       if (!formData.title.trim()) throw new Error("Title is required");
       if (!formData.code.trim()) throw new Error("Code is required");
-      if (!formData.sub_category.trim()) throw new Error("Sub-category is required");
-      if (!formData.description.trim()) throw new Error("Description is required");
-      if (!formData.thumbnail_url.trim()) throw new Error("Thumbnail URL is required");
-      if (sections.length === 0) throw new Error("At least one section is required");
+      if (!formData.sub_category.trim())
+        throw new Error("Sub-category is required");
+      if (!formData.description.trim())
+        throw new Error("Description is required");
+      if (!formData.thumbnail_url.trim())
+        throw new Error("Thumbnail URL is required");
+      if (sections.length === 0)
+        throw new Error("At least one section is required");
 
       await createCourse(formData);
       router.push("/admin/add-exam");
     } catch (err: unknown) {
       console.error("Error creating course:", err);
-      const message = err instanceof Error ? err.message : "Failed to create course";
+      const message =
+        err instanceof Error ? err.message : "Failed to create course";
       setError(message);
     } finally {
       setLoading(false);
@@ -107,18 +115,40 @@ export default function NewExamPage() {
       <div className="mb-8">
         <Button
           onClick={() => router.back()}
-          variant="outline"
-          className="mb-4"
+          className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Courses
         </Button>
 
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Add New Exam/Course</h1>
-          <p className="text-gray-600 mt-2">
-            Create a new exam or course with sections for question management.
-          </p>
+        <div className="mt-6">
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl shadow-lg border border-emerald-200/50 p-8 backdrop-blur-sm">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold text-slate-900 mb-3">
+                  Create New Exam/Course
+                </h1>
+                <p className="text-lg text-slate-600">
+                  Set up a new exam or course with sections for comprehensive question management
+                </p>
+              </div>
+
+              <div className="flex gap-3 flex-wrap">
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-emerald-200/50">
+                  <span className="text-sm text-slate-600">Sections: </span>
+                  <span className="font-semibold text-emerald-700">{sections.length}</span>
+                </div>
+                <div className={`px-4 py-2 rounded-lg text-sm font-medium ${formData.is_free ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {formData.is_free ? 'Free Course' : `₹${formData.price || 0}`}
+                </div>
+                {!formData.is_free && (formData.discount_percent || 0) > 0 && (
+                  <div className="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-green-700">
+                    Save ₹{((formData.price || 0) * (formData.discount_percent || 0) / 100).toFixed(0)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -131,11 +161,14 @@ export default function NewExamPage() {
         )}
 
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Basic Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
@@ -144,6 +177,7 @@ export default function NewExamPage() {
                   value={formData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="e.g., JEE Main Physics"
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                   required
                 />
               </div>
@@ -155,6 +189,7 @@ export default function NewExamPage() {
                   value={formData.code}
                   onChange={(e) => handleInputChange("code", e.target.value)}
                   placeholder="e.g., JEE-PHYS-2024"
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                   required
                 />
               </div>
@@ -166,14 +201,22 @@ export default function NewExamPage() {
                 <Select
                   value={formData.category}
                   onValueChange={(value) =>
-                    handleInputChange("category", value as CreateCourseRequest["category"])}
+                    handleInputChange(
+                      "category",
+                      value as CreateCourseRequest["category"]
+                    )
+                  }
                 >
-                  <SelectTrigger className="bg-white border border-gray-300 text-gray-800 rounded-md">
+                  <SelectTrigger className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white rounded-md border border-gray-300">
+                  <SelectContent className="bg-white/95 backdrop-blur-md border border-emerald-200 shadow-xl">
                     {EXAM_CATEGORIES.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
+                      <SelectItem
+                        key={category.value}
+                        value={category.value}
+                        className="hover:bg-emerald-50 focus:bg-emerald-50"
+                      >
                         {category.label}
                       </SelectItem>
                     ))}
@@ -186,8 +229,11 @@ export default function NewExamPage() {
                 <Input
                   id="sub_category"
                   value={formData.sub_category}
-                  onChange={(e) => handleInputChange("sub_category", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("sub_category", e.target.value)
+                  }
                   placeholder="e.g., JEE Main, NEET, SSC CGL"
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                   required
                 />
               </div>
@@ -198,8 +244,11 @@ export default function NewExamPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 placeholder="Describe the course content and objectives..."
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200 min-h-[120px]"
                 rows={4}
                 required
               />
@@ -208,25 +257,40 @@ export default function NewExamPage() {
         </Card>
 
         {/* Pricing */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pricing</CardTitle>
+        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Pricing
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             {/* Labeled Toggle */}
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700 font-medium">Paid</span>
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="text-slate-700 font-medium">Paid Course</span>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   className="sr-only"
                   checked={formData.is_free}
-                  onChange={(e) => handleInputChange("is_free", e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange("is_free", e.target.checked)
+                  }
                 />
-                <div className={`w-16 h-8 bg-gray-300 rounded-full transition-colors duration-300 ${formData.is_free ? "bg-blue-600" : "bg-gray-300"}`}></div>
-                <div className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${formData.is_free ? "translate-x-8" : ""}`}></div>
+                <div
+                  className={`w-16 h-8 rounded-full transition-colors duration-300 ${
+                    formData.is_free ? "bg-emerald-500" : "bg-slate-300"
+                  }`}
+                ></div>
+                <div
+                  className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                    formData.is_free ? "translate-x-8" : ""
+                  }`}
+                ></div>
               </label>
-              <span className="text-gray-700 font-medium">Free Course</span>
+              <span className={`font-medium ${formData.is_free ? 'text-emerald-700' : 'text-slate-500'}`}>
+                {formData.is_free ? 'Free Course' : 'Paid Course'}
+              </span>
             </div>
 
             {!formData.is_free && (
@@ -241,8 +305,12 @@ export default function NewExamPage() {
                     value={formData.price === 0 ? "" : formData.price}
                     onChange={(e) => {
                       const val = e.target.value;
-                      handleInputChange("price", val === "" ? 0 : parseFloat(val));
+                      handleInputChange(
+                        "price",
+                        val === "" ? 0 : parseFloat(val)
+                      );
                     }}
+                    className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                   />
                 </div>
 
@@ -253,11 +321,19 @@ export default function NewExamPage() {
                     type="number"
                     min={0}
                     max={100}
-                    value={formData.discount_percent === 0 ? "" : formData.discount_percent}
+                    value={
+                      formData.discount_percent === 0
+                        ? ""
+                        : formData.discount_percent
+                    }
                     onChange={(e) => {
                       const val = e.target.value;
-                      handleInputChange("discount_percent", val === "" ? 0 : parseFloat(val));
+                      handleInputChange(
+                        "discount_percent",
+                        val === "" ? 0 : parseFloat(val)
+                      );
                     }}
+                    className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                   />
                 </div>
               </div>
@@ -265,21 +341,31 @@ export default function NewExamPage() {
           </CardContent>
         </Card>
 
-
         {/* Sections */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sections *</CardTitle>
+        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Sections *
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="flex gap-2">
               <Input
                 value={newSection}
                 onChange={(e) => setNewSection(e.target.value)}
                 placeholder="e.g., Physics, Chemistry, Mathematics"
-                onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSection())}
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
+                onKeyPress={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), addSection())
+                }
               />
-              <Button type="button" onClick={addSection} size="sm">
+              <Button
+                type="button"
+                onClick={addSection}
+                size="sm"
+                className="bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-4"
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -291,13 +377,13 @@ export default function NewExamPage() {
                   {sections.map((section, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-md text-sm"
+                      className="flex items-center gap-1 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-md text-sm border border-emerald-200"
                     >
                       {section}
                       <button
                         type="button"
                         onClick={() => removeSection(index)}
-                        className="text-blue-600 hover:text-blue-800 ml-1"
+                        className="text-emerald-600 hover:text-emerald-800 ml-1 hover:bg-emerald-200 rounded-full p-0.5 transition-colors"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -310,18 +396,24 @@ export default function NewExamPage() {
         </Card>
 
         {/* Media URLs */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Media</CardTitle>
+        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Media
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="space-y-2">
               <Label htmlFor="thumbnail_url">Thumbnail URL *</Label>
               <Input
                 id="thumbnail_url"
                 value={formData.thumbnail_url}
-                onChange={(e) => handleInputChange("thumbnail_url", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("thumbnail_url", e.target.value)
+                }
                 placeholder="https://example.com/thumbnail.jpg"
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 required
               />
             </div>
@@ -332,8 +424,11 @@ export default function NewExamPage() {
                 <Input
                   id="icon_url"
                   value={formData.icon_url || ""}
-                  onChange={(e) => handleInputChange("icon_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("icon_url", e.target.value)
+                  }
                   placeholder="https://example.com/icon.png"
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
 
@@ -342,8 +437,11 @@ export default function NewExamPage() {
                 <Input
                   id="banner_url"
                   value={formData.banner_url || ""}
-                  onChange={(e) => handleInputChange("banner_url", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("banner_url", e.target.value)
+                  }
                   placeholder="https://example.com/banner.jpg"
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
             </div>
@@ -355,24 +453,36 @@ export default function NewExamPage() {
                 value={formData.tagline || ""}
                 onChange={(e) => handleInputChange("tagline", e.target.value)}
                 placeholder="e.g., Master Physics for JEE Main"
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Submit Buttons */}
-        <div className="flex justify-end gap-4 flex-wrap">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
+        <div className="flex justify-end gap-4 flex-wrap pt-6 border-t border-slate-200">
+          <Button
+            type="button"
+            onClick={() => router.back()}
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-6 py-3 shadow-sm transition-all duration-200"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={loading}>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Creating Course...
               </>
             ) : (
-              "Create Course"
+              <>
+                <Plus className="h-4 w-4" />
+                Create Course
+              </>
             )}
           </Button>
         </div>
