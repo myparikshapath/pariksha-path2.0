@@ -7,6 +7,7 @@ import {
   deleteSectionFromCourse,
   getCourseDetails,
   Course,
+  Section,
 } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,9 +77,12 @@ const EditSectionPage = () => {
 
       // Handle both string sections and object sections
       if (courseData.sections && courseData.sections.length > 0) {
-        if (typeof courseData.sections[0] === "string") {
+        // Type guard to check if sections are strings or objects
+        const firstSection = courseData.sections[0];
+
+        if (typeof firstSection === "string") {
           // Sections are stored as strings - convert to objects
-          validSections = courseData.sections.map(
+          validSections = (courseData.sections as unknown as string[]).map(
             (sectionName: string, index: number) => ({
               name: sectionName,
               description: `Section ${index + 1}: ${sectionName}`,
@@ -87,9 +91,9 @@ const EditSectionPage = () => {
               is_active: true,
             })
           );
-        } else {
+        } else if (firstSection && typeof firstSection === "object" && "name" in firstSection) {
           // Sections are proper objects - filter valid ones
-          validSections = courseData.sections.filter((s) => s && s.name);
+          validSections = (courseData.sections as Section[]).filter((s) => s && s.name);
         }
       }
 
