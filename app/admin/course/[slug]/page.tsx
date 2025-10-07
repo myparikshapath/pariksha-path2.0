@@ -352,7 +352,9 @@ const CourseDetailPage = () => {
                             type="number"
                             min={0}
                             value={tempQuestionCount}
-                            onChange={(e) => setTempQuestionCount(e.target.value)}
+                            onChange={(e) =>
+                              setTempQuestionCount(e.target.value)
+                            }
                             className="border border-[#d6f5e5] rounded-md px-3 py-1.5 w-20 text-sm focus:ring-1 focus:ring-[#1f7a53] focus:border-[#1f7a53]"
                           />
                           <button

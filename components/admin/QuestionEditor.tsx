@@ -91,13 +91,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
     }
   }, [isEditing, question]);
 
-  // const handleInputChange = (field: keyof QuestionUpdateRequest, value: any) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     [field]: value
-  //   }));
-  // };
-
   const handleInputChange = <K extends keyof QuestionUpdateRequest>(
     field: K,
     value: QuestionUpdateRequest[K]
@@ -107,16 +100,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
       [field]: value,
     }));
   };
-
-  // const handleOptionChange = (
-  //   index: number,
-  //   field: keyof QuestionOption,
-  //   value: any
-  // ) => {
-  //   const newOptions = [...(formData.options || [])];
-  //   newOptions[index] = { ...newOptions[index], [field]: value };
-  //   handleInputChange("options", newOptions);
-  // };
 
   const handleOptionChange = <K extends keyof QuestionOption>(
     index: number,
@@ -211,11 +194,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-lg">{question.title}</CardTitle>
-              <div className="flex gap-2 mt-2">
-                <Badge variant="outline">{question.question_type}</Badge>
-                <Badge variant="outline">{question.difficulty_level}</Badge>
-                <Badge variant="outline">{question.subject}</Badge>
-              </div>
             </div>
             <div>
               <Button onClick={onEdit} size="sm" variant="outline">
@@ -229,7 +207,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                     <span className="text-red-600">Delete</span>
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="bg-white border-2 border-[#869C51] shadow-xl">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
