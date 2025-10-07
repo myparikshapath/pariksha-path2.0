@@ -128,6 +128,7 @@ export interface Course {
 	code?: string;
 	thumbnail_url?: string;
 	discount_percent?: number;
+	validity_period_days?: number;
 	material_ids?: string[];
 	test_series_ids?: string[];
 	icon_url?: string;
@@ -155,6 +156,7 @@ export interface CreateCourseRequest {
 	price: number;
 	is_free: boolean;
 	discount_percent?: number;
+	validity_period_days?: number;
 	material_ids?: string[];
 	test_series_ids?: string[];
 	thumbnail_url: string;
@@ -172,6 +174,7 @@ export interface UpdateCourseRequest {
 	price?: number;
 	is_free?: boolean;
 	discount_percent?: number;
+	validity_period_days?: number;
 	material_ids?: string[];
 	test_series_ids?: string[];
 	thumbnail_url?: string;

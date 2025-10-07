@@ -5,22 +5,18 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-
-interface ExamData {
-  [category: string]: {
-    [subCategory: string]:
-      | string[]
-      | {
-          [state: string]: string[];
-        };
-  };
-}
+import api from "@/utils/api";
 
 interface Exam {
-  name: string;
+  id: string;
+  title: string;
+  code: string;
   category: string;
-  sub_category?: string;
-  state?: string;
+  sub_category: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function AdminExamsPage() {
@@ -30,46 +26,38 @@ export default function AdminExamsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const examsPerPage = 15;
 
-  // Flatten JSON recursively
-  function flattenExams(data: ExamData): Exam[] {
-    const result: Exam[] = [];
-    for (const category in data) {
-      const subCats = data[category];
-      for (const subCat in subCats) {
-        const examsOrObj = subCats[subCat];
-        if (Array.isArray(examsOrObj)) {
-          examsOrObj.forEach((exam: string) =>
-            result.push({ name: exam, category: subCat })
-          );
-        } else if (typeof examsOrObj === "object") {
-          for (const state in examsOrObj) {
-            const stateExams = examsOrObj[state];
-            if (Array.isArray(stateExams)) {
-              stateExams.forEach((exam: string) =>
-                result.push({ name: exam, category: subCat, state })
-              );
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
-
   useEffect(() => {
-    fetch("/data/exams.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const examsArray = flattenExams(data);
-        setExams(examsArray);
+    api.get("/courses")
+      .then((response) => {
+        if (response.data.courses) {
+          setExams(response.data.courses);
+        }
       })
-      .catch(console.error);
+      .catch((error) => {
+        console.error("Error fetching courses:", error);
+      });
   }, []);
 
   // Filter exams
   const filteredExams = exams.filter((exam) =>
-    exam.name.toLowerCase().includes(search.toLowerCase())
+    exam.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Toggle visibility
+  const toggleVisibility = async (examId: string, currentStatus: boolean) => {
+    try {
+      const response = await api.put(`/courses/${examId}/toggle-visibility`);
+      if (response.status === 200) {
+        setExams((prev) =>
+          prev.map((exam) =>
+            exam.id === examId ? { ...exam, is_active: !currentStatus } : exam
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling visibility:', error);
+    }
+  };
 
   // Pagination
   const totalPages = Math.ceil(filteredExams.length / examsPerPage);
@@ -114,28 +102,36 @@ export default function AdminExamsPage() {
             onClick={() =>
               router.push(
                 `/admin/exam/${encodeURIComponent(
-                  exam.name.toLowerCase().replace(/\s+/g, "-")
+                  exam.title.toLowerCase().replace(/\s+/g, "-")
                 )}`
               )
             }
           >
             <div>
-              <h2 className="text-xl font-semibold">{exam.name}</h2>
+              <h2 className="text-xl font-semibold">{exam.title}</h2>
               <p className="text-gray-600 mt-2">
-                {exam.sub_category || exam.category}
-                {exam.state ? ` - ${exam.state}` : ""}
+                {exam.sub_category}
               </p>
             </div>
 
             {/* Admin Actions */}
-            <div className="flex space-x-2 mt-4">
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm text-gray-600">Visible:</label>
+                <input
+                  type="checkbox"
+                  checked={exam.is_active}
+                  onChange={() => toggleVisibility(exam.id, exam.is_active)}
+                  className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                />
+              </div>
               <button
                 className="bg-[#2E4A3C] text-white px-4 py-2 rounded-full hover:bg-[#22362c] transition cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(
                     `/admin/exam/${encodeURIComponent(
-                      exam.name.toLowerCase().replace(/\s+/g, "-")
+                      exam.title.toLowerCase().replace(/\s+/g, "-")
                     )}`
                   );
                 }}

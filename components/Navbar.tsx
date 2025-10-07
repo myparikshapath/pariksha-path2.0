@@ -15,7 +15,11 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 
-import examData from "@/public/data/exams.json";
+import { Exam } from "@/models/exam";
+import api from "@/utils/api";
+
+// Remove JSON import
+// import examData from "@/public/data/exams.json";
 
 // ---------- Types ----------
 interface ExamStateGroup {
@@ -48,49 +52,55 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Exam[]>([]);
+
+  // Fetch courses from API
+  useEffect(() => {
+    api
+      .get("/courses")
+      .then((response) => {
+        if (response.data.courses) {
+          setCourses(
+            response.data.courses.filter((course: Exam) => course.is_active)
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching courses:", error);
+        // Optionally set empty or handle error
+      });
+  }, []);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
-  useEffect(() => {
-    if (hoveredDropdown) {
-      const examsDropdown = navLinks.find((link) => link.name === hoveredDropdown)?.dropdown;
-      if (examsDropdown && examsDropdown.length > 0 && !activeCategory) {
-        setActiveCategory(examsDropdown[0].category); // SSC or first category
-      }
-      document.body.style.overflow = "hidden"; // lock background scroll
-    } else {
-      setActiveCategory(null);
-      document.body.style.overflow = "auto";
-    }
-    return () => { document.body.style.overflow = "auto"; };
-  }, [hoveredDropdown]);
-
-
-
-  const isActive = (href: string) => pathname === href;
-
+  // Group courses by category and sub_category
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     {
       name: "Exams",
-      dropdown: Object.entries(examData).map(([category, sub]) => ({
+      dropdown: Object.entries(
+        courses.reduce((acc, course) => {
+          const cat = course.category;
+          if (!acc[cat]) acc[cat] = {};
+          const sub = course.sub_category;
+          if (!acc[cat][sub]) acc[cat][sub] = [];
+          acc[cat][sub].push(course.title);
+          return acc;
+        }, {} as Record<string, Record<string, string[]>>)
+      ).map(([category, sub]) => ({
         category,
-        items: Object.entries(sub).map(([subCat, exams]) => {
-          if (Array.isArray(exams)) return { subCategory: subCat, exams };
-          return {
-            subCategory: subCat,
-            exams: Object.entries(exams).map(([state, examsArr]) => ({
-              state,
-              exams: examsArr as string[],
-            })),
-          };
-        }),
+        items: Object.entries(sub).map(([subCat, exams]) => ({
+          subCategory: subCat,
+          exams: exams.sort(),
+        })),
       })),
     },
     { name: "Mock", href: "/mock" },
     { name: "Blog", href: "/blog" },
   ];
+
+  const isActive = (href: string) => pathname === href;
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white/35 backdrop-blur-2xl shadow-md z-50">
@@ -130,10 +140,9 @@ export default function Navbar() {
               ) : (
                 <Link
                   href={link.href!}
-                  className={`hover:text-[#2E4A3C] transition-colors ${isActive(link.href!)
-                    ? "text-[#869C51]"
-                    : "text-gray-900"
-                    } text-[16px]`}
+                  className={`hover:text-[#2E4A3C] transition-colors ${
+                    isActive(link.href!) ? "text-[#869C51]" : "text-gray-900"
+                  } text-[16px]`}
                 >
                   {link.name}
                 </Link>
@@ -158,8 +167,9 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.98 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1250px] h-[80vh] z-50 border border-gray-200 flex ${isLoggedIn ? `ml-12` : `ml-[-60px]`
-                        }`}
+                      className={`absolute top-full left-1/2 -translate-x-1/2 bg-white shadow-2xl rounded-sm mt-4 w-[92vw] max-w-[1250px] h-[80vh] z-50 border border-gray-200 flex ${
+                        isLoggedIn ? `ml-12` : `ml-[-60px]`
+                      }`}
                     >
                       {/* LEFT panel - categories */}
                       <div className="w-[28%] max-w-[300px] border-r border-gray-100 overflow-hidden">
@@ -168,10 +178,11 @@ export default function Navbar() {
                             key={i}
                             onClick={() => setActiveCategory(group.category)}
                             className={`w-full text-left px-5 py-3 text-lg font-bold transition-all duration-300 
-                ${activeCategory === group.category
-                                ? "bg-yellow-400 text-gray-700 shadow-inner"
-                                : "text-gray-700 hover:text-gray-800 hover:bg-yellow-400"
-                              }`}
+                ${
+                  activeCategory === group.category
+                    ? "bg-yellow-400 text-gray-700 shadow-inner"
+                    : "text-gray-700 hover:text-gray-800 hover:bg-yellow-400"
+                }`}
                             whileHover={{ x: 4 }}
                           >
                             {group.category}
@@ -204,7 +215,7 @@ export default function Navbar() {
 
                                   {/* direct exams */}
                                   {Array.isArray(sub.exams) &&
-                                    typeof sub.exams[0] === "string" ? (
+                                  typeof sub.exams[0] === "string" ? (
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                                       {sub.exams.map((ex, i) => (
                                         <motion.div
@@ -216,7 +227,9 @@ export default function Navbar() {
                                           }}
                                         >
                                           <Link
-                                            onClick={() => setHoveredDropdown(null)}
+                                            onClick={() =>
+                                              setHoveredDropdown(null)
+                                            }
                                             href={`/course/${slugify(ex)}`}
                                             className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-500 shadow-sm transition-all"
                                           >
@@ -228,40 +241,42 @@ export default function Navbar() {
                                   ) : (
                                     // state-level exams
                                     <div className="space-y-6">
-                                      {(sub.exams as ExamStateGroup[]).map(
-                                        (subState, sti) => (
-                                          <div key={sti}>
-                                            <div className="text-lg font-bold text-gray-700 mb-3">
-                                              {subState.state}
-                                            </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                                              {subState.exams.map((ex, ei) => (
-                                                <motion.div
-                                                  key={ei}
-                                                  whileHover={{
-                                                    scale: 1.05,
-                                                    y: -4,
-                                                  }}
-                                                  transition={{
-                                                    type: "spring",
-                                                    stiffness: 250,
-                                                  }}
-                                                >
-                                                  <Link
-                                                    onClick={() => setHoveredDropdown(null)}
-                                                    href={`/course/${slugify(
-                                                      ex
-                                                    )}`}
-                                                    className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-yellow-400 hover:text-yellow-500 shadow-sm transition-all"
-                                                  >
-                                                    {ex}
-                                                  </Link>
-                                                </motion.div>
-                                              ))}
-                                            </div>
+                                      {(
+                                        sub.exams as unknown as ExamStateGroup[]
+                                      ).map((subState, sti) => (
+                                        <div key={sti}>
+                                          <div className="text-lg font-bold text-gray-700 mb-3">
+                                            {subState.state}
                                           </div>
-                                        )
-                                      )}
+                                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                                            {subState.exams.map((ex, ei) => (
+                                              <motion.div
+                                                key={ei}
+                                                whileHover={{
+                                                  scale: 1.05,
+                                                  y: -4,
+                                                }}
+                                                transition={{
+                                                  type: "spring",
+                                                  stiffness: 250,
+                                                }}
+                                              >
+                                                <Link
+                                                  onClick={() =>
+                                                    setHoveredDropdown(null)
+                                                  }
+                                                  href={`/course/${slugify(
+                                                    ex
+                                                  )}`}
+                                                  className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-green-50 hover:border-yellow-400 hover:text-yellow-500 shadow-sm transition-all"
+                                                >
+                                                  {ex}
+                                                </Link>
+                                              </motion.div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))}
                                     </div>
                                   )}
                                 </section>
@@ -281,7 +296,9 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center space-x-4">
           {isLoggedIn === true && (
             <Link
-              href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
+              href={
+                role === "admin" ? "/admin/dashboard" : "/student/dashboard"
+              }
               className="bg-gray-200 text-[#2E4A3C] px-6 py-2 rounded font-bold hover:bg-gray-300 shadow-xl transition transform hover:-translate-y-1 hover:scale-100"
             >
               {role === "admin" ? "Admin Dashboard" : "Dashboard"}
@@ -295,7 +312,8 @@ export default function Navbar() {
                 className="bg-red-600 text-white px-8 py-2 rounded font-bold hover:bg-red-700 transition shadow-xl transform hover:-translate-y-1 hover:scale-100 cursor-pointer"
               >
                 Logout
-              </button></Link>
+              </button>
+            </Link>
           ) : (
             <Link
               href="/login"
@@ -340,10 +358,9 @@ export default function Navbar() {
                   <Link
                     key={idx}
                     href={link.href!}
-                    className={`block py-2 font-extrabold hover:text-[#2E4A3C] ${isActive(link.href!)
-                      ? "text-[#869C51]"
-                      : "text-gray-900"
-                      }`}
+                    className={`block py-2 font-extrabold hover:text-[#2E4A3C] ${
+                      isActive(link.href!) ? "text-[#869C51]" : "text-gray-900"
+                    }`}
                   >
                     {link.name}
                   </Link>
@@ -389,7 +406,7 @@ export default function Navbar() {
                                       <AccordionContent className="pl-4 pb-2 space-y-1">
                                         {/* exams */}
                                         {Array.isArray(sub.exams) &&
-                                          typeof sub.exams[0] === "string" ? (
+                                        typeof sub.exams[0] === "string" ? (
                                           <ul className="space-y-1">
                                             {sub.exams.map((exam, eIdx) => (
                                               <li key={eIdx}>
@@ -406,37 +423,37 @@ export default function Navbar() {
                                           </ul>
                                         ) : (
                                           <Accordion type="multiple">
-                                            {(sub.exams as ExamStateGroup[]).map(
-                                              (subState, stIdx) => (
-                                                <AccordionItem
-                                                  key={stIdx}
-                                                  value={`state-${stIdx}`}
-                                                  className="rounded-md border border-gray-100"
-                                                >
-                                                  <AccordionTrigger className="text-sm font-medium px-2 py-1 hover:bg-gray-50 data-[state=open]:bg-green-50">
-                                                    {subState.state}
-                                                  </AccordionTrigger>
-                                                  <AccordionContent className="pl-3 pb-2">
-                                                    <ul className="space-y-1">
-                                                      {subState.exams.map(
-                                                        (ex, i) => (
-                                                          <li key={i}>
-                                                            <Link
-                                                              href={`/course/${slugify(
-                                                                ex
-                                                              )}`}
-                                                              className="block px-2 py-1 rounded-md text-gray-600 hover:bg-green-50 hover:text-[#2E4A3C]"
-                                                            >
-                                                              {ex}
-                                                            </Link>
-                                                          </li>
-                                                        )
-                                                      )}
-                                                    </ul>
-                                                  </AccordionContent>
-                                                </AccordionItem>
-                                              )
-                                            )}
+                                            {(
+                                              sub.exams as unknown as ExamStateGroup[]
+                                            ).map((subState, stIdx) => (
+                                              <AccordionItem
+                                                key={stIdx}
+                                                value={`state-${stIdx}`}
+                                                className="rounded-md border border-gray-100"
+                                              >
+                                                <AccordionTrigger className="text-sm font-medium px-2 py-1 hover:bg-gray-50 data-[state=open]:bg-green-50">
+                                                  {subState.state}
+                                                </AccordionTrigger>
+                                                <AccordionContent className="pl-3 pb-2">
+                                                  <ul className="space-y-1">
+                                                    {subState.exams.map(
+                                                      (ex, i) => (
+                                                        <li key={i}>
+                                                          <Link
+                                                            href={`/course/${slugify(
+                                                              ex
+                                                            )}`}
+                                                            className="block px-2 py-1 rounded-md text-gray-600 hover:bg-green-50 hover:text-[#2E4A3C]"
+                                                          >
+                                                            {ex}
+                                                          </Link>
+                                                        </li>
+                                                      )
+                                                    )}
+                                                  </ul>
+                                                </AccordionContent>
+                                              </AccordionItem>
+                                            ))}
                                           </Accordion>
                                         )}
                                       </AccordionContent>
@@ -457,7 +474,9 @@ export default function Navbar() {
             {/* mobile buttons */}
             {isLoggedIn === true && (
               <Link
-                href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
+                href={
+                  role === "admin" ? "/admin/dashboard" : "/student/dashboard"
+                }
                 className="block w-full bg-gray-200 text-[#2E4A3C] text-center py-2 rounded font-semibold hover:bg-gray-300"
               >
                 {role === "admin" ? "Admin Dashboard" : "Dashboard"}
@@ -478,7 +497,6 @@ export default function Navbar() {
               >
                 Login
               </Link>
-
             )}
           </motion.div>
         )}

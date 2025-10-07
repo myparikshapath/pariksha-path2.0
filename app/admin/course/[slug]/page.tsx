@@ -26,6 +26,7 @@ import {
   MoreVertical,
   FileText,
   Eye,
+  Calendar,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -246,6 +247,14 @@ const CourseDetailPage = () => {
                 <span className="font-medium text-[#1f7a53]">
                   {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
                   Sections
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-full bg-[#f0fbf4] px-4 py-2 border border-[#d6f5e5]">
+                <div className="p-2 rounded-full bg-[#d6f5e5]">
+                  <Calendar className="h-4 w-4 text-[#1f7a53]" />
+                </div>
+                <span className="font-medium text-[#1f7a53]">
+                  {course.validity_period_days || 365} days validity
                 </span>
               </div>
             </div>
