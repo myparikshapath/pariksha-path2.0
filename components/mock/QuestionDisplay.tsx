@@ -119,6 +119,8 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         <span>Subject: {question.subject}</span>
         <span>•</span>
         <span>Topic: {question.topic}</span>
+        <span>•</span>
+        <span className="font-medium text-gray-700">Marks: {question.marks}</span>
         {question.tags && question.tags.length > 0 && (
           <>
             <span>•</span>

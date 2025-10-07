@@ -192,7 +192,15 @@ const SectionQuestionsPage = () => {
     }
   };
 
-  const renderQuestion = (question: Question, index: number) => {
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+
+  useEffect(() => {
+    if (pagination.page !== 1) {
+      setActiveQuestionIndex(0);
+    }
+  }, [pagination.page]);
+
+  const renderQuestion = (question: Question) => {
     // Convert Question to QuestionResponse format for the editor
     const questionResponse: QuestionResponse = {
       id: question.id,
@@ -217,28 +225,40 @@ const SectionQuestionsPage = () => {
     };
 
     return (
-      <div key={question.id} className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-700">
-            Question {(pagination.page - 1) * pagination.limit + index + 1}
-          </h3>
-          <div className="flex gap-2">
-            <Badge className={getDifficultyColor(question.difficulty_level)}>
-              {question.difficulty_level}
-            </Badge>
-            <Badge variant="outline">{question.marks} marks</Badge>
+      <Card className="border border-[#e3f6ec] bg-white shadow-sm">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#143f2a]">
+                Question{" "}
+                {(pagination.page - 1) * pagination.limit +
+                  (activeQuestionIndex + 1)}
+              </h3>
+              <p className="text-sm text-[#2c8a62]">
+                {question.topic ? `${question.topic} • ` : ""}Difficulty:{" "}
+                {question.difficulty_level}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Badge className={getDifficultyColor(question.difficulty_level)}>
+                {question.difficulty_level}
+              </Badge>
+              <Badge variant="outline">{question.marks} marks</Badge>
+            </div>
           </div>
-        </div>
 
-        <QuestionEditor
-          question={questionResponse}
-          onSave={handleQuestionUpdate}
-          onCancel={handleCancelEdit}
-          onDelete={handleDeleteQuestion}
-          isEditing={editingQuestionId === question.id}
-          onEdit={() => handleEditQuestion(question.id)}
-        />
-      </div>
+          <div className="rounded-lg border border-[#d6f5e5] bg-[#f0fbf4] p-4">
+            <QuestionEditor
+              question={questionResponse}
+              onSave={handleQuestionUpdate}
+              onCancel={handleCancelEdit}
+              onDelete={handleDeleteQuestion}
+              isEditing={editingQuestionId === question.id}
+              onEdit={() => handleEditQuestion(question.id)}
+            />
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -320,126 +340,110 @@ const SectionQuestionsPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <Button
-          onClick={() => router.back()}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Course
-        </Button>
+    <div className="min-h-screen bg-[#f5fcf7]">
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            onClick={() => router.back()}
+            className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[#1f7a53] shadow-sm border border-[#d6f5e5] hover:bg-[#ebfaf2] hover:text-[#176344]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Course
+          </Button>
 
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {sectionDetails?.name || sectionName}
-            </h1>
-            {courseInfo && (
-              <p className="text-gray-600 mt-2">
-                {courseInfo.title} ({courseInfo.code})
-              </p>
-            )}
-            {sectionDetails?.description && (
-              <p className="text-gray-700 mt-2">{sectionDetails.description}</p>
-            )}
-          </div>
-          <div className="text-right">
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <BookOpen className="h-4 w-4" />
-                <span>{pagination.total} questions</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Target className="h-4 w-4" />
-                <span>
-                  Page {pagination.page} of {pagination.total_pages}
-                </span>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-semibold text-[#143f2a]">
+                {sectionDetails?.name || sectionName}
+              </h1>
+              {courseInfo && (
+                <p className="text-[#2c8a62] mt-2 text-sm">
+                  {courseInfo.title} ({courseInfo.code})
+                </p>
+              )}
+              {sectionDetails?.description && (
+                <p className="text-[#285d43] mt-3 text-sm leading-relaxed">
+                  {sectionDetails.description}
+                </p>
+              )}
+            </div>
+            <div className="text-right">
+              <div className="flex items-center gap-4 text-sm text-[#2c8a62]">
+                <div className="flex items-center gap-1">
+                  <BookOpen className="h-4 w-4" />
+                  <span>{pagination.total} questions</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex gap-4 items-center">
-            <Filter className="h-5 w-5 text-gray-600" />
-            <div className="flex gap-4">
-              <Select
-                value={filters.difficulty || "all"}
-                onValueChange={(value) =>
-                  handleFilterChange("difficulty", value === "all" ? "" : value)
-                }
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Difficulty" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Difficulties</SelectItem>
-                  <SelectItem value="easy">Easy</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="hard">Hard</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filters.topic || "all"}
-                onValueChange={(value) =>
-                  handleFilterChange("topic", value === "all" ? "" : value)
-                }
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Topic" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Topics</SelectItem>
-                  {/* Add more topics as needed */}
-                </SelectContent>
-              </Select>
-
-              {(filters.difficulty || filters.topic) && (
-                <Button
-                  onClick={() => {
-                    setFilters({ difficulty: "", topic: "" });
-                    setPagination((prev) => ({ ...prev, page: 1 }));
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Questions */}
-      {questions.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No questions found
-            </h3>
-            <p className="text-gray-600">
-              {filters.difficulty || filters.topic
-                ? "No questions match your current filters."
-                : "No questions have been uploaded for this section yet."}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
+        {/* Questions */}
+        {questions.length === 0 ? (
+          <Card className="border border-[#d6f5e5] bg-white">
+            <CardContent className="text-center py-12">
+              <BookOpen className="h-12 w-12 text-[#d6f5e5] mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-[#143f2a] mb-2">
+                No questions found
+              </h3>
+              <p className="text-[#285d43]">
+                {filters.difficulty || filters.topic
+                  ? "No questions match your current filters."
+                  : "No questions have been uploaded for this section yet."}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
           <div className="space-y-6">
-            {questions.map((question, index) =>
-              renderQuestion(question, index)
-            )}
+            <div className="rounded-2xl border border-[#d6f5e5] bg-white shadow-sm p-4">
+              <div className="flex flex-wrap gap-3 mb-4">
+                {questions.map((question, index) => (
+                  <Button
+                    key={question.id}
+                    size="sm"
+                    onClick={() => {
+                      setActiveQuestionIndex(index);
+                      setEditingQuestionId(null);
+                    }}
+                    className={`h-9 w-9 rounded-full border ${
+                      activeQuestionIndex === index
+                        ? "bg-[#1f7a53] text-white border-[#1f7a53]"
+                        : "bg-white text-[#1f7a53] border-[#d6f5e5] hover:bg-[#f0fbf4]"
+                    }`}
+                  >
+                    {index + 1}
+                  </Button>
+                ))}
+              </div>
+              {renderQuestion(questions[activeQuestionIndex])}
+            </div>
+            <div className="flex justify-between items-center gap-4">
+              <Button
+                disabled={activeQuestionIndex === 0}
+                onClick={() =>
+                  setActiveQuestionIndex((prev) => Math.max(0, prev - 1))
+                }
+                className="rounded-full bg-white text-[#1f7a53] border border-[#d6f5e5] hover:bg-[#f0fbf4] disabled:opacity-50"
+              >
+                Previous Question
+              </Button>
+              <Button
+                disabled={activeQuestionIndex === questions.length - 1}
+                onClick={() =>
+                  setActiveQuestionIndex((prev) =>
+                    Math.min(questions.length - 1, prev + 1)
+                  )
+                }
+                className="rounded-full bg-[#1f7a53] text-white hover:bg-[#176344] disabled:opacity-50"
+              >
+                Next Question
+              </Button>
+            </div>
+            {renderPagination()}
           </div>
-          {renderPagination()}
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };

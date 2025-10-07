@@ -685,7 +685,7 @@ export default function MockTestAttemptPage() {
             </ul>
           </div>
 
-          <div className="mb-8">
+          {/* <div className="mb-8">
             <h2 className="text-lg font-semibold mb-3">Sections</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {sections.map((section, index) => (
@@ -698,7 +698,7 @@ export default function MockTestAttemptPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-center">
             <Button
