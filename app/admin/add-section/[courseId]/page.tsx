@@ -5,23 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import {
   addSectionToCourse,
   getCourseDetails,
-  Course
+  Course,
 } from "@/src/services/courseService";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-  Plus
-} from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Plus } from "lucide-react";
 
 const AddSectionPage = () => {
   const params = useParams();
@@ -43,7 +33,7 @@ const AddSectionPage = () => {
       const courseData = await getCourseDetails(courseId);
       setCourse(courseData);
     } catch (e: unknown) {
-      console.error('Error loading course:', e);
+      console.error("Error loading course:", e);
       setError(e instanceof Error ? e.message : "Failed to load course");
     } finally {
       setLoading(false);
@@ -63,7 +53,11 @@ const AddSectionPage = () => {
     setSaving(true);
     try {
       await addSectionToCourse(courseId, sectionName.trim(), questionCount);
-      router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
+      router.push(
+        `/admin/course/${
+          course.code?.toLowerCase().replace(/\s+/g, "-") || course.id
+        }`
+      );
     } catch (error) {
       console.error("Error adding section:", error);
       setError("Failed to add section");
@@ -74,13 +68,17 @@ const AddSectionPage = () => {
 
   const handleBack = () => {
     if (course) {
-      router.push(`/admin/course/${course.code?.toLowerCase().replace(/\s+/g, '-') || course.id}`);
+      router.push(
+        `/admin/course/${
+          course.code?.toLowerCase().replace(/\s+/g, "-") || course.id
+        }`
+      );
     } else {
       router.push("/admin/add-exam");
     }
   };
 
-  const isDuplicate = course?.sections?.some(s => s.name) || false;
+  const isDuplicate = course?.sections?.some((s) => s.name) || false;
 
   if (loading) {
     return (
@@ -116,7 +114,8 @@ const AddSectionPage = () => {
             {error || "Course not found"}
           </h2>
           <p className="text-gray-600">
-            The course you&apos;re trying to add a section to doesn&apos;t exist or has been removed.
+            The course you&apos;re trying to add a section to doesn&apos;t exist
+            or has been removed.
           </p>
         </div>
       </div>
@@ -161,7 +160,7 @@ const AddSectionPage = () => {
                 <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-emerald-200/50">
                   <span className="text-sm text-slate-600">Course: </span>
                   <span className="font-semibold text-emerald-700">
-                    {course?.title || 'Loading...'}
+                    {course?.title || "Loading..."}
                   </span>
                 </div>
               </div>
@@ -215,7 +214,7 @@ const AddSectionPage = () => {
                   Enter a descriptive name for the new section.
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="questionCount">Mock Test Question Count</Label>
                 <Input
@@ -224,33 +223,23 @@ const AddSectionPage = () => {
                   min="1"
                   max="100"
                   value={questionCount}
-                  onChange={(e) => setQuestionCount(parseInt(e.target.value) || 10)}
+                  onChange={(e) =>
+                    setQuestionCount(parseInt(e.target.value) || 10)
+                  }
                   placeholder="Number of questions to show in mock test"
                 />
                 <p className="text-sm text-gray-500">
-                  How many questions should be randomly selected for this section in mock tests?
+                  How many questions should be randomly selected for this
+                  section in mock tests?
                 </p>
               </div>
-
-              {course.sections && course.sections.length > 0 && (
-                <div className="space-y-2">
-                  <Label>Existing Sections:</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {course.sections.map((section, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-100 text-gray-800 px-3 py-1 rounded-md 
-                        text-sm"
-                      >
-                        {section.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={handleBack} className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-6 py-3 shadow-sm transition-all duration-200">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-6 py-3 shadow-sm transition-all duration-200"
+                >
                   Cancel
                 </Button>
                 <Button
