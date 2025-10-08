@@ -5,7 +5,7 @@ import { UserCheck, BookOpenCheck, Sprout } from "lucide-react";
 
 export default function About() {
     return (
-        <main className="pt-12 px-6 max-w-7xl mx-auto">
+        <main className="px-6 max-w-7xl mx-auto">
 
             {/* Coaching Overview */}
             <section className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

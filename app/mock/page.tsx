@@ -89,7 +89,7 @@ export default function MockPage() {
   return (
     <>
       <Navbar />
-      <main className="pt-16 max-w-7xl mx-auto px-6 space-y-20">
+      <main className="pt-8 max-w-7xl mx-auto px-6 space-y-20">
         {/* ===== Hero Section ===== */}
         <motion.section
           initial="hidden"
