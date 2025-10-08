@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   Upload,
   BookOpen,
-  Clock,
   Check,
   DollarSign,
   Edit,
@@ -47,42 +46,32 @@ const CourseDetailPage = () => {
   const [deletingSection, setDeletingSection] = useState<string | null>(null);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [operationLoading, setOperationLoading] = useState(false);
-
   const [isEditingSection, setIsEditingSection] = useState<string | null>(null);
   const [tempQuestionCount, setTempQuestionCount] = useState<string>("0");
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
-  const handleUploadQuestions = (section: string) => {
+  const handleUploadQuestions = (section: string) =>
     router.push(`/admin/course/${params.slug}/${encodeURIComponent(section)}`);
-  };
 
-  const handleViewQuestions = (section: string) => {
+  const handleViewQuestions = (section: string) =>
     router.push(`/course/${params.slug}/${encodeURIComponent(section)}`);
-  };
 
-  const handleManagePDFs = (section: string) => {
+  const handleManagePDFs = (section: string) =>
     router.push(
       `/admin/course/${params.slug}/${encodeURIComponent(section)}/pdfs`
     );
-  };
 
   const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
       const courses = await fetchAvailableCourses();
-
       const foundCourse = courses.find((c) => {
         const courseSlug = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
         return courseSlug === params.slug;
       });
-
-      if (foundCourse) {
-        setCourse(foundCourse);
-      } else {
-        setError("Course not found");
-      }
+      if (foundCourse) setCourse(foundCourse);
+      else setError("Course not found");
     } catch (e: unknown) {
       console.error("Error loading course:", e);
       setError(e instanceof Error ? e.message : "Failed to load course");
@@ -95,97 +84,66 @@ const CourseDetailPage = () => {
     loadCourse();
   }, [params.slug, loadCourse]);
 
-  const handleBackClick = () => {
-    router.push("/admin/add-exam");
-  };
-
-  const handleAddSection = () => {
-    if (!course) return;
-    router.push(`/admin/add-section/${course.id}`);
-  };
-
-  const handleEditSection = (sectionName: string) => {
-    if (!course) return;
-    router.push(
-      `/admin/edit-section/${course.id}/${encodeURIComponent(sectionName)}`
-    );
-  };
-
-  const handleDeleteSection = (sectionName: string) => {
-    setDeletingSection(sectionName);
+  const handleBackClick = () => router.push("/admin/add-exam");
+  const handleAddSection = () =>
+    course && router.push(`/admin/add-section/${course.id}`);
+  const handleEditSection = (s: string) =>
+    course && router.push(`/admin/edit-section/${course.id}/${encodeURIComponent(s)}`);
+  const handleDeleteSection = (s: string) => {
+    setDeletingSection(s);
     setDeleteSectionDialogOpen(true);
   };
-
-  const handleConfirmDeleteSection = async (sectionName: string) => {
+  const handleConfirmDeleteSection = async (s: string) => {
     if (!course) return;
-
     setOperationLoading(true);
     try {
-      await deleteSectionFromCourse(course.id, sectionName);
+      await deleteSectionFromCourse(course.id, s);
       await loadCourse();
       setDeleteSectionDialogOpen(false);
       setDeletingSection(null);
     } catch (error: unknown) {
       console.error("Error deleting section:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to delete section"
-      );
+      setError(error instanceof Error ? error.message : "Failed to delete section");
     } finally {
       setOperationLoading(false);
     }
   };
-
   const closeDeleteDialog = () => {
     setDeleteSectionDialogOpen(false);
     setDeletingSection(null);
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading course...</span>
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-green-700" />
       </div>
     );
-  }
 
-  if (error || !course) {
+  if (error || !course)
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            onClick={handleBackClick}
-            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Courses
-          </Button>
-        </div>
-
-        <div className="text-center py-12">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            {error || "Course not found"}
-          </h2>
-          <p className="text-gray-600">
-            The course you&apos;re looking for doesn&apos;t exist or has been
-            removed.
-          </p>
-        </div>
+      <div className="max-w-lg mx-auto text-center py-20">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">
+          {error || "Course not found"}
+        </h2>
+        <Button
+          onClick={handleBackClick}
+          className="mt-4 bg-green-700 hover:bg-green-800 text-white rounded-full"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Courses
+        </Button>
       </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-[#f5fcf7] py-10">
-      <div className="max-w-5xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+    <div className="min-h-screen bg-[#f5fcf7] py-6 sm:py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Back Button */}
+        <div className="flex items-center mb-6">
           <Button
             onClick={handleBackClick}
-            className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[#1f7a53] shadow-sm border border-[#d6f5e5] hover:bg-[#ebfaf2] hover:text-[#176344]"
+            className="flex items-center gap-2 rounded-full bg-white px-4 sm:px-5 py-2 text-[#1f7a53] border border-[#d6f5e5] hover:bg-[#ebfaf2]"
           >
             <ArrowLeft className="h-5 w-5" />
             Back to Courses
@@ -193,40 +151,37 @@ const CourseDetailPage = () => {
         </div>
 
         {/* Course Info */}
-        <div className="mb-10">
-          <div className="rounded-2xl border border-[#d6f5e5] bg-white shadow-sm">
-            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-8 p-8">
-              <div className="flex-1 space-y-4">
-                <h1 className="text-3xl lg:text-4xl font-semibold text-[#143f2a]">
+        <div className="mb-8">
+          <div className="rounded-2xl border border-[#d6f5e5] bg-white shadow-sm p-6 sm:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+              <div className="flex-1 space-y-3">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-[#143f2a]">
                   {course.title}
                 </h1>
-                {course.sub_category && (
-                  <p className="inline-flex rounded-full bg-[#f0fbf4] px-4 py-1.5 text-[#1f7a53] text-sm font-medium border border-[#d6f5e5]">
-                    {course.sub_category}
-                  </p>
-                )}
-                {course.code && (
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f0fbf4] text-[#176344] text-xs font-semibold uppercase tracking-wide border border-[#d6f5e5]">
-                    <span className="opacity-70">Code</span>
-                    <span className="font-mono text-sm">{course.code}</span>
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  {course.sub_category && (
+                    <span className="px-3 py-1 text-sm bg-[#f0fbf4] border border-[#d6f5e5] rounded-full text-[#1f7a53]">
+                      {course.sub_category}
+                    </span>
+                  )}
+                  {course.code && (
+                    <span className="px-3 py-1 text-xs bg-[#f0fbf4] border border-[#d6f5e5] rounded-full text-[#176344] font-mono uppercase">
+                      {course.code}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="text-left lg:text-right space-y-3">
-                <div className="inline-flex items-center gap-3 rounded-xl bg-[#f0fbf4] px-4 py-3 shadow-sm border border-[#d6f5e5]">
+              <div className="flex-shrink-0 text-left lg:text-right">
+                <div className="inline-flex items-center gap-3 bg-[#f0fbf4] border border-[#d6f5e5] rounded-xl px-4 py-3">
                   <div className="p-3 rounded-full bg-[#1f7a53] text-white">
                     <DollarSign className="h-5 w-5" />
                   </div>
-                  <div className="text-left">
-                    <div className="text-2xl font-semibold text-[#176344]">
-                      {course.is_free
-                        ? "Free"
-                        : `Rs.${course.price.toFixed(2)}`}
+                  <div>
+                    <div className="text-lg sm:text-xl font-semibold text-[#176344]">
+                      {course.is_free ? "Free" : `₹${course.price.toFixed(2)}`}
                     </div>
-                    <div className="text-xs uppercase tracking-wide text-[#2c8a62] font-medium">
-                      {course.is_free
-                        ? "No payment required"
-                        : "One-time payment"}
+                    <div className="text-xs uppercase text-[#2c8a62] font-medium">
+                      {course.is_free ? "No payment" : "One-time payment"}
                     </div>
                   </div>
                 </div>
@@ -234,83 +189,67 @@ const CourseDetailPage = () => {
             </div>
 
             {course.description && (
-              <p className="px-8 pb-8 text-base leading-relaxed text-[#285d43]">
+              <p className="mt-4 text-[#285d43] text-sm sm:text-base leading-relaxed">
                 {course.description}
               </p>
             )}
 
-            <div className="px-8 pb-8 flex flex-wrap items-center gap-4 text-sm">
-              <div className="flex items-center gap-3 rounded-full bg-[#f0fbf4] px-4 py-2 border border-[#d6f5e5]">
-                <div className="p-2 rounded-full bg-[#d6f5e5]">
-                  <BookOpen className="h-4 w-4 text-[#1f7a53]" />
-                </div>
-                <span className="font-medium text-[#1f7a53]">
-                  {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
-                  Sections
-                </span>
-              </div>
-              <div className="flex items-center gap-3 rounded-full bg-[#f0fbf4] px-4 py-2 border border-[#d6f5e5]">
-                <div className="p-2 rounded-full bg-[#d6f5e5]">
-                  <Calendar className="h-4 w-4 text-[#1f7a53]" />
-                </div>
-                <span className="font-medium text-[#1f7a53]">
-                  {course.validity_period_days || 365} days validity
-                </span>
-              </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <span className="flex items-center gap-2 text-sm bg-[#f0fbf4] border border-[#d6f5e5] px-3 py-2 rounded-full text-[#1f7a53]">
+                <BookOpen className="h-4 w-4" />
+                {course.sections?.length || 0} Sections
+              </span>
+              <span className="flex items-center gap-2 text-sm bg-[#f0fbf4] border border-[#d6f5e5] px-3 py-2 rounded-full text-[#1f7a53]">
+                <Calendar className="h-4 w-4" />
+                {course.validity_period_days || 365} Days validity
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Sections Grid */}
-        <div>
-          <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-semibold text-[#143f2a]">
+        {/* Sections */}
+        <div className="mb-12">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#143f2a]">
                 Course Sections
               </h2>
-              <div className="px-3 py-1 rounded-full bg-[#f0fbf4] text-[#1f7a53] text-sm font-medium border border-[#d6f5e5]">
-                {Array.isArray(course.sections) ? course.sections.length : 0}{" "}
-                sections
-              </div>
+              <span className="px-3 py-1 text-sm bg-[#f0fbf4] border border-[#d6f5e5] rounded-full text-[#1f7a53]">
+                {course.sections?.length || 0}
+              </span>
             </div>
             <Button
               onClick={handleAddSection}
               className="flex items-center gap-2 rounded-full bg-[#1f7a53] px-4 py-2 text-white shadow-sm hover:bg-[#176344]"
             >
-              <Plus className="h-5 w-5" />
-              Add Section
+              <Plus className="h-5 w-5" /> Add Section
             </Button>
           </div>
 
-          {!course.sections || course.sections.length === 0 ? (
-            <div className="text-center py-14 border border-dashed border-[#d6f5e5] rounded-2xl bg-white shadow-sm">
-              <div className="p-4 rounded-full bg-[#f0fbf4] w-fit mx-auto mb-4">
-                <BookOpen className="h-14 w-14 text-[#1f7a53]" />
-              </div>
-              <p className="text-[#285d43] text-lg mb-5 font-medium">
-                No sections available for this course yet.
+          {!course.sections?.length ? (
+            <div className="text-center py-12 border border-dashed border-[#d6f5e5] rounded-2xl bg-white shadow-sm">
+              <BookOpen className="h-12 w-12 text-[#1f7a53] mx-auto mb-4" />
+              <p className="text-[#285d43] text-base sm:text-lg mb-5">
+                No sections available yet.
               </p>
               <Button
                 onClick={handleAddSection}
-                className="flex items-center gap-2 rounded-full bg-[#1f7a53] px-6 py-3 text-white shadow-sm hover:bg-[#176344]"
+                className="rounded-full bg-[#1f7a53] px-6 py-2.5 text-white hover:bg-[#176344]"
               >
-                <Plus className="h-5 w-5" />
-                Add First Section
+                <Plus className="mr-2 h-4 w-4" /> Add First Section
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+            <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {course.sections.map((section, index) => (
                 <Card
                   key={index}
-                  className="group overflow-hidden border border-[#e3f6ec] bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                  className="group border border-[#e3f6ec] bg-white hover:shadow-md transition-all duration-200"
                 >
-                  <CardHeader className="pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#f9fefb] border-b border-[#e3f6ec]">
-                    <div className="flex items-center gap-4 flex-wrap w-full">
-                      <CardTitle className="text-lg font-semibold text-[#143f2a] group-hover:text-[#1f7a53] transition-colors flex-1 -mb-6">
-                        {section.name}
-                      </CardTitle>
-                    </div>
+                  <CardHeader className="flex justify-between items-center bg-[#f9fefb] border-b border-[#e3f6ec] px-5 py-3">
+                    <CardTitle className="text-[#143f2a] text-base sm:text-lg font-semibold">
+                      {section.name}
+                    </CardTitle>
                     <DropdownMenu
                       open={dropdownOpen === section.name}
                       onOpenChange={(open) =>
@@ -321,137 +260,108 @@ const CourseDetailPage = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-9 w-9 p-0 rounded-full text-[#1f7a53] hover:bg-[#e9f8f0]"
+                          className="h-8 w-8 p-0 rounded-full text-[#1f7a53] hover:bg-[#e9f8f0]"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="bg-white border border-[#e3f6ec] shadow-lg"
-                      >
+                      <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => handleEditSection(section.name)}
-                          className="hover:bg-[#f0fbf4] cursor-pointer py-2.5 px-4 text-[#1f7a53]"
                         >
-                          <Edit className="mr-3 h-4 w-4" />
-                          <span className="font-medium">Edit Section</span>
+                          <Edit className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteSection(section.name)}
-                          className="text-red-600 hover:bg-red-50 cursor-pointer py-2.5 px-4"
+                          className="text-red-600"
                         >
-                          <Trash2 className="mr-3 h-4 w-4" />
-                          <span className="font-medium">Delete</span>
+                          <Trash2 className="mr-2 h-4 w-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </CardHeader>
 
-                  <CardContent className="flex flex-col gap-5 p-5">
-                    {/* Number of Questions */}
-                    <div className="flex items-center gap-3 flex-wrap p-3 rounded-lg bg-[#f5fbf7] border border-[#e3f6ec]">
-                      <label className="text-sm font-medium text-[#285d43] flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#1f7a53]"></div>
+                  <CardContent className="p-5 flex flex-col gap-4">
+                    {/* Questions */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="font-medium text-[#285d43]">
                         Questions:
-                      </label>
+                      </span>
                       {isEditingSection === section.name ? (
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
                           <input
                             type="number"
-                            min={0}
                             value={tempQuestionCount}
-                            onChange={(e) =>
-                              setTempQuestionCount(e.target.value)
-                            }
-                            className="border border-[#d6f5e5] rounded-md px-3 py-1.5 w-20 text-sm focus:ring-1 focus:ring-[#1f7a53] focus:border-[#1f7a53]"
+                            onChange={(e) => setTempQuestionCount(e.target.value)}
+                            className="border border-[#d6f5e5] rounded-md px-3 py-1 w-20 text-sm"
                           />
-                          <button
-                            className="p-2 rounded-md bg-[#1f7a53] text-white hover:bg-[#176344]"
+                          <Button
+                            size="sm"
                             onClick={async () => {
-                              if (tempQuestionCount && course) {
-                                try {
-                                  await updateSectionQuestionCount(
-                                    course.id,
-                                    section.name,
-                                    tempQuestionCount
-                                  );
-                                  await loadCourse();
-                                  setIsEditingSection(null);
-                                } catch (err) {
-                                  console.error(
-                                    "Failed to update question count",
-                                    err
-                                  );
-                                  setError("Failed to update question count");
-                                }
+                              if (course) {
+                                await updateSectionQuestionCount(
+                                  course.id,
+                                  section.name,
+                                  tempQuestionCount
+                                );
+                                await loadCourse();
+                                setIsEditingSection(null);
                               }
                             }}
+                            className="bg-[#1f7a53] hover:bg-[#176344]"
                           >
                             <Check className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="p-2 rounded-md border border-[#d6f5e5] text-[#285d43] hover:bg-[#e9f8f0]"
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => setIsEditingSection(null)}
                           >
                             <X className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-lg font-semibold text-[#143f2a] px-3 py-1.5 rounded-md bg-white border border-[#e3f6ec]">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-[#143f2a]">
                             {section.question_count || 0}
                           </span>
-                          <button
-                            className="p-2 rounded-md border border-[#e3f6ec] text-[#1f7a53] hover:bg-[#f0fbf4]"
-                            onClick={(e) => {
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
                               setIsEditingSection(section.name);
                               setTempQuestionCount(
-                                section.question_count.toString() || "0"
+                                section.question_count?.toString() || "0"
                               );
-                              e.stopPropagation();
                             }}
                           >
                             <Edit className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Actions */}
                     <div className="flex flex-wrap gap-3">
                       <Button
-                        size="sm"
-                        className="flex items-center gap-2 flex-1 min-w-[120px] justify-center rounded-md border border-[#d6f5e5] bg-white text-[#1f7a53] hover:bg-[#f0fbf4]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewQuestions(section.name);
-                        }}
+                        variant="outline"
+                        className="flex-1 border-[#d6f5e5] text-[#1f7a53]"
+                        onClick={() => handleViewQuestions(section.name)}
                       >
-                        <Eye className="h-4 w-4" />
-                        <span className="font-medium">View Questions</span>
+                        <Eye className="mr-2 h-4 w-4" /> View
                       </Button>
                       <Button
-                        size="sm"
-                        className="flex items-center gap-2 flex-1 min-w-[120px] justify-center rounded-md bg-[#1f7a53] text-white hover:bg-[#176344]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUploadQuestions(section.name);
-                        }}
+                        className="flex-1 bg-[#1f7a53] hover:bg-[#176344] text-white"
+                        onClick={() => handleUploadQuestions(section.name)}
                       >
-                        <Upload className="h-4 w-4" />
-                        <span className="font-medium">Upload Questions</span>
+                        <Upload className="mr-2 h-4 w-4" /> Upload
                       </Button>
                       <Button
-                        size="sm"
-                        className="flex items-center gap-2 flex-1 min-w-[120px] justify-center rounded-md border border-[#fbe6b2] bg-white text-[#b58102] hover:bg-[#fff6e0]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleManagePDFs(section.name);
-                        }}
+                        variant="outline"
+                        className="flex-1 border-[#fbe6b2] text-[#b58102]"
+                        onClick={() => handleManagePDFs(section.name)}
                       >
-                        <FileText className="h-4 w-4" />
-                        <span className="font-medium">Manage PDFs</span>
+                        <FileText className="mr-2 h-4 w-4" /> PDFs
                       </Button>
                     </div>
                   </CardContent>

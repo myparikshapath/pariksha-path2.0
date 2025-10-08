@@ -210,7 +210,7 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
 
 export const fetchAvailableCourses = async (): Promise<Course[]> => {
 	try {
-		const response = await api.get("/courses");
+		const response = await api.get("/courses?limit=200");
 		console.log("API Response:", response.data);
 		// Handle both response formats
 		const coursesData = response.data.data || response.data.courses || [];

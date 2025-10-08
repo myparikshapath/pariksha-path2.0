@@ -101,8 +101,13 @@ const Navbar: React.FC = () => {
 
         setGroupedData(grouped);
         if (grouped.length > 0) setActiveCategory(grouped[0].category);
-      } catch (err: any) {
-        console.error("🔥 Error fetching courses:", err?.response || err);
+      } catch (err: unknown) {
+        // Fully type-safe error handling
+        if (err instanceof Error) {
+          console.error("🔥 Error fetching courses:", err.message);
+        } else {
+          console.error("🔥 Unknown error fetching courses:", err);
+        }
       } finally {
         setLoading(false);
       }
