@@ -29,6 +29,12 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold">Manage Users</h2>
             <p className="text-sm">Manage registered users</p>
           </Link>
+
+          <Link href={"/admin/contacts"}
+            className="bg-[#32b071] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
+            <h2 className="text-lg font-semibold">Contacts</h2>
+            <p className="text-sm">Check who contacted</p>
+          </Link>
           {/* </div> */}
           {/* <div className="bg-[#1d3328] text-white p-6 rounded-xl shadow-md hover:scale-105 transition-transform h-32 flex flex-col justify-between">
             <h2 className="text-lg font-semibold">Reports</h2>
@@ -76,6 +82,6 @@ export default function AdminDashboard() {
           © {new Date().getFullYear()} Admin Panel. All rights reserved.
         </footer>
       </div>
-    </div>
+    </div >
   );
 }

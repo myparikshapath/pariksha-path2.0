@@ -65,7 +65,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 flex justify-center items-start pt-36 pb-10">
+    <div className="min-h-screen bg-white px-4 flex justify-center items-start pt-12 pb-12">
       <div
         ref={ref}
         className="w-full max-w-lg bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"
