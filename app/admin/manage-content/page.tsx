@@ -210,29 +210,40 @@ export default function AdminExamsPage() {
   const router = useRouter();
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const examsPerPage = 15;
 
   // Fetch exams
   useEffect(() => {
-    api.get("/courses?limit=100")
+    setLoading(true);
+    api.get("/courses", { params: { limit: 100, is_active: null } })
       .then((response) => {
-        if (response.data.courses) {
-          console.log("Raw courses from API:", response.data.courses); // 🔍 check what is_active is
-          const courses = response.data.courses.map((c: any) => {
-            console.log("Course:", c.title, "is_active:", c.is_active); // 🔍 per-course check
+        const allCourses: any[] = Array.isArray(response.data)
+          ? response.data
+          : response.data.courses || response.data.data || [];
+
+        if (allCourses.length > 0) {
+          console.log("Raw courses from API:", allCourses); // 🔍 check what is_active is
+          const courses = allCourses.map((c: any) => {
+            // console.log("Course:", c.title, "is_active:", c.is_active); // 🔍 per-course check
             return {
               ...c,
               is_active: Boolean(c.is_active) // force boolean
             };
           });
           setExams(courses);
+        } else {
+          console.log("No courses found");
+          setExams([]);
         }
       })
       .catch((error) => {
         console.error("Error fetching courses:", error);
-      });
+        setError("Failed to load courses. Please check your connection and try again.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
 
@@ -255,8 +266,10 @@ export default function AdminExamsPage() {
           )
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error toggling visibility:", error);
+      // You could add a toast notification here
+      alert("Failed to toggle course visibility. Please try again.");
     }
   };
 
@@ -271,6 +284,20 @@ export default function AdminExamsPage() {
     return (
       <div className="p-6 max-w-7xl mx-20 text-center text-gray-600">
         Loading courses...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-20 text-center text-red-600">
+        <p>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+          Retry
+        </button>
       </div>
     );
   }

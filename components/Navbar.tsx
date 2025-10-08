@@ -60,7 +60,7 @@ const Navbar: React.FC = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await api.get("/courses/", {
+        const res = await api.get("/courses", {
           params: { limit: 100 },
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });

@@ -210,7 +210,7 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
 
 export const fetchAvailableCourses = async (): Promise<Course[]> => {
 	try {
-		const response = await api.get("/courses/");
+		const response = await api.get("/courses");
 		console.log("API Response:", response.data);
 		// Handle both response formats
 		const coursesData = response.data.data || response.data.courses || [];
@@ -274,7 +274,7 @@ export const createCourse = async (
 	courseData: CreateCourseRequest
 ): Promise<{ course_id: string }> => {
 	try {
-		const response = await api.post("/courses/", courseData);
+		const response = await api.post("/courses", courseData);
 		return response.data;
 	} catch (error) {
 		console.error("Error creating course:", error);
