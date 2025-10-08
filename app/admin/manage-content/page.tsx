@@ -214,11 +214,11 @@ export default function AdminExamsPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const examsPerPage = 15;
-
   // Fetch exams
   useEffect(() => {
     setLoading(true);
-    api.get("/courses", { params: { limit: 100, is_active: null } })
+    api
+      .get("/courses", { params: { limit: 1000 } })
       .then((response) => {
         const allCourses: any[] = Array.isArray(response.data)
           ? response.data
@@ -227,10 +227,9 @@ export default function AdminExamsPage() {
         if (allCourses.length > 0) {
           console.log("Raw courses from API:", allCourses); // 🔍 check what is_active is
           const courses = allCourses.map((c: any) => {
-            // console.log("Course:", c.title, "is_active:", c.is_active); // 🔍 per-course check
             return {
               ...c,
-              is_active: Boolean(c.is_active) // force boolean
+              is_active: Boolean(c.is_active), // force boolean
             };
           });
           setExams(courses);
@@ -241,11 +240,12 @@ export default function AdminExamsPage() {
       })
       .catch((error) => {
         console.error("Error fetching courses:", error);
-        setError("Failed to load courses. Please check your connection and try again.");
+        setError(
+          "Failed to load courses. Please check your connection and try again."
+        );
       })
       .finally(() => setLoading(false));
   }, []);
-
 
   // Filter exams by search
   const filteredExams = exams.filter((exam) =>
@@ -381,10 +381,11 @@ export default function AdminExamsPage() {
           <button
             key={page}
             onClick={() => setCurrentPage(page)}
-            className={`px-4 py-2 rounded-full border ${currentPage === page
-              ? "bg-[#2E4A3C] text-white shadow-md"
-              : "bg-gray-100 text-gray-700 hover:bg-green-100"
-              } transition`}
+            className={`px-4 py-2 rounded-full border ${
+              currentPage === page
+                ? "bg-[#2E4A3C] text-white shadow-md"
+                : "bg-gray-100 text-gray-700 hover:bg-green-100"
+            } transition`}
           >
             {page}
           </button>
