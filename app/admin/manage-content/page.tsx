@@ -251,7 +251,7 @@ export default function AdminExamsPage() {
                       e.stopPropagation();
                       router.push(
                         `/admin/exam/${encodeURIComponent(
-                          exam.title.toLowerCase().replace(/\s+/g, "-")
+                          exam.code.toLowerCase().replace(/\s+/g, "-")
                         )}`
                       );
                     }}

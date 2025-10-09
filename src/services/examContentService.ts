@@ -1,4 +1,4 @@
-import api from '@/utils/api';
+import api from "@/utils/api";
 
 export interface ExamInfoSection {
   id: string;
@@ -12,7 +12,6 @@ export interface ExamContent {
   exam_code: string;
   title: string;
   description: string;
-  linked_course_id: string;
   thumbnail_url?: string | null;
   banner_url?: string | null;
   exam_info_sections: ExamInfoSection[];
@@ -25,7 +24,9 @@ export async function getExamContentByCode(
   examCode: string
 ): Promise<ExamContent | null> {
   try {
-    const response = await api.get(`/exam-contents/${encodeURIComponent(examCode)}`);
+    const response = await api.get(
+      `/exam-contents/${encodeURIComponent(examCode)}`
+    );
 
     if (response.status === 404) {
       return null;
