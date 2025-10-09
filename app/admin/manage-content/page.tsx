@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import api from "@/utils/api";
@@ -40,13 +46,15 @@ export default function AdminExamsPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const limit = 12; // items per page
+  const limit = 10; // items per page
 
   const loadExams = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get("/courses", { params: { limit: 1000 } });
+      const response = await api.get("/courses", {
+        params: { limit: 1000, show_all: true },
+      });
 
       const allCourses: CourseResponse[] = Array.isArray(response.data)
         ? response.data
@@ -172,7 +180,9 @@ export default function AdminExamsPage() {
       {/* Exams Grid */}
       {paginatedExams.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed border-slate-300 rounded-2xl bg-white/50">
-          <p className="text-slate-600 text-lg mb-6 font-medium">No exams found</p>
+          <p className="text-slate-600 text-lg mb-6 font-medium">
+            No exams found
+          </p>
           <Button onClick={loadExams}>Reload</Button>
         </div>
       ) : (
@@ -191,7 +201,9 @@ export default function AdminExamsPage() {
                     {exam.title}
                   </h2>
                   {exam.sub_category && (
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">{exam.sub_category}</p>
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
+                      {exam.sub_category}
+                    </p>
                   )}
                   {exam.code && (
                     <div className="inline-flex items-center px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-mono mt-1">
@@ -224,10 +236,11 @@ export default function AdminExamsPage() {
                       e.stopPropagation();
                       toggleVisibility(exam.id);
                     }}
-                    className={`px-4 py-2 cursor-pointer rounded-full text-xs font-medium ${exam.is_active
+                    className={`px-4 py-2 cursor-pointer rounded-full text-xs font-medium ${
+                      exam.is_active
                         ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
                         : "bg-red-200 text-gray-800 hover:bg-red-300"
-                      } transition`}
+                    } transition`}
                   >
                     {exam.is_active ? "Active" : "Inactive"}
                   </button>
@@ -268,10 +281,11 @@ export default function AdminExamsPage() {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 sm:px-4 py-2 rounded-full border ${currentPage === page
+              className={`px-3 sm:px-4 py-2 rounded-full border ${
+                currentPage === page
                   ? "bg-[#2E4A3C] text-white shadow-md"
                   : "bg-gray-100 text-gray-700 hover:bg-green-100"
-                } transition`}
+              } transition`}
             >
               {page}
             </button>
