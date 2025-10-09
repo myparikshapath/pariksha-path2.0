@@ -109,14 +109,34 @@ const CoursePage = () => {
         //     return fieldStr ? slugify(fieldStr) === rawSlug : false;
         //   });
         // });
-        const foundCourse = courses.find((c: Course) => {
-          const slugified = slugify(c.code || c.title || "");
-          return (
-            slugified === rawSlug ||
-            slugified.replace(/_/g, "-") === rawSlug ||
-            rawSlug.replace(/_/g, "-") === slugified
-          );
-        });
+        // const foundCourse = courses.find((c: Course) => {
+        //   const slugified = slugify(c.code || c.title || "");
+        //   return (
+        //     slugified === rawSlug ||
+        //     slugified.replace(/_/g, "-") === rawSlug ||
+        //     rawSlug.replace(/_/g, "-") === slugified
+        //   );
+        // });
+        // Helper: normalize everything to lowercase alphanumeric only
+        const normalize = (str?: string) =>
+          (str || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, ""); // removes -, _, spaces, etc.
+
+        // Then use:
+        const foundCourse =
+          courses.find((c: Course) => {
+            const normalizedSlug = normalize(String(slug));
+            const candidates = [
+              c.code,
+              c.title,
+              c.id,
+              examContent?.linked_course_id, // ✅ very important
+            ];
+
+            return candidates.some((field) => normalize(field) === normalizedSlug);
+          }) || null;
+
         // console.log("Matched course:", foundCourse);
 
         setCourse(foundCourse || null);
