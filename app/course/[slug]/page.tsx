@@ -56,7 +56,7 @@ const CoursePage = () => {
   const router = useRouter();
   const { slug } = params;
   const { user } = useAuth();
-  console.log("this is a new user", user);
+  // console.log("this is a new user", user);
 
   const [examContent, setExamContent] = useState<ExamContent | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
@@ -84,31 +84,40 @@ const CoursePage = () => {
             .replace(/(^-|-$)/g, "");
 
 
-        console.log("route slug:", rawSlug);
+        // console.log("route slug:", rawSlug);
 
         const content = await getExamContentByCode(rawSlug);
         if (!content) throw new Error("Exam content not found");
         setExamContent(content);
 
         const courses = await fetchAvailableCourses();
-        console.log(
-          "courses sample:",
-          courses.slice(0, 5).map((c: Course) => ({
-            id: c.id,
-            code: c.code,
-            slug: rawSlug,
-            title: c.title,
-          }))
-        );
+        // console.log(
+        //   "courses sample:",
+        //   courses.slice(0, 5).map((c: Course) => ({
+        //     id: c.id,
+        //     code: c.code,
+        //     slug: rawSlug,
+        //     title: c.title,
+        //   }))
+        // );
 
+        // const foundCourse = courses.find((c: Course) => {
+        //   // try several possible fields
+        //   const candidates = [c.code, slug, c.title, c.id];
+        //   return candidates.some((field) => {
+        //     const fieldStr = Array.isArray(field) ? field[0] : field;
+        //     return fieldStr ? slugify(fieldStr) === rawSlug : false;
+        //   });
+        // });
         const foundCourse = courses.find((c: Course) => {
-          // try several possible fields
-          const candidates = [c.code, slug, c.title, c.id];
-          return candidates.some((field) => {
-            const fieldStr = Array.isArray(field) ? field[0] : field;
-            return fieldStr ? slugify(fieldStr) === rawSlug : false;
-          });
+          const slugified = slugify(c.code || c.title || "");
+          return (
+            slugified === rawSlug ||
+            slugified.replace(/_/g, "-") === rawSlug ||
+            rawSlug.replace(/_/g, "-") === slugified
+          );
         });
+        // console.log("Matched course:", foundCourse);
 
         setCourse(foundCourse || null);
       } catch (e) {
@@ -149,7 +158,7 @@ const CoursePage = () => {
 
   const handleBuyNow = async () => {
     try {
-      console.log(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
+      // console.log(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
       if (!course) {
         alert("Course not found!");
         return;
@@ -173,14 +182,14 @@ const CoursePage = () => {
 
       // 1️⃣ Create Razorpay order on server (amount in paise)
       const amountInPaise = Math.round(price) * 100;
-      console.log("Creating order for amount (paise):", amountInPaise);
+      // console.log("Creating order for amount (paise):", amountInPaise);
 
       const courseId = String((course as Course).id || course.id || "");
       if (!courseId) {
         throw new Error("Course ID not found for payment.");
       }
       const token = localStorage.getItem("access_token");
-      console.log(token);
+      // console.log(token);
       if (!token)
         throw new Error("User not authenticated. Please login again.");
 
@@ -191,7 +200,7 @@ const CoursePage = () => {
         course_id: (course as Course).id,
       });
 
-      console.log("Create order response:", createRes);
+      // console.log("Create order response:", createRes);
 
       // backend might return different shapes — be flexible
       const createData = (createRes && (createRes.data ?? createRes)) || null;
@@ -208,7 +217,7 @@ const CoursePage = () => {
         orderFromBody?.currency || createData?.currency || "INR";
 
       if (!orderId) {
-        console.error("Create order response:", createData);
+        // console.error("Create order response:", createData);
         throw new Error(
           "Invalid order response from server. Missing order id."
         );
@@ -224,7 +233,7 @@ const CoursePage = () => {
         order_id: orderId,
         handler: async (response: RazorpaySuccessResponse) => {
           try {
-            console.log("Razorpay response:", response);
+            // console.log("Razorpay response:", response);
 
             // 3️⃣ Verify payment on server
             // const verifyRes = await api.post("/payments/verify", {
@@ -389,7 +398,7 @@ const CoursePage = () => {
         <button
           onClick={handleBuyNow}
           disabled={isProcessing}
-          className={`px-10 py-3 text-xl font-bold rounded-xl shadow-2xl transition-all duration-300 ease-in-out ${isProcessing
+          className={`cursor-pointer px-10 py-3 text-xl font-bold rounded-xl shadow-2xl transition-all duration-300 ease-in-out ${isProcessing
             ? "opacity-60 cursor-not-allowed"
             : "bg-[#2d8a5b] hover:scale-105 hover:shadow-green-400/50 text-white"
             }`}

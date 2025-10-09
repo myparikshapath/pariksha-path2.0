@@ -71,6 +71,7 @@ export default function AdminExamDetailPage({
         const response = await api.get(
           `/exam-contents/${encodeURIComponent(examNameRaw)}`
         );
+        console.log(`/exam-contents/${encodeURIComponent(examNameRaw)}`);
         setMode("edit");
         setExamContent({
           exam_code: response.data.exam_code || examNameRaw,
@@ -116,8 +117,7 @@ export default function AdminExamDetailPage({
   // Update debug info
   useEffect(() => {
     setDebugInfo(
-      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${
-        isLoading ? "Loading..." : "Ready"
+      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${isLoading ? "Loading..." : "Ready"
       }`
     );
   }, [mode, examNameRaw, isLoading]);

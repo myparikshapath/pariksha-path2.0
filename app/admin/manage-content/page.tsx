@@ -46,7 +46,7 @@ export default function AdminExamsPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const limit = 10; // items per page
+  const limit = 12; // items per page
 
   const loadExams = async () => {
     setLoading(true);
@@ -236,11 +236,10 @@ export default function AdminExamsPage() {
                       e.stopPropagation();
                       toggleVisibility(exam.id);
                     }}
-                    className={`px-4 py-2 cursor-pointer rounded-full text-xs font-medium ${
-                      exam.is_active
+                    className={`px-4 py-2 cursor-pointer rounded-full text-xs font-medium ${exam.is_active
                         ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
                         : "bg-red-200 text-gray-800 hover:bg-red-300"
-                    } transition`}
+                      } transition`}
                   >
                     {exam.is_active ? "Active" : "Inactive"}
                   </button>
@@ -281,11 +280,10 @@ export default function AdminExamsPage() {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 sm:px-4 py-2 rounded-full border ${
-                currentPage === page
+              className={`px-3 sm:px-4 py-2 rounded-full border ${currentPage === page
                   ? "bg-[#2E4A3C] text-white shadow-md"
                   : "bg-gray-100 text-gray-700 hover:bg-green-100"
-              } transition`}
+                } transition`}
             >
               {page}
             </button>
