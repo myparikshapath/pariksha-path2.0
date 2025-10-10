@@ -8,7 +8,7 @@ const api = axios.create({
   },
 });
 
-// Attach token automatically
+// Request interceptor - Attach token automatically
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
@@ -35,17 +35,109 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Global response handling
+// Response interceptor - Handle token refresh and logout
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else if (token) {
+      resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (resp) => resp,
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_role");
-        window.location.href = "/login"; // central redirect
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+          }
+          return api(originalRequest);
+        }).catch(err => {
+          throw err;
+        });
       }
-    } else if (error.response) {
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = localStorage.getItem("refresh_token");
+        if (!refreshToken) {
+          throw new Error("No refresh token available");
+        }
+
+        // Attempt to refresh token
+        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {}, {
+          headers: {
+            "Authorization": `Bearer ${refreshToken}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        const { access_token, refresh_token } = response.data;
+
+        // Update stored tokens
+        localStorage.setItem("access_token", access_token);
+        if (refresh_token) {
+          localStorage.setItem("refresh_token", refresh_token);
+        }
+
+        // Process queued requests
+        processQueue(null, access_token);
+
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        }
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, logout user
+        processQueue(refreshError, null);
+
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("user_role");
+          localStorage.removeItem("refresh_token");
+          localStorage.setItem("logout", Date.now().toString());
+
+          // Dispatch logout event to other tabs
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'logout',
+            newValue: Date.now().toString(),
+            storageArea: localStorage
+          }));
+
+          // Redirect to login page
+          if (window.location.pathname !== '/login') {
+            window.location.href = "/login";
+          }
+        }
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    if (error.response) {
       console.error("API response error:", error.response);
     } else if (error.request) {
       console.error("API no response:", error.request);

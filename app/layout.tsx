@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pariksha Path",
+  title: "My Pariksha Path",
   description: "A platform for students to prepare for competitive exams.",
 };
 

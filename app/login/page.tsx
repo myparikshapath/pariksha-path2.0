@@ -39,7 +39,7 @@ export default function Login() {
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("refresh_token", refresh_token);
 
-                login(access_token, userRole);
+                login(access_token, refresh_token, userRole);
 
                 if (res.data.user.role === "admin") {
                     router.push("/admin/dashboard");

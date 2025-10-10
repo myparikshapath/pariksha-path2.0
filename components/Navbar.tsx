@@ -135,7 +135,7 @@ const Navbar: React.FC = () => {
           <div className="relative w-40 h-12 sm:w-[200px] sm:h-[50px]">
             <Image
               src="/webLogo.png"
-              alt="ParikshaPath Logo"
+              alt="My ParikshaPath Logo"
               fill
               className="object-contain"
               priority

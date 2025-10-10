@@ -12,7 +12,7 @@ const Privacy = () => {
       </p>
 
       <p className="mb-6 text-gray-700">
-        Parikshapath (&quot;Company&quot;, &quot;we&quot;, &quot;our&quot;,
+        My Parikshapath (&quot;Company&quot;, &quot;we&quot;, &quot;our&quot;,
         &quot;us&quot;) values and respects the privacy of every individual who
         uses our website, mobile application, products, and services
         (collectively, “Services”). This Privacy Policy outlines how we collect,

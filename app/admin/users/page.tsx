@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Search, ArrowLeft, Eye, X } from "lucide-rea
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { AdminRoute } from "@/components/AdminRoute";
 
 interface CourseEnrollment {
   id: string;
@@ -117,7 +118,8 @@ export default function StudentsPage() {
   }, [debouncedSearch]);
 
   return (
-    <div className="min-h-screen p-6 md:p-10 bg-gray-50 flex flex-col items-center">
+    <AdminRoute>
+      <div className="min-h-screen p-6 md:p-10 bg-gray-50 flex flex-col items-center">
       {/* Back button - left aligned, above banner */}
       <div className="w-full max-w-9xl mb-4 flex justify-start cursor-pointer">
         <Button
@@ -360,5 +362,6 @@ export default function StudentsPage() {
         </div>
       )}
     </div>
+    </AdminRoute>
   );
 }

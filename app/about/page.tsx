@@ -16,7 +16,7 @@ export default function About() {
                 >
                     <h2 className="text-3xl text-[#2E4A3C] font-bold mb-4">Who We Are</h2>
                     <p className="text-gray-700 leading-relaxed mb-4">
-                        Pariksha Path is a newly established institute in 2025, committed to guiding aspirants towards success in competitive exams.
+                        My Parikshapath is a new platform, committed to guiding aspirants towards success in competitive exams.
                         With a team of passionate educators and mentors, we focus on creating a strong foundation for every student.
                     </p>
                     <p className="text-gray-700 leading-relaxed">

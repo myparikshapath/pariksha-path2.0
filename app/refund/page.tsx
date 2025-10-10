@@ -11,12 +11,12 @@ const Refund = () => {
 
             <p className="mb-6 text-gray-700">
                 Effective Date: 01-10-2025 <br />
-                Website: Parikshapath (“we,” “our,” or “us”)
+                Website: My Parikshapath (“we,” “our,” or “us”)
             </p>
 
             <p className="mb-6 text-gray-700">
                 This Refund & Cancellation Policy applies to all purchases made on the
-                Parikshapath website and mobile application. By enrolling in our courses
+                My Parikshapath website and mobile application. By enrolling in our courses
                 or services, you agree to the terms outlined below.
             </p>
 
@@ -130,7 +130,7 @@ const Refund = () => {
                         7. Changes to Policy
                     </h2>
                     <p>
-                        Parikshapath reserves the right to amend or update this Refund &
+                        My Parikshapath reserves the right to amend or update this Refund &
                         Cancellation Policy at any time. Any material changes will be
                         communicated through the website or via email notification.
                     </p>

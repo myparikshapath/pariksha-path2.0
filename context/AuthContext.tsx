@@ -174,7 +174,7 @@ interface AuthContextType {
     role: "student" | "admin" | null;
     user: User | null;
     loading: boolean;
-    login: (token: string, role: "student" | "admin") => void;
+    login: (accessToken: string, refreshToken: string, role: "student" | "admin") => void;
     logout: () => void;
 }
 
@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setIsLoggedIn(true);
                 setRole(storedRole);
 
-                const res = await api.get("/payments/user-data");
+                const res = await api.get("/auth/me");
                 const userData = res.data?.user ?? res.data;
                 setUser(userData ?? null);
             } else {
@@ -223,6 +223,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         fetchUser();
+
+        // Listen for logout events from other tabs
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'logout' && e.newValue) {
+                // Another tab logged out, clear this tab's state
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("user_role");
+                localStorage.removeItem("refresh_token");
+
+                setIsLoggedIn(false);
+                setRole(null);
+                setUser(null);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Cleanup function
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -231,8 +252,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return <Loader />;
     }
 
-    const login = (token: string, role: "student" | "admin") => {
-        localStorage.setItem("access_token", token);
+    const login = (accessToken: string, refreshToken: string, role: "student" | "admin") => {
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
         localStorage.setItem("user_role", role);
         setIsLoggedIn(true);
         setRole(role);
@@ -243,9 +265,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const logout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("user_role");
+        localStorage.removeItem("refresh_token");
+        localStorage.setItem("logout", Date.now().toString()); // Broadcast logout event
+
         setIsLoggedIn(false);
         setRole(null);
         setUser(null);
+
+        // Dispatch storage event to notify other tabs
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'logout',
+            newValue: Date.now().toString(),
+            storageArea: localStorage
+        }));
     };
 
     return (

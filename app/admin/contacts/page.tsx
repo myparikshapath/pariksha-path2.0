@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import api from "@/utils/api";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdminRoute } from "@/components/AdminRoute";
 
 interface Contact {
     id: string;
@@ -38,7 +39,8 @@ export default function ContactAdminPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gray-50 sm:px-4 lg:px-8 py-8 flex flex-col items-center">
+        <AdminRoute>
+            <div className="min-h-screen bg-gray-50 sm:px-4 lg:px-8 py-8 flex flex-col items-center">
 
             {/* Back Button */}
             <div className="w-full max-w-9xl mb-4 flex justify-start">
@@ -166,5 +168,6 @@ export default function ContactAdminPage() {
                 )
             }
         </div >
+        </AdminRoute>
     );
 }
