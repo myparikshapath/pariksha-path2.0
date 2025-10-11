@@ -66,14 +66,39 @@ const CourseDetailPage = () => {
       setLoading(true);
       setError(null);
       const courses = await fetchAvailableCourses();
+
+      console.log("🔍 Available courses:", courses);
+      console.log("🔍 Looking for slug:", params.slug);
+
       const foundCourse = courses.find((c) => {
         const courseSlug = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
+        console.log("🔍 Comparing slug:", courseSlug, "with params.slug:", params.slug);
         return courseSlug === params.slug;
       });
-      if (foundCourse) setCourse(foundCourse);
-      else setError("Course not found");
+
+      if (foundCourse) {
+        // console.log("🔍 Found course:", foundCourse);
+        // console.log("🔍 Course sections:", foundCourse.sections);
+        // console.log("🔍 Course sections type:", typeof foundCourse.sections);
+
+        if (foundCourse.sections) {
+          foundCourse.sections.forEach((section, index) => {
+            // console.log(`🔍 Section ${index}:`, {
+            //   section,
+            //   type: typeof section,
+            //   name: section?.name,
+            //   length: section?.name?.length
+            // });
+          });
+        }
+
+        setCourse(foundCourse);
+      } else {
+        // console.error("❌ Course not found for slug:", params.slug);
+        setError("Course not found");
+      }
     } catch (e: unknown) {
-      console.error("Error loading course:", e);
+      console.error("❌ Error loading course:", e);
       setError(e instanceof Error ? e.message : "Failed to load course");
     } finally {
       setLoading(false);
@@ -95,14 +120,20 @@ const CourseDetailPage = () => {
   };
   const handleConfirmDeleteSection = async (s: string) => {
     if (!course) return;
+
+    console.log("🔍 handleConfirmDeleteSection called with section:", s);
+    console.log("🔍 Course sections at deletion time:", course.sections);
+
     setOperationLoading(true);
     try {
       await deleteSectionFromCourse(course.id, s);
+      console.log("✅ Section deleted successfully, reloading course data");
       await loadCourse();
       setDeleteSectionDialogOpen(false);
       setDeletingSection(null);
     } catch (error: unknown) {
-      console.error("Error deleting section:", error);
+      console.error("❌ Error deleting section:", error);
+      console.error("❌ Section name that failed:", s);
       setError(error instanceof Error ? error.message : "Failed to delete section");
     } finally {
       setOperationLoading(false);

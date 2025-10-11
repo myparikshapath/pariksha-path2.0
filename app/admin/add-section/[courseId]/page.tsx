@@ -78,7 +78,9 @@ const AddSectionPage = () => {
     }
   };
 
-  const isDuplicate = course?.sections?.some((s) => s.name) || false;
+  const isDuplicate = course?.sections?.some((s) =>
+    s.name?.toLowerCase() === sectionName.trim().toLowerCase()
+  ) || false;
 
   if (loading) {
     return (
@@ -207,7 +209,7 @@ const AddSectionPage = () => {
                 />
                 {isDuplicate && sectionName.trim() && (
                   <p className="text-sm text-red-600">
-                    A section with this name already exists.
+                    A section with this name already exists in this course.
                   </p>
                 )}
                 <p className="text-sm text-gray-500">

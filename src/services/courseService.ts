@@ -349,12 +349,22 @@ export const deleteSectionFromCourse = async (
 	sectionName: string
 ): Promise<{ message: string }> => {
 	try {
+		console.log("🔍 deleteSectionFromCourse called with:", {
+			courseId,
+			sectionName,
+			sectionNameLength: sectionName.length,
+			sectionNameType: typeof sectionName
+		});
+
 		const response = await api.delete(
 			`/courses/${courseId}/sections/${encodeURIComponent(sectionName)}`
 		);
+
+		console.log("✅ deleteSectionFromCourse success:", response.data);
 		return response.data;
 	} catch (error) {
-		console.error("Error deleting section:", error);
+		console.error("❌ deleteSectionFromCourse error:", error);
+		console.error("❌ Section name being deleted:", sectionName);
 		throw error;
 	}
 };
