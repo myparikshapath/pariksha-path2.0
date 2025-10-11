@@ -6,9 +6,9 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Footer() {
-  const phoneNumber = "+919992266559";
+  const phoneNumber = "+91XXXXXXXXXX";
   const email = "myparikshapath@gmail.com";
-  const whatsappNumber = "919992266559";
+  const whatsappNumber = "91XXXXXXXXXX";
 
   const pathname = usePathname();
   const router = useRouter();
@@ -165,7 +165,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-[#3D5A4D] mt-8 pt-6 text-center text-gray-400 text-sm">
-        &copy; {new Date().getFullYear()}My Pariksha Path. All rights reserved.
+        &copy; {new Date().getFullYear()} My Parikshapath. All rights reserved.
       </div>
     </footer>
   );

@@ -203,7 +203,7 @@ export default function Home() {
               icon: Globe,
               name: "General Knowledge Quizzes",
               button: "Try Now",
-              href: "/course/ssc-cpo",
+              href: "/mock",
             },
           ].map((course, idx) => (
             <Card
@@ -228,14 +228,14 @@ export default function Home() {
       {/* WHY CHOOSE US */}
       <section ref={statsRef} className="max-w-6xl mx-auto mt-16 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2E4A3C]">
-          Why Choose My ParikshaPath ?
+          Why Choose My Parikshapath ?
         </h2>
         <div className="w-[30vw] h-1 bg-yellow-400 mx-auto mb-8 mt-2 rounded"></div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { number: 1000, suffix: "+", label: "Students Enrolled" },
-            { number: 50, suffix: "+", label: "Tests Daily" },
+            { number: 100, suffix: "+", label: "Students Enrolled" },
+            { number: 20, suffix: "+", label: "Tests Daily" },
             { number: 100, suffix: "%", label: "Free Resources" },
             { number: 400, suffix: "+", label: "Courses Available" },
           ].map((stat, idx) => (
