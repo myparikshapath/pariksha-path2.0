@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Eye,
   X,
+  Trash2,
 } from "lucide-react";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
@@ -102,17 +103,36 @@ export default function StudentsPage() {
     }
   };
 
-  const activateStudent = async (id: string) => {
-    if (!confirm("Activate this student?")) return;
-    try {
-      await api.put(`/admin/students/${id}`, { is_active: true });
+  const activateStudent = async(id:string) =>{
+    if(!confirm("Activate htis student?")) return;
+    try{
+      await api.put(`/admin/students/${id}`,{is_active:true})
       fetchStudents(page, debouncedSearch);
-    } catch (error) {
+    }catch(error){
       const err = error as AxiosError<{ message?: string }>;
       alert(
         err.response?.data?.message ||
           err.message ||
           "Failed to activate student"
+      );
+    }
+  }
+
+  const permanentlyDeleteStudent = async (id: string) => {
+    if (!confirm("Are you sure you want to permanently delete this student? This action cannot be undone and will remove all associated data.")) return;
+    try {
+      await api.delete(`/admin/students/${id}/permanent`);
+      fetchStudents(page, debouncedSearch);
+      if (selectedStudent && selectedStudent.id === id) {
+        setShowStudentDetails(false);
+        setSelectedStudent(null);
+      }
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      alert(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to permanently delete student"
       );
     }
   };
@@ -296,6 +316,15 @@ export default function StudentsPage() {
                     >
                       View Details
                     </Button>
+                    {!s.is_active && (
+                      <Button
+                        onClick={() => permanentlyDeleteStudent(s.id)}
+                        className="w-full bg-red-700 hover:bg-red-800 text-white"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Permanently
+                      </Button>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -316,7 +345,7 @@ export default function StudentsPage() {
                       Details
                     </th>
                     <th className="px-6 py-3 text-center font-semibold">
-                      Action
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -353,20 +382,30 @@ export default function StudentsPage() {
                         </Button>
                       </td>
                       <td className="px-6 py-3 text-center">
-                        <Button
-                          onClick={() =>
-                            s.is_active
-                              ? deactivateStudent(s.id)
-                              : activateStudent(s.id)
-                          }
-                          className={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm ${
-                            s.is_active
-                              ? "bg-red-500 hover:bg-red-600"
-                              : "bg-green-500 hover:bg-green-600"
-                          } text-white`}
-                        >
-                          {s.is_active ? "Deactivate" : "Activate"}
-                        </Button>
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            onClick={() =>
+                              s.is_active
+                                ? deactivateStudent(s.id)
+                                : activateStudent(s.id)
+                            }
+                            className={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm ${
+                              s.is_active
+                                ? "bg-red-500 hover:bg-red-600"
+                                : "bg-green-500 hover:bg-green-600"
+                            } text-white`}
+                          >
+                            {s.is_active ? "Deactivate" : "Activate"}
+                          </Button>
+                          {!s.is_active && (
+                            <Button
+                              onClick={() => permanentlyDeleteStudent(s.id)}
+                              className="px-4 py-2 rounded-lg text-sm font-medium shadow-sm bg-red-700 hover:bg-red-800 text-white"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -421,12 +460,26 @@ export default function StudentsPage() {
                   <h2 className="text-2xl font-bold text-green-900">
                     Student Details - {selectedStudent.name}
                   </h2>
-                  <button
-                    onClick={() => setShowStudentDetails(false)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
+                  <div className="flex gap-2">
+                    {!selectedStudent.is_active && (
+                      <Button
+                        onClick={() => {
+                          permanentlyDeleteStudent(selectedStudent.id);
+                          setShowStudentDetails(false);
+                        }}
+                        className="bg-red-700 hover:bg-red-800 text-white px-4 py-2"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Permanently
+                      </Button>
+                    )}
+                    <button
+                      onClick={() => setShowStudentDetails(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Basic Info */}
