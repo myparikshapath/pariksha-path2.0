@@ -44,13 +44,21 @@ export default function MockPage() {
   const paidTestsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchTests = async () => {
+    const fetchTests:() => Promise<void> = async () => {
       try {
-        const freeRes = await api.get("/courses?is_free=true");
-        setFreeTests(freeRes.data.courses || []);
+        // const freeRes = await api.get("/courses?is_free=true&is_active=true");
+        const freeRes = await api.get("/courses", {
+          params: { is_free: true, is_active: true },
+        });
+        setFreeTests(freeRes.data.data || []);
+        console.log("GOT Free EXAMs ", freeRes);
+        // const paidRes = await api.get("/courses?is_free=false&is_active=true");
+        const paidRes = await api.get("/courses", {
+          params: { is_free: false, is_active: true },
+        });
+        console.log("GOT paid EXAMs ", paidRes);
 
-        const paidRes = await api.get("/courses?is_free=false");
-        setPaidTests(paidRes.data.courses || []);
+        setPaidTests(paidRes.data.data || []);
       } catch (err) {
         console.error("Error fetching tests:", err);
       } finally {
@@ -73,15 +81,24 @@ export default function MockPage() {
   );
 
   const generateSlug = (title: string) =>
-    title.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
+    title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
 
   // ✅ Scroll to section on Enter
   const handleSearchEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       if (filteredFreeTests.length > 0 && freeTestsRef.current) {
-        freeTestsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        freeTestsRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       } else if (filteredPaidTests.length > 0 && paidTestsRef.current) {
-        paidTestsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        paidTestsRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       }
     }
   };
@@ -158,7 +175,10 @@ export default function MockPage() {
           animate="visible"
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <h2 id="free" className="text-3xl font-bold text-center text-[#2E4A3C]">
+          <h2
+            id="free"
+            className="text-3xl font-bold text-center text-[#2E4A3C]"
+          >
             Free Demo Tests
           </h2>
           <div className="w-56 h-1 bg-yellow-400 mx-auto mb-12 mt-2 rounded"></div>
@@ -190,7 +210,6 @@ export default function MockPage() {
               <p className="text-center col-span-3 text-gray-500">
                 No free tests found for &quot;{search}&quot;
               </p>
-
             )}
           </div>
         </motion.section>
@@ -217,31 +236,33 @@ export default function MockPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(showAllPaid ? filteredPaidTests : filteredPaidTests.slice(0, 6)).map(
-                  (test) => (
-                    <motion.div
-                      key={test.id}
-                      whileHover={{ scale: 1.03 }}
-                      className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between min-h-[220px]"
+                {(showAllPaid
+                  ? filteredPaidTests
+                  : filteredPaidTests.slice(0, 6)
+                ).map((test) => (
+                  <motion.div
+                    key={test.id}
+                    whileHover={{ scale: 1.03 }}
+                    className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-6 flex flex-col justify-between min-h-[220px]"
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-2 text-[#2E4A3C]">
+                        {test.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                        {test.description ||
+                          "Get full-length tests and detailed solutions."}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/course/${test.slug || generateSlug(test.title)}`}
                     >
-                      <div className="flex-1">
-                        <h3 className="font-semibold mb-2 text-[#2E4A3C]">
-                          {test.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {test.description || "Get full-length tests and detailed solutions."}
-                        </p>
-                      </div>
-                      <Link
-                        href={`/course/${test.slug || generateSlug(test.title)}`}
-                      >
-                        <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg hover:cursor-pointer">
-                          Buy Now
-                        </Button>
-                      </Link>
-                    </motion.div>
-                  )
-                )}
+                      <Button className="bg-[#869C51] hover:bg-[#6e8343] text-white w-full rounded-lg hover:cursor-pointer">
+                        Buy Now
+                      </Button>
+                    </Link>
+                  </motion.div>
+                ))}
               </div>
 
               {filteredPaidTests.length > 6 && !showAllPaid && (

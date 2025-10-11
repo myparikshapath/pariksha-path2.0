@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import SecureTokenStorage from "./secureStorage";
 
 const api = axios.create({
   baseURL: "http://localhost:8000/api/v1",
@@ -12,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
+      const token = SecureTokenStorage.getAccessToken();
       if (token) {
         config.headers.set("Authorization", `Bearer ${token}`);
       } else {
@@ -78,7 +79,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem("refresh_token");
+        const refreshToken = SecureTokenStorage.getRefreshToken();
         if (!refreshToken) {
           throw new Error("No refresh token available");
         }
@@ -94,9 +95,9 @@ api.interceptors.response.use(
         const { access_token, refresh_token } = response.data;
 
         // Update stored tokens
-        localStorage.setItem("access_token", access_token);
+        SecureTokenStorage.setAccessToken(access_token);
         if (refresh_token) {
-          localStorage.setItem("refresh_token", refresh_token);
+          SecureTokenStorage.setRefreshToken(refresh_token);
         }
 
         // Process queued requests
@@ -113,10 +114,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
 
         if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("user_role");
-          localStorage.removeItem("refresh_token");
-          localStorage.setItem("logout", Date.now().toString());
+          SecureTokenStorage.clearAllTokens();
 
           // Dispatch logout event to other tabs
           window.dispatchEvent(new StorageEvent('storage', {

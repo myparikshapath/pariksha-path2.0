@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
+import SecureTokenStorage from "@/utils/secureStorage";
 import {
   Accordion,
   AccordionItem,
@@ -59,7 +60,7 @@ const Navbar: React.FC = () => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
+        const token = SecureTokenStorage.getAccessToken();
         const res = await api.get("/courses", {
           params: { limit: 100 },
           headers: token ? { Authorization: `Bearer ${token}` } : {},

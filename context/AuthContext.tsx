@@ -162,6 +162,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "@/utils/api";
 import Loader from "@/components/loader";
+import SecureTokenStorage from "@/utils/secureStorage";
 
 interface User {
     name: string;
@@ -189,15 +190,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const fetchUser = async () => {
         try {
-            const token = localStorage.getItem("access_token");
-            const storedRole = localStorage.getItem("user_role") as
-                | "student"
-                | "admin"
-                | null;
+            const token = SecureTokenStorage.getAccessToken();
+            const storedRole = SecureTokenStorage.getUserRole();
 
             if (token && storedRole) {
                 setIsLoggedIn(true);
-                setRole(storedRole);
+                setRole(storedRole as "student" | "admin");
 
                 const res = await api.get("/auth/me");
                 const userData = res.data?.user ?? res.data;
@@ -228,10 +226,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'logout' && e.newValue) {
                 // Another tab logged out, clear this tab's state
-                localStorage.removeItem("access_token");
-                localStorage.removeItem("user_role");
-                localStorage.removeItem("refresh_token");
-
+                SecureTokenStorage.clearAllTokens();
                 setIsLoggedIn(false);
                 setRole(null);
                 setUser(null);
@@ -253,9 +248,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const login = (accessToken: string, refreshToken: string, role: "student" | "admin") => {
-        localStorage.setItem("access_token", accessToken);
-        localStorage.setItem("refresh_token", refreshToken);
-        localStorage.setItem("user_role", role);
+        const accessStored = SecureTokenStorage.setAccessToken(accessToken);
+        const refreshStored = SecureTokenStorage.setRefreshToken(refreshToken);
+        const roleStored = SecureTokenStorage.setUserRole(role);
+
+        if (!accessStored || !refreshStored || !roleStored) {
+            console.error("Failed to store authentication tokens securely");
+            return;
+        }
+
         setIsLoggedIn(true);
         setRole(role);
         // Fire and forget fetchUser to update user info
@@ -263,11 +264,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_role");
-        localStorage.removeItem("refresh_token");
-        localStorage.setItem("logout", Date.now().toString()); // Broadcast logout event
-
+        SecureTokenStorage.clearAllTokens();
         setIsLoggedIn(false);
         setRole(null);
         setUser(null);
