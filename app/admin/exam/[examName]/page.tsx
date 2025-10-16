@@ -82,7 +82,10 @@ export default function AdminExamDetailPage({
           exam_info_sections: response.data.exam_info_sections || [],
         });
       } catch (error) {
-        const is404Error = error && (error as any).response?.status === 404;
+        const is404Error =
+          error &&
+          (error as unknown as { response: { status: number } }).response
+            ?.status === 404;
         if (!is404Error) {
           console.error("Error fetching exam content:", error);
         }
@@ -117,7 +120,8 @@ export default function AdminExamDetailPage({
   // Update debug info
   useEffect(() => {
     setDebugInfo(
-      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${isLoading ? "Loading..." : "Ready"
+      `Mode: ${mode.toUpperCase()}, Exam Code: ${examNameRaw}, Status: ${
+        isLoading ? "Loading..." : "Ready"
       }`
     );
   }, [mode, examNameRaw, isLoading]);
