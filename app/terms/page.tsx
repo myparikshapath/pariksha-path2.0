@@ -11,7 +11,7 @@ const Terms = () => {
 
             <p className="mb-6 text-gray-700">
                 Effective Date: 01-10-2025 <br />
-                Website: Parikshapath (“we,” “our,” or “us”)
+                Website: My Parikshapath (“we,” “our,” or “us”)
             </p>
 
             <p className="mb-6 text-gray-700">

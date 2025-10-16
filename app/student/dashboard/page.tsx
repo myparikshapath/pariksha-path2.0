@@ -21,7 +21,7 @@ export default function StudentDashboardRedirect() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 pt-32">
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#0000D3]"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-600"></div>
       </div>
     </div>
   );

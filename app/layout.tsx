@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
-import ScrollToTop from "../components/ScrollToTop"
-import Navbar from "../components/Navbar"
+import ScrollToTop from "../components/ScrollToTop";
+import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import { AuthProvider } from "@/context/AuthContext";
@@ -18,10 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pariksha Path",
+  title: "My Parikshapath",
   description: "A platform for students to prepare for competitive exams.",
 };
-
 
 export default function RootLayout({
   children,
@@ -37,9 +36,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           {/* yeh main content stretch karega */}
-          <main className="flex-grow mt-20">
-            {children}
-          </main>
+          <main className="flex-grow mt-20">{children}</main>
           <Footer />
           <FloatingContact />
         </AuthProvider>

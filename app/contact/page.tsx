@@ -55,7 +55,7 @@ export default function ContactPage() {
                                 allowFullScreen
                                 loading="lazy"
                                 className="border-0"
-                                title="Pariksha Path Location"
+                                title="Parikshapath Location"
                             />
                         </div>
 

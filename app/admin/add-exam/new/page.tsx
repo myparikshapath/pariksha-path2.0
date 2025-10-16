@@ -43,6 +43,7 @@ export default function NewExamPage() {
     price: 0,
     is_free: false,
     discount_percent: 0,
+    validity_period_days: 365,
     material_ids: [],
     test_series_ids: [],
     thumbnail_url: "",
@@ -338,6 +339,30 @@ export default function NewExamPage() {
                 </div>
               </div>
             )}
+
+            {/* Validity Period */}
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="validity_period_days">Validity Period (Days)</Label>
+              <Input
+                id="validity_period_days"
+                type="number"
+                min={1}
+                max={3650}
+                value={formData.validity_period_days || 365}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  handleInputChange(
+                    "validity_period_days",
+                    val === "" ? 365 : parseInt(val)
+                  );
+                }}
+                placeholder="365"
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
+              />
+              <p className="text-sm text-slate-600">
+                Number of days the course access is valid after enrollment (1-3650 days)
+              </p>
+            </div>
           </CardContent>
         </Card>
 

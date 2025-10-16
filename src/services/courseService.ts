@@ -128,6 +128,7 @@ export interface Course {
 	code?: string;
 	thumbnail_url?: string;
 	discount_percent?: number;
+	validity_period_days?: number;
 	material_ids?: string[];
 	test_series_ids?: string[];
 	icon_url?: string;
@@ -155,6 +156,7 @@ export interface CreateCourseRequest {
 	price: number;
 	is_free: boolean;
 	discount_percent?: number;
+	validity_period_days?: number;
 	material_ids?: string[];
 	test_series_ids?: string[];
 	thumbnail_url: string;
@@ -172,6 +174,7 @@ export interface UpdateCourseRequest {
 	price?: number;
 	is_free?: boolean;
 	discount_percent?: number;
+	validity_period_days?: number;
 	material_ids?: string[];
 	test_series_ids?: string[];
 	thumbnail_url?: string;
@@ -207,7 +210,7 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
 
 export const fetchAvailableCourses = async (): Promise<Course[]> => {
 	try {
-		const response = await api.get("/courses/");
+		const response = await api.get("/courses?limit=200");
 		console.log("API Response:", response.data);
 		// Handle both response formats
 		const coursesData = response.data.data || response.data.courses || [];
@@ -271,7 +274,7 @@ export const createCourse = async (
 	courseData: CreateCourseRequest
 ): Promise<{ course_id: string }> => {
 	try {
-		const response = await api.post("/courses/", courseData);
+		const response = await api.post("/courses", courseData);
 		return response.data;
 	} catch (error) {
 		console.error("Error creating course:", error);
@@ -346,12 +349,22 @@ export const deleteSectionFromCourse = async (
 	sectionName: string
 ): Promise<{ message: string }> => {
 	try {
+		console.log("🔍 deleteSectionFromCourse called with:", {
+			courseId,
+			sectionName,
+			sectionNameLength: sectionName.length,
+			sectionNameType: typeof sectionName
+		});
+
 		const response = await api.delete(
 			`/courses/${courseId}/sections/${encodeURIComponent(sectionName)}`
 		);
+
+		console.log("✅ deleteSectionFromCourse success:", response.data);
 		return response.data;
 	} catch (error) {
-		console.error("Error deleting section:", error);
+		console.error("❌ deleteSectionFromCourse error:", error);
+		console.error("❌ Section name being deleted:", sectionName);
 		throw error;
 	}
 };

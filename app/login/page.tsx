@@ -39,7 +39,7 @@ export default function Login() {
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("refresh_token", refresh_token);
 
-                login(access_token, userRole);
+                login(access_token, refresh_token, userRole);
 
                 if (res.data.user.role === "admin") {
                     router.push("/admin/dashboard");
@@ -56,7 +56,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 pt-12 pb-12">
             <div
                 ref={ref}
                 className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 relative overflow-hidden"

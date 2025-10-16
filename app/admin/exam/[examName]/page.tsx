@@ -16,7 +16,6 @@ interface ExamContent {
   exam_code: string;
   title: string;
   description: string;
-  linked_course_id: string;
   thumbnail_url?: string | null;
   banner_url?: string | null;
   exam_info_sections: ExamInfoSection[];
@@ -28,9 +27,6 @@ export default function AdminExamDetailPage({
   params: Promise<{ examName: string }>;
 }) {
   const router = useRouter();
-  // const searchParams = useSearchParams(); // Unused variable - commented out
-
-  // ✅ unwrap params (since it's a promise in Next.js 15+)
   const resolvedParams = use(params);
   const examNameRaw = resolvedParams.examName;
 
@@ -42,7 +38,6 @@ export default function AdminExamDetailPage({
     exam_code: examNameRaw || "",
     title: examName,
     description: "",
-    linked_course_id: "dummy-course-id", // TODO: replace with real course id
     thumbnail_url: null,
     banner_url: null,
     exam_info_sections: [
@@ -76,25 +71,29 @@ export default function AdminExamDetailPage({
         const response = await api.get(
           `/exam-contents/${encodeURIComponent(examNameRaw)}`
         );
+        console.log(`/exam-contents/${encodeURIComponent(examNameRaw)}`);
         setMode("edit");
         setExamContent({
           exam_code: response.data.exam_code || examNameRaw,
           title: response.data.title || examName,
           description: response.data.description || "",
-          linked_course_id: response.data.linked_course_id || "dummy-course-id",
           thumbnail_url: response.data.thumbnail_url || null,
           banner_url: response.data.banner_url || null,
           exam_info_sections: response.data.exam_info_sections || [],
         });
       } catch (error) {
-        // If not found, use add mode with defaults
-        console.error("Error fetching exam content:", error);
+        const is404Error =
+          error &&
+          (error as unknown as { response: { status: number } }).response
+            ?.status === 404;
+        if (!is404Error) {
+          console.error("Error fetching exam content:", error);
+        }
         setMode("add");
         setExamContent({
           exam_code: examNameRaw || "",
           title: examName,
           description: "",
-          linked_course_id: "dummy-course-id",
           thumbnail_url: null,
           banner_url: null,
           exam_info_sections: [
@@ -165,10 +164,6 @@ export default function AdminExamDetailPage({
       alert("Please enter a description");
       return;
     }
-    if (!examContent.linked_course_id || !examContent.linked_course_id.trim()) {
-      alert("Please enter a linked course ID");
-      return;
-    }
 
     // Ensure we're using the correct exam_code for the URL
     const examCodeForUrl = examContent.exam_code || examNameRaw;
@@ -190,7 +185,6 @@ export default function AdminExamDetailPage({
       exam_code: examCodeForUrl,
       title: examContent.title.trim(),
       description: examContent.description.trim(),
-      linked_course_id: examContent.linked_course_id.trim(),
       thumbnail_url: examContent.thumbnail_url || null,
       banner_url: examContent.banner_url || null,
       exam_info_sections: examContent.exam_info_sections.map(
@@ -290,10 +284,9 @@ export default function AdminExamDetailPage({
         />
 
         {/* Linked Course */}
-        <input
+        {/* <input
           type="text"
           placeholder="Linked Course ID"
-          value={examContent.linked_course_id}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setExamContent((prev: ExamContent) => ({
               ...prev,
@@ -301,7 +294,7 @@ export default function AdminExamDetailPage({
             }))
           }
           className="border px-3 py-2 rounded w-full mb-6"
-        />
+        /> */}
 
         {/* Thumbnail URL */}
         <input

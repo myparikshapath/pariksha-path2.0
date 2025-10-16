@@ -55,6 +55,7 @@ const EditCoursePage = () => {
         price: courseData.price,
         is_free: courseData.is_free,
         discount_percent: courseData.discount_percent,
+        validity_period_days: courseData.validity_period_days,
         thumbnail_url: courseData.thumbnail_url,
         icon_url: courseData.icon_url,
         banner_url: courseData.banner_url,
@@ -321,6 +322,19 @@ const EditCoursePage = () => {
                   max="100"
                   value={formData.discount_percent || 0}
                   onChange={(e) => handleInputChange("discount_percent", parseFloat(e.target.value))}
+                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="validity_period_days">Validity Period (Days)</Label>
+                <Input
+                  id="validity_period_days"
+                  type="number"
+                  min={1}
+                  max={3650}
+                  value={formData.validity_period_days || 365}
+                  onChange={(e) => handleInputChange("validity_period_days", parseInt(e.target.value))}
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>

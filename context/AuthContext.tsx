@@ -162,6 +162,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "@/utils/api";
 import Loader from "@/components/loader";
+import SecureTokenStorage from "@/utils/secureStorage";
 
 interface User {
     name: string;
@@ -174,7 +175,7 @@ interface AuthContextType {
     role: "student" | "admin" | null;
     user: User | null;
     loading: boolean;
-    login: (token: string, role: "student" | "admin") => void;
+    login: (accessToken: string, refreshToken: string, role: "student" | "admin") => void;
     logout: () => void;
 }
 
@@ -189,17 +190,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const fetchUser = async () => {
         try {
-            const token = localStorage.getItem("access_token");
-            const storedRole = localStorage.getItem("user_role") as
-                | "student"
-                | "admin"
-                | null;
+            const token = SecureTokenStorage.getAccessToken();
+            const storedRole = SecureTokenStorage.getUserRole();
 
             if (token && storedRole) {
                 setIsLoggedIn(true);
-                setRole(storedRole);
+                setRole(storedRole as "student" | "admin");
 
-                const res = await api.get("/payments/user-data");
+                const res = await api.get("/auth/me");
                 const userData = res.data?.user ?? res.data;
                 setUser(userData ?? null);
             } else {
@@ -223,6 +221,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         fetchUser();
+
+        // Listen for logout events from other tabs
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'logout' && e.newValue) {
+                // Another tab logged out, clear this tab's state
+                SecureTokenStorage.clearAllTokens();
+                setIsLoggedIn(false);
+                setRole(null);
+                setUser(null);
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        // Cleanup function
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -231,9 +247,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return <Loader />;
     }
 
-    const login = (token: string, role: "student" | "admin") => {
-        localStorage.setItem("access_token", token);
-        localStorage.setItem("user_role", role);
+    const login = (accessToken: string, refreshToken: string, role: "student" | "admin") => {
+        const accessStored = SecureTokenStorage.setAccessToken(accessToken);
+        const refreshStored = SecureTokenStorage.setRefreshToken(refreshToken);
+        const roleStored = SecureTokenStorage.setUserRole(role);
+
+        if (!accessStored || !refreshStored || !roleStored) {
+            console.error("Failed to store authentication tokens securely");
+            return;
+        }
+
         setIsLoggedIn(true);
         setRole(role);
         // Fire and forget fetchUser to update user info
@@ -241,11 +264,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = () => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user_role");
+        SecureTokenStorage.clearAllTokens();
         setIsLoggedIn(false);
         setRole(null);
         setUser(null);
+
+        // Dispatch storage event to notify other tabs
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: 'logout',
+            newValue: Date.now().toString(),
+            storageArea: localStorage
+        }));
     };
 
     return (

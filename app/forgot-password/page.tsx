@@ -5,6 +5,7 @@ import { AxiosError } from "axios";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCursorGlow } from "@/hooks/useCursorGlow"; // 👈 import glow hook
 
 export default function ForgotPassword() {
@@ -13,6 +14,7 @@ export default function ForgotPassword() {
     const [loading, setLoading] = useState(false);
 
     const { ref, cursorPos } = useCursorGlow(); // 👈 glow hook
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,6 +24,11 @@ export default function ForgotPassword() {
         try {
             const res = await api.post("/auth/forgot-password", { email });
             setMessage(res.data.message);
+            if (res.status === 200) {
+                setTimeout(() => {
+                    router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+                }, 1500);
+            }
         } catch (err) {
             const axiosError = err as AxiosError<{ detail?: string }>;
             setMessage(
