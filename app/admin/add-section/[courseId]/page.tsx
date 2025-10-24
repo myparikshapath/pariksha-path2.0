@@ -20,7 +20,7 @@ const AddSectionPage = () => {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [sectionName, setSectionName] = useState("");
-  const [questionCount, setQuestionCount] = useState<number>(3);
+  const [questionCount, setQuestionCount] = useState<string>("10");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ const AddSectionPage = () => {
 
     setSaving(true);
     try {
-      await addSectionToCourse(courseId, sectionName.trim(), questionCount);
+      await addSectionToCourse(courseId, sectionName.trim(), questionCount ? parseInt(questionCount, 10) : 10);
       router.push(
         `/admin/course/${
           course.code?.toLowerCase().replace(/\s+/g, "-") || course.id
@@ -78,9 +78,10 @@ const AddSectionPage = () => {
     }
   };
 
-  const isDuplicate = course?.sections?.some((s) =>
-    s.name?.toLowerCase() === sectionName.trim().toLowerCase()
-  ) || false;
+  const isDuplicate =
+    course?.sections?.some(
+      (s) => s.name?.toLowerCase() === sectionName.trim().toLowerCase()
+    ) || false;
 
   if (loading) {
     return (
@@ -225,14 +226,23 @@ const AddSectionPage = () => {
                   min="1"
                   max="100"
                   value={questionCount}
-                  onChange={(e) =>
-                    setQuestionCount(parseInt(e.target.value) || 10)
-                  }
-                  placeholder="Number of questions to show in mock test"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow empty string when erased
+                    if (value === "") {
+                      setQuestionCount("");
+                    } else {
+                      const numValue = parseInt(value, 10);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 100) {
+                        setQuestionCount(numValue.toString());
+                      }
+                    }
+                  }}
+                  placeholder="Number of questions (default: 10)"
                 />
                 <p className="text-sm text-gray-500">
                   How many questions should be randomly selected for this
-                  section in mock tests?
+                  section in mock tests? Leave empty to use default (10).
                 </p>
               </div>
               <div className="flex justify-end gap-3 pt-4">

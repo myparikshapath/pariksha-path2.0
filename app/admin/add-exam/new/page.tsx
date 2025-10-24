@@ -130,21 +130,35 @@ export default function NewExamPage() {
                   Create New Exam/Course
                 </h1>
                 <p className="text-lg text-slate-600">
-                  Set up a new exam or course with sections for comprehensive question management
+                  Set up a new exam or course with sections for comprehensive
+                  question management
                 </p>
               </div>
 
               <div className="flex gap-3 flex-wrap">
                 <div className="bg-white/80 backdrop-blur-sm rounded-lg px-4 py-2 border border-emerald-200/50">
                   <span className="text-sm text-slate-600">Sections: </span>
-                  <span className="font-semibold text-emerald-700">{sections.length}</span>
+                  <span className="font-semibold text-emerald-700">
+                    {sections.length}
+                  </span>
                 </div>
-                <div className={`px-4 py-2 rounded-lg text-sm font-medium ${formData.is_free ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                  {formData.is_free ? 'Free Course' : `₹${formData.price || 0}`}
+                <div
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    formData.is_free
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {formData.is_free ? "Free Course" : `₹${formData.price || 0}`}
                 </div>
                 {!formData.is_free && (formData.discount_percent || 0) > 0 && (
                   <div className="px-4 py-2 rounded-lg text-sm font-medium bg-green-100 text-green-700">
-                    Save ₹{((formData.price || 0) * (formData.discount_percent || 0) / 100).toFixed(0)}
+                    Save ₹
+                    {(
+                      ((formData.price || 0) *
+                        (formData.discount_percent || 0)) /
+                      100
+                    ).toFixed(0)}
                   </div>
                 )}
               </div>
@@ -289,8 +303,12 @@ export default function NewExamPage() {
                   }`}
                 ></div>
               </label>
-              <span className={`font-medium ${formData.is_free ? 'text-emerald-700' : 'text-slate-500'}`}>
-                {formData.is_free ? 'Free Course' : 'Paid Course'}
+              <span
+                className={`font-medium ${
+                  formData.is_free ? "text-emerald-700" : "text-slate-500"
+                }`}
+              >
+                {formData.is_free ? "Free Course" : "Paid Course"}
               </span>
             </div>
 
@@ -342,25 +360,42 @@ export default function NewExamPage() {
 
             {/* Validity Period */}
             <div className="space-y-2 mt-4">
-              <Label htmlFor="validity_period_days">Validity Period (Days)</Label>
+              <Label htmlFor="validity_period_days">
+                Validity Period (Days)
+              </Label>
               <Input
                 id="validity_period_days"
                 type="number"
                 min={1}
                 max={3650}
-                value={formData.validity_period_days || 365}
+                required={true}
+                value={
+                  (formData.validity_period_days as unknown as string) === "" ||
+                  formData.validity_period_days === undefined
+                    ? ""
+                    : formData.validity_period_days
+                }
                 onChange={(e) => {
                   const val = e.target.value;
-                  handleInputChange(
-                    "validity_period_days",
-                    val === "" ? 365 : parseInt(val)
-                  );
+                  if (val === "") {
+                    // user cleared input, keep it blank
+                    handleInputChange(
+                      "validity_period_days",
+                      "" as unknown as number
+                    );
+                  } else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      handleInputChange("validity_period_days", num);
+                    }
+                  }
                 }}
                 placeholder="365"
                 className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
               />
               <p className="text-sm text-slate-600">
-                Number of days the course access is valid after enrollment (1-3650 days)
+                Number of days the course access is valid after enrollment
+                (1-3650 days)
               </p>
             </div>
           </CardContent>
@@ -421,7 +456,7 @@ export default function NewExamPage() {
         </Card>
 
         {/* Media URLs */}
-        <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+        {/* <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
             <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
@@ -482,7 +517,7 @@ export default function NewExamPage() {
               />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Submit Buttons */}
         <div className="flex justify-end gap-4 flex-wrap pt-6 border-t border-slate-200">
