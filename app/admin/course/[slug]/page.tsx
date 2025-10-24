@@ -66,32 +66,12 @@ const CourseDetailPage = () => {
       setLoading(true);
       setError(null);
       const courses = await fetchAvailableCourses();
-
-      console.log("🔍 Available courses:", courses);
-      console.log("🔍 Looking for slug:", params.slug);
-
       const foundCourse = courses.find((c) => {
         const courseSlug = c.code?.toLowerCase().replace(/\s+/g, "-") || c.id;
-        console.log("🔍 Comparing slug:", courseSlug, "with params.slug:", params.slug);
         return courseSlug === params.slug;
       });
 
       if (foundCourse) {
-        // console.log("🔍 Found course:", foundCourse);
-        // console.log("🔍 Course sections:", foundCourse.sections);
-        // console.log("🔍 Course sections type:", typeof foundCourse.sections);
-
-        if (foundCourse.sections) {
-          foundCourse.sections.forEach((section, index) => {
-            // console.log(`🔍 Section ${index}:`, {
-            //   section,
-            //   type: typeof section,
-            //   name: section?.name,
-            //   length: section?.name?.length
-            // });
-          });
-        }
-
         setCourse(foundCourse);
       } else {
         // console.error("❌ Course not found for slug:", params.slug);
@@ -113,7 +93,8 @@ const CourseDetailPage = () => {
   const handleAddSection = () =>
     course && router.push(`/admin/add-section/${course.id}`);
   const handleEditSection = (s: string) =>
-    course && router.push(`/admin/edit-section/${course.id}/${encodeURIComponent(s)}`);
+    course &&
+    router.push(`/admin/edit-section/${course.id}/${encodeURIComponent(s)}`);
   const handleDeleteSection = (s: string) => {
     setDeletingSection(s);
     setDeleteSectionDialogOpen(true);
@@ -134,7 +115,9 @@ const CourseDetailPage = () => {
     } catch (error: unknown) {
       console.error("❌ Error deleting section:", error);
       console.error("❌ Section name that failed:", s);
-      setError(error instanceof Error ? error.message : "Failed to delete section");
+      setError(
+        error instanceof Error ? error.message : "Failed to delete section"
+      );
     } finally {
       setOperationLoading(false);
     }
@@ -291,22 +274,27 @@ const CourseDetailPage = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 rounded-full text-[#1f7a53] hover:bg-[#e9f8f0]"
+                          className="h-8 w-8 p-0  rounded-full text-[#1f7a53] hover:bg-[#e9f8f0]"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent
+                        align="end"
+                        className="bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl min-w-[160px]"
+                      >
                         <DropdownMenuItem
                           onClick={() => handleEditSection(section.name)}
                         >
-                          <Edit className="mr-2 h-4 w-4" /> Edit
+                          <Edit className="mr-3 h-4 w-4 text-emerald-600" />
+                          <span className="font-medium">Edit</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteSection(section.name)}
-                          className="text-red-600"
+                          className="text-red-600 hover:bg-red-50 cursor-pointer py-3 px-4"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          <Trash2 className="mr-3 h-4 w-4" />
+                          <span className="font-medium">Delete</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -323,7 +311,9 @@ const CourseDetailPage = () => {
                           <input
                             type="number"
                             value={tempQuestionCount}
-                            onChange={(e) => setTempQuestionCount(e.target.value)}
+                            onChange={(e) =>
+                              setTempQuestionCount(e.target.value)
+                            }
                             className="border border-[#d6f5e5] rounded-md px-3 py-1 w-20 text-sm"
                           />
                           <Button
