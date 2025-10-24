@@ -12,9 +12,6 @@ export default function StudentDashboardRedirect() {
       router.push("/login");
       return;
     }
-
-    // Redirect to default dashboard view
-    // You can customize this based on user preferences or default view
     router.push("/student/dashboard/overview");
   }, [isLoggedIn, router]);
 

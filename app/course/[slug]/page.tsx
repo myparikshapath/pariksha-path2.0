@@ -10,6 +10,7 @@ import {
   Course,
   // getCourseDetails,
   fetchAvailableCourses,
+  enrollInCourse,
 } from "@/src/services/courseService";
 import api from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
@@ -178,19 +179,28 @@ const CoursePage = () => {
 
   const handleBuyNow = async () => {
     try {
-      // console.log(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
       if (!course) {
         alert("Course not found!");
         return;
       }
 
+      setIsProcessing(true);
+
+      // Check if the course is free
+      if (course.is_free || course.price === 0) {
+        // Enroll directly for free courses
+        await enrollInCourse(course.id);
+        alert(`✅ Successfully enrolled in ${course.title}`);
+        router.push("/student/dashboard");
+        return;
+      }
+
+      // For paid courses, proceed with Razorpay
       const price = Number(course.price);
       if (!Number.isFinite(price) || price <= 0) {
         alert("Invalid course price. Please contact support.");
         return;
       }
-
-      setIsProcessing(true);
 
       // 0️⃣ Ensure Razorpay SDK is loaded
       const sdkLoaded = await loadScript(
@@ -303,11 +313,11 @@ const CoursePage = () => {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err: unknown) {
-      console.error("Failed to initiate payment:", err);
+      console.error("Failed to initiate enrollment:", err);
       if (err instanceof Error) {
-        alert("❌ Failed to initiate payment. " + err.message);
+        alert("❌ Failed to initiate enrollment. " + err.message);
       } else {
-        alert("❌ Failed to initiate payment. " + String(err));
+        alert("❌ Failed to initiate enrollment. " + String(err));
       }
     } finally {
       setIsProcessing(false);
@@ -411,7 +421,11 @@ const CoursePage = () => {
         {course && (
           <div className="text-center my-6">
             <p className="text-2xl font-semibold text-gray-800">
-              Price: ₹{course.price}
+              {course.is_free || course.price === 0 ? (
+                <span className="text-green-600">Free Course</span>
+              ) : (
+                `Price: ₹${course.price}`
+              )}
             </p>
           </div>
         )}
@@ -420,10 +434,16 @@ const CoursePage = () => {
           disabled={isProcessing}
           className={`cursor-pointer px-10 py-3 text-xl font-bold rounded-xl shadow-2xl transition-all duration-300 ease-in-out ${isProcessing
             ? "opacity-60 cursor-not-allowed"
+            : course?.is_free || course?.price === 0
+            ? "bg-green-600 hover:bg-green-700 hover:scale-105 text-white"
             : "bg-[#2d8a5b] hover:scale-105 hover:shadow-green-400/50 text-white"
             }`}
         >
-          {isProcessing ? "Processing…" : "🚀 Buy Now"}
+          {isProcessing
+            ? "Processing…"
+            : course?.is_free || course?.price === 0
+            ? "🚀 Enroll Now"
+            : "🚀 Buy Now"}
         </button>
       </div>
 
