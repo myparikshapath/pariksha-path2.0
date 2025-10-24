@@ -576,9 +576,9 @@ export default function StudentsPage() {
                             <th className="px-4 py-3 text-left font-semibold">
                               Status
                             </th>
-                            <th className="px-4 py-3 text-left font-semibold">
+                            {/* <th className="px-4 py-3 text-left font-semibold">
                               Days Left
-                            </th>
+                            </th> */}
                           </tr>
                         </thead>
                         <tbody>
@@ -628,13 +628,13 @@ export default function StudentsPage() {
                                     </span>
                                   )}
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-700">
+                                {/* <td className="px-4 py-3 text-sm text-gray-700">
                                   {enrollment.days_remaining !== undefined
                                     ? enrollment.days_remaining > 0
                                       ? `${enrollment.days_remaining} days`
                                       : "Expired"
                                     : "N/A"}
-                                </td>
+                                </td> */}
                               </tr>
                             )
                           )}

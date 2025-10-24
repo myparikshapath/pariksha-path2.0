@@ -280,16 +280,30 @@ const EditCoursePage = () => {
                   id="price"
                   type="number"
                   step="0.01"
-                  value={formData.price || 0}
-                  onChange={(e) =>
-                    handleInputChange("price", parseFloat(e.target.value))
+                  // value={formData.price || 0}
+                  value={
+                    (formData.price as unknown as string) === "" ||
+                    formData.price === undefined
+                      ? ""
+                      : formData.price
                   }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      handleInputChange("price", "" as unknown as number);
+                    } else {
+                      const num = parseInt(val, 10);
+                      if (!isNaN(num)) {
+                        handleInputChange("price", num);
+                      }
+                    }
+                  }}
                   disabled={formData.is_free}
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="thumbnail_url">Thumbnail URL</Label>
                 <Input
                   id="thumbnail_url"
@@ -299,9 +313,9 @@ const EditCoursePage = () => {
                   }
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
-              </div>
+              </div> */}
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="icon_url">Icon URL</Label>
                 <Input
                   id="icon_url"
@@ -311,9 +325,9 @@ const EditCoursePage = () => {
                   }
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
-              </div>
+              </div> */}
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="banner_url">Banner URL</Label>
                 <Input
                   id="banner_url"
@@ -323,7 +337,7 @@ const EditCoursePage = () => {
                   }
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="tagline">Tagline</Label>
@@ -388,12 +402,13 @@ const EditCoursePage = () => {
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="priority_order">Priority Order</Label>
                 <Input
                   id="priority_order"
                   type="number"
-                  value={formData.priority_order || 0}
+                  value = {(formData.priority_order as unknown as string) === formData.priority_order===undefined ? "" : formData.priority_order}
+                  required = {true}
                   onChange={(e) =>
                     handleInputChange(
                       "priority_order",
@@ -402,7 +417,7 @@ const EditCoursePage = () => {
                   }
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-2">
@@ -446,7 +461,7 @@ const EditCoursePage = () => {
                 </Label>
               </div>
 
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -472,7 +487,7 @@ const EditCoursePage = () => {
                 <Label htmlFor="is_active" className="font-medium">
                   Active
                 </Label>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
