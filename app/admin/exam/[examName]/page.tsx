@@ -297,7 +297,7 @@ export default function AdminExamDetailPage({
         /> */}
 
         {/* Thumbnail URL */}
-        <input
+        {/* <input
           type="url"
           placeholder="Thumbnail URL (optional)"
           value={examContent.thumbnail_url || ""}
@@ -308,10 +308,10 @@ export default function AdminExamDetailPage({
             }))
           }
           className="border px-3 py-2 rounded w-full mb-6"
-        />
+        /> */}
 
         {/* Banner URL */}
-        <input
+        {/* <input
           type="url"
           placeholder="Banner URL (optional)"
           value={examContent.banner_url || ""}
@@ -322,7 +322,7 @@ export default function AdminExamDetailPage({
             }))
           }
           className="border px-3 py-2 rounded w-full mb-6"
-        />
+        /> */}
 
         {/* Add New Section */}
         <div className="mb-6 flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0">

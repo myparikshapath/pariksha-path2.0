@@ -357,13 +357,28 @@ const EditCoursePage = () => {
                   step="0.01"
                   min="0"
                   max="100"
-                  value={formData.discount_percent || 0}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "discount_percent",
-                      parseFloat(e.target.value)
-                    )
+                  required={true}
+                  // value={formData.discount_percent || 0}
+                  value={
+                    (formData.discount_percent as unknown as string) === "" ||
+                    formData.discount_percent === undefined
+                      ? ""
+                      : formData.discount_percent
                   }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      handleInputChange(
+                        "discount_percent",
+                        "" as unknown as number
+                      );
+                    } else {
+                      const num = parseInt(val, 10);
+                      if (!isNaN(num)) {
+                        handleInputChange("discount_percent", num);
+                      }
+                    }
+                  }}
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
               </div>
