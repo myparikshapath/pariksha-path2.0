@@ -48,7 +48,7 @@ export default function Footer() {
         </div>
 
         {/* Popular Courses */}
-        <div className="md:flex-1">
+        {/* <div className="md:flex-1">
           <h3 className="text-xl font-semibold mb-4 text-[#D9E2C4]">
             Popular Courses
           </h3>
@@ -64,7 +64,7 @@ export default function Footer() {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
 
         {/* Legal Section */}
         <div className="md:flex-1">
