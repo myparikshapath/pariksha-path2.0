@@ -1,6 +1,11 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import SecureTokenStorage from "./secureStorage";
 
+// Set up logging for this module
+const logger = (message: string, data?: any) => {
+  console.log(`[API] ${message}`, data ? data : "");
+};
+
 const api = axios.create({
   // baseURL: "http://localhost:8000/api/v1",
   baseURL: "https://pariksha-path-backend-8rm9.onrender.com/api/v1",
@@ -9,15 +14,22 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - Attach token automatically
+// Request interceptor - Attach token automatically and log requests
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
       const token = SecureTokenStorage.getAccessToken();
       if (token) {
         config.headers.set("Authorization", `Bearer ${token}`);
+        logger(`Request to ${config.method?.toUpperCase()} ${config.url}`, {
+          headers: { ...config.headers, Authorization: "Bearer ****" }, // Redact token
+          data: config.data,
+        });
       } else {
-        config.headers.delete("Authorization");
+        logger(`Request to ${config.method?.toUpperCase()} ${config.url} (No token)`, {
+          headers: config.headers,
+          data: config.data,
+        });
       }
     }
 
@@ -33,7 +45,32 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    logger("Request interceptor error", error.message);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor - Log responses and errors
+api.interceptors.response.use(
+  (response) => {
+    logger(`Response from ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+      status: response.status,
+      data: response.data,
+      headers: response.headers,
+    });
+    return response;
+  },
+  (error: AxiosError) => {
+    logger(`Response error from ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      headers: error.response?.headers,
+    });
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor - Handle token refresh and logout
