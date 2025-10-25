@@ -53,7 +53,7 @@ interface RazorpayWindow extends Window {
 declare const window: RazorpayWindow;
 
 // Set up logging for this module
-const logger = (message: string, data?: any) => {
+const logger = (message: string, data?: unknown) => {
   console.log(`[COURSE PAGE] ${message}`, data ? data : "");
 };
 

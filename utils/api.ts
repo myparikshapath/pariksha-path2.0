@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import SecureTokenStorage from "./secureStorage";
 
 // Set up logging for this module
-const logger = (message: string, data?: any) => {
+const logger = (message: string, data?: unknown) => {
   console.log(`[API] ${message}`, data ? data : "");
 };
 
