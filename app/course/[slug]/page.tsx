@@ -264,7 +264,8 @@ const CoursePage = () => {
         handler: async (response: RazorpaySuccessResponse) => {
           try {
             // console.log("Razorpay response:", response);
-
+            console.log(process.env.NEXT_PUBLIC_RAZORPAY_KEY);
+            console.log(process.env.RAZORPAY_SECRET);
             // 3️⃣ Verify payment on server
             // const verifyRes = await api.post("/payments/verify", {
             //   razorpay_order_id: response.razorpay_order_id,
