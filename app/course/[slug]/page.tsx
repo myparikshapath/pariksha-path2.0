@@ -52,12 +52,17 @@ interface RazorpayWindow extends Window {
 
 declare const window: RazorpayWindow;
 
+// Set up logging for this module
+const logger = (message: string, data?: unknown) => {
+  console.log(`[COURSE PAGE] ${message}`, data ? data : "");
+};
+
 const CoursePage = () => {
   const params = useParams();
   const router = useRouter();
   const { slug } = params;
   const { user } = useAuth();
-  // console.log("this is a new user", user);
+  logger("[LOAD DATA] User data", user);
 
   const [examContent, setExamContent] = useState<ExamContent | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
@@ -84,12 +89,12 @@ const CoursePage = () => {
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
 
-
         // console.log("route slug:", rawSlug);
 
         const content = await getExamContentByCode(rawSlug);
         if (!content) throw new Error("Exam content not found");
         setExamContent(content);
+        logger("[LOAD DATA] Exam content loaded", { title: content.title });
 
         const courses = await fetchAvailableCourses();
         // console.log(
@@ -132,7 +137,7 @@ const CoursePage = () => {
               c.code,
               c.title,
               c.id,
-              examContent?.linked_course_id, // ✅ very important
+              examContent?.linked_course_id, // 
             ];
 
             return candidates.some((field) => normalize(field) === normalizedSlug);
@@ -141,6 +146,7 @@ const CoursePage = () => {
         // console.log("Matched course:", foundCourse);
 
         setCourse(foundCourse || null);
+        logger("[LOAD DATA] Course matched", foundCourse ? { id: foundCourse.id, title: foundCourse.title, price: foundCourse.price } : "No course found");
       } catch (e) {
         console.error("Error loading exam content:", e);
         setError(
@@ -185,6 +191,7 @@ const CoursePage = () => {
       }
 
       setIsProcessing(true);
+      logger("[BUY NOW] Starting payment process", { course: { id: course.id, title: course.title, price: course.price }, user: { name: user?.name, email: user?.email } });
 
       // Check if the course is free
       if (course.is_free || course.price === 0) {
@@ -209,6 +216,7 @@ const CoursePage = () => {
       if (!sdkLoaded || !(window as Window & { Razorpay?: unknown }).Razorpay) {
         throw new Error("Razorpay SDK failed to load.");
       }
+      logger("[BUY NOW] Razorpay SDK loaded successfully");
 
       // 1️⃣ Create Razorpay order on server (amount in paise)
       const amountInPaise = Math.round(price) * 100;
@@ -253,9 +261,15 @@ const CoursePage = () => {
         );
       }
 
+      logger("[BUY NOW] Order created successfully", { orderId, orderAmount, orderCurrency });
+
       // 2️⃣ Open Razorpay checkout
+      const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY || "";
+      const keyType = razorpayKey.startsWith("rzp_test_") ? "TEST" : razorpayKey.startsWith("rzp_live_") ? "LIVE" : "UNKNOWN";
+      logger("[BUY NOW] Using Razorpay key", { keyType, key: razorpayKey.substring(0, 8) + "****" });
+
       const options: RazorpayOptions = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || "",
+        key: razorpayKey,
         amount: orderAmount,
         currency: orderCurrency,
         name: "My Parisksha Path",
@@ -264,8 +278,7 @@ const CoursePage = () => {
         handler: async (response: RazorpaySuccessResponse) => {
           try {
             // console.log("Razorpay response:", response);
-            console.log(process.env.NEXT_PUBLIC_RAZORPAY_KEY);
-            console.log(process.env.RAZORPAY_SECRET);
+
             // 3️⃣ Verify payment on server
             // const verifyRes = await api.post("/payments/verify", {
             //   razorpay_order_id: response.razorpay_order_id,
@@ -286,7 +299,7 @@ const CoursePage = () => {
 
             const verifyData =
               (verifyRes && (verifyRes.data ?? verifyRes)) || {};
-            console.log("verify response:", verifyData);
+            logger("[BUY NOW] Payment verification response", verifyData);
 
             const success =
               verifyData?.success ?? verifyData?.verified ?? false;
@@ -299,6 +312,7 @@ const CoursePage = () => {
             }
           } catch (err) {
             console.error("Payment verification error:", err);
+            logger("[BUY NOW] Payment verification error", err);
             alert("❌ Payment verification failed. Please contact support.");
           }
         },
@@ -312,9 +326,11 @@ const CoursePage = () => {
       };
 
       const rzp = new window.Razorpay(options);
+      logger("[BUY NOW] Opening Razorpay checkout", { orderId, amount: orderAmount });
       rzp.open();
     } catch (err: unknown) {
       console.error("Failed to initiate enrollment:", err);
+      logger("[BUY NOW] Error occurred", { error: err });
       if (err instanceof Error) {
         alert("❌ Failed to initiate enrollment. " + err.message);
       } else {
