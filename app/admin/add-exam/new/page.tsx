@@ -394,6 +394,7 @@ export default function NewExamPage() {
                 placeholder="365"
                 className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
               />
+            </div>
             {/* Mock Test Timer */}
             <div className="space-y-2 mt-4">
               <Label htmlFor="mock_test_timer_seconds">
@@ -408,7 +409,9 @@ export default function NewExamPage() {
                   (formData.mock_test_timer_seconds as unknown as string) ===
                     "" || formData.mock_test_timer_seconds === undefined
                     ? ""
-                    : Math.floor((formData.mock_test_timer_seconds || 3600) / 60)
+                    : Math.floor(
+                        (formData.mock_test_timer_seconds || 3600) / 60
+                      )
                 }
                 onChange={(e) => {
                   const val = e.target.value;
