@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import type { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import {
   getSectionQuestions,
   fetchCourseBySlug,
+  getCourseById,
   Question,
   SectionDetails as BaseSectionDetails,
   Course,
@@ -12,8 +14,9 @@ import {
 } from "@/src/services/courseService";
 import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Info, Loader2, TimerReset } from "lucide-react";
 import dynamic from "next/dynamic";
+import QuestionPalette from "@/components/mock/QuestionPalette";
 
 // Import components with no SSR
 const SectionNavigation = dynamic(
@@ -52,9 +55,13 @@ export default function MockTestAttemptPage() {
     [key: string]: string;
   }>({});
   const [testStarted, setTestStarted] = useState(false);
-  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(3600); // 1 hour in seconds
+  const [timeRemaining, setTimeRemaining] = useState(0); // Timer will be set from course data
+  const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(
+    null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const submitRef = useRef<(() => Promise<void> | void) | null>(null);
 
   // Load course and sections data
 
@@ -159,8 +166,25 @@ export default function MockTestAttemptPage() {
       setError(null);
 
       // Fetch course info
-      const courseData = await fetchCourseBySlug(id as string);
+      let courseData: Course | null = null;
+
+      if (typeof id === "string") {
+        try {
+          courseData = await getCourseById(id);
+        } catch (err) {
+          const axiosError = err as AxiosError;
+          if (axiosError?.response?.status !== 404) {
+            console.warn("Direct course lookup by ID failed:", err);
+          }
+        }
+      }
+
+      if (!courseData) {
+        courseData = await fetchCourseBySlug(id as string);
+      }
+
       if (!courseData) throw new Error("Course not found");
+
       setCourseInfo(courseData);
 
       // Fetch sections
@@ -194,7 +218,12 @@ export default function MockTestAttemptPage() {
     try {
       await Promise.all(
         sections.map((section, index) => {
-          if (section.question_count && section.question_count > 0) {
+          if (
+            section.question_count &&
+            section.question_count > 0 &&
+            section.questions.length === 0 &&
+            !section.loading
+          ) {
             return loadSectionQuestions(section.name, index);
           }
           return Promise.resolve();
@@ -208,22 +237,13 @@ export default function MockTestAttemptPage() {
 
   // Handle starting the test
   const handleStartTest = async () => {
+    const duration =
+      initialTimerSeconds ?? courseInfo?.mock_test_timer_seconds ?? 3600;
+    setInitialTimerSeconds(duration);
+    setTimeRemaining(duration);
     setTestStarted(true);
     await loadAllSections();
-    // Start timer
-    setTimeRemaining(3600); // 1 hour in seconds
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          void handleSubmitTest();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    // Store timer ID to clear it later
-    setTimerId(timer);
+    // Timer will be initialized by the useEffect that depends on testStarted and course timer
   };
 
   // Handle answer selection
@@ -337,17 +357,32 @@ export default function MockTestAttemptPage() {
     loadInitialData();
   }, [loadCourseData]);
 
+  useEffect(() => {
+    if (!courseInfo) return;
+
+    const duration = courseInfo.mock_test_timer_seconds ?? 3600;
+    setInitialTimerSeconds(duration);
+
+    if (!testStarted) {
+      setTimeRemaining(duration);
+    }
+  }, [courseInfo, courseInfo?.mock_test_timer_seconds, testStarted]);
+
   // Separate effect to load first section questions after sections are loaded
   useEffect(() => {
-    // Only run when sections are available but first section has no questions yet
-    if (
-      sections.length > 0 &&
-      (!sections[0]?.questions || sections[0].questions.length === 0) &&
-      !sections[0]?.loading
-    ) {
-      loadSectionQuestions(sections[0].name, 0);
-    }
-  }, [sections, loadSectionQuestions]);
+    // Prefetch questions for all sections before the test starts
+    if (sections.length === 0 || testStarted) return;
+
+    sections.forEach((section, index) => {
+      if (
+        (section.question_count || 0) > 0 &&
+        section.questions.length === 0 &&
+        !section.loading
+      ) {
+        void loadSectionQuestions(section.name, index);
+      }
+    });
+  }, [sections, loadSectionQuestions, testStarted]);
 
   // Persist answers and review marks in sessionStorage
   useEffect(() => {
@@ -415,9 +450,9 @@ export default function MockTestAttemptPage() {
   useEffect(() => {
     if (!testStarted) {
       // Clean up timer if test is not started
-      if (timerId) {
-        clearInterval(timerId);
-        setTimerId(null);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
       }
       return;
     }
@@ -472,11 +507,19 @@ export default function MockTestAttemptPage() {
       });
 
       try {
+        const totalDuration =
+          initialTimerSeconds ?? courseInfo?.mock_test_timer_seconds ?? 3600;
+        const elapsedSeconds = totalDuration - timeRemaining;
+        const safeElapsedSeconds = Math.max(
+          0,
+          Math.min(totalDuration, Math.floor(elapsedSeconds))
+        );
+
         const response = await api.post(
           `/courses/${courseInfo.id}/mock/submit`,
           {
             answers,
-            time_spent_seconds: Math.floor(3600 - timeRemaining),
+            time_spent_seconds: safeElapsedSeconds,
             marked_for_review: markedForReviewAll.map((id) => String(id)),
           }
         );
@@ -557,36 +600,49 @@ export default function MockTestAttemptPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [courseInfo, id, isSubmitting, sections, selectedAnswers, timeRemaining]);
+  }, [
+    courseInfo,
+    id,
+    initialTimerSeconds,
+    isSubmitting,
+    sections,
+    selectedAnswers,
+    timeRemaining,
+  ]);
+
+  useEffect(() => {
+    submitRef.current = handleSubmitTest;
+  }, [handleSubmitTest]);
 
   // Timer effect
   useEffect(() => {
-    if (!testStarted) return;
+    if (!testStarted || !initialTimerSeconds) return;
 
-    // Clear any existing timer
-    if (timerId) {
-      clearInterval(timerId);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
 
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
-          void handleSubmitTest();
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          submitRef.current?.();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    // Store the timer ID
-    setTimerId(timer);
-
-    // Cleanup function
     return () => {
-      if (timer) clearInterval(timer);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [testStarted, handleSubmitTest]); // Removed timerId from dependencies as we're setting it inside
+  }, [initialTimerSeconds, testStarted]);
 
   // Manual submit with confirmation
   const handleManualSubmit = useCallback(() => {
@@ -644,8 +700,22 @@ export default function MockTestAttemptPage() {
     );
   }
 
-  // Test instructions screen
   if (!testStarted) {
+    const totalQuestionsLoaded = sections.reduce(
+      (sum, sec) => sum + (sec.questions?.length || 0),
+      0
+    );
+
+    const totalQuestionsPlanned = sections.reduce(
+      (sum, sec) => sum + (sec.question_count || 0),
+      0
+    );
+
+    const totalQuestionsDisplay =
+      totalQuestionsLoaded > 0 ? totalQuestionsLoaded : totalQuestionsPlanned;
+
+    const hasLoadedCounts = totalQuestionsLoaded > 0;
+
     return (
       <div className="max-w-4xl mx-auto p-6">
         <Button
@@ -657,48 +727,127 @@ export default function MockTestAttemptPage() {
           Back
         </Button>
 
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold mb-6">
-            {courseInfo?.title} - Mock Test
-          </h1>
+        <div className="bg-white rounded-lg shadow-md p-8 space-y-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+              <Info className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                {courseInfo?.title || "Mock Test"} – Overview
+              </h1>
+              <p className="text-sm text-gray-500">
+                Review the information below before starting your attempt.
+              </p>
+            </div>
+          </div>
 
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-3">Instructions</h2>
-            <ul className="list-disc pl-5 space-y-2 text-gray-700">
-              <li>Total Duration: 60 minutes</li>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                <TimerReset
+                  className="h-4 w-4 text-blue-500"
+                  aria-hidden="true"
+                />
+                Duration
+              </h2>
+              <p className="mt-2 text-2xl font-semibold text-gray-900">
+                {Math.floor((courseInfo?.mock_test_timer_seconds || 3600) / 60)}
+                min
+              </p>
+              <p className="mt-2 text-sm text-gray-600">
+                Timer starts when you click "Start Test" and auto-submits when
+                time runs out.
+              </p>
+            </div>
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+                Total Questions
+              </h2>
+              <p className="mt-2 text-2xl font-semibold text-gray-900">
+                {totalQuestionsDisplay}
+              </p>
+              <p className="mt-2 text-sm text-gray-600">
+                {hasLoadedCounts
+                  ? "Based on the questions currently available across sections."
+                  : "Each question carries equal weight. There is no negative marking."}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Sections</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {sections.map((section) => {
+                const plannedCount = section.question_count || 0;
+                const loadedCount = section.questions.length;
+                const displayCount = loadedCount || plannedCount;
+
+                return (
+                  <div
+                    key={section.name}
+                    className="rounded-lg border border-gray-200 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          {section.name}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          {displayCount} question
+                          {displayCount === 1 ? "" : "s"} loaded
+                          {loadedCount && loadedCount !== plannedCount
+                            ? ` (planned ${plannedCount})`
+                            : loadedCount
+                            ? ""
+                            : plannedCount
+                            ? ` planned`
+                            : ""}
+                        </p>
+                      </div>
+                      {section.loading ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">
+                          <Loader2
+                            className="h-3 w-3 animate-spin"
+                            aria-hidden="true"
+                          />
+                          Loading
+                        </span>
+                      ) : loadedCount > 0 ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                          Ready
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700">
+                          Pending load
+                        </span>
+                      )}
+                    </div>
+                    {section.loading && (
+                      <p className="mt-2 text-xs text-gray-500">
+                        Fetching questions for this section. Please wait a
+                        moment.
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+            <ul className="list-disc space-y-2 pl-5">
+              <li>All questions are compulsory.</li>
               <li>
-                Total Questions:{" "}
-                {sections.reduce(
-                  (sum, sec) => sum + (sec.question_count || 0),
-                  0
-                )}
+                You can mark questions for review and revisit them via the
+                palette.
               </li>
-              <li>All questions are compulsory</li>
-              <li>Each question carries equal marks</li>
-              <li>No negative marking</li>
+              <li>Your responses auto-save locally until you submit.</li>
               <li>
-                You can navigate between questions using the navigation buttons
-              </li>
-              <li>
-                You can mark questions for review and come back to them later
+                The test auto-submits if the timer expires or you navigate away.
               </li>
             </ul>
           </div>
-
-          {/* <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-3">Sections</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {sections.map((section, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <h3 className="font-medium">{section.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {section.questions.length} questions •{" "}
-                    {Math.floor(section.questions.length * 0.5)} min
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div> */}
 
           <div className="flex justify-center">
             <Button
@@ -714,9 +863,10 @@ export default function MockTestAttemptPage() {
   }
 
   // Format time remaining
-  const hours = Math.floor(timeRemaining / 3600);
-  const minutes = Math.floor((timeRemaining % 3600) / 60);
-  const seconds = timeRemaining % 60;
+  const safeTimeRemaining = Math.max(0, timeRemaining);
+  const hours = Math.floor(safeTimeRemaining / 3600);
+  const minutes = Math.floor((safeTimeRemaining % 3600) / 60);
+  const seconds = safeTimeRemaining % 60;
   const timeString = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
     .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
@@ -792,68 +942,124 @@ export default function MockTestAttemptPage() {
           currentSectionIndex={currentSectionIndex}
           onSectionChange={handleSectionChange}
           answeredCounts={answeredCounts}
+          className="bg-white shadow-sm"
         />
       )}
 
       {/* Main Content */}
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
-        {currentSection?.loading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-            <span className="ml-2 text-gray-500">Loading questions...</span>
-          </div>
-        ) : currentSection?.error ? (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+      <main className="flex-1 mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="space-y-6">
+            {currentSection?.loading ? (
+              <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-gray-200 bg-white text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                <span className="mt-3 text-sm text-gray-500">
+                  Loading questions...
+                </span>
               </div>
-              <div className="ml-3">
+            ) : currentSection?.error ? (
+              <div className="rounded-lg border-l-4 border-red-500 bg-red-50 px-4 py-3">
                 <p className="text-sm text-red-700">{currentSection.error}</p>
+              </div>
+            ) : currentQuestion ? (
+              <>
+                <QuestionDisplay
+                  question={currentQuestion}
+                  selectedAnswer={selectedAnswers[currentQuestion.id] || null}
+                  onAnswerSelect={handleAnswerSelect}
+                  questionNumber={currentQuestionIndex + 1}
+                  totalQuestions={currentSection.questions.length}
+                  isMarkedForReview={isMarkedForReview}
+                  onToggleMarkForReview={handleToggleMarkForReview}
+                  className="mb-6"
+                />
+
+                <TestControls
+                  onPrevious={() => handleQuestionNavigation("prev")}
+                  onNext={() => handleQuestionNavigation("next")}
+                  onSubmit={handleManualSubmit}
+                  isFirstQuestion={isFirstQuestion && currentSectionIndex === 0}
+                  isLastQuestion={isLastQuestionInSection && isLastSection}
+                  isMarkedForReview={isMarkedForReview}
+                  onToggleMarkForReview={handleToggleMarkForReview}
+                />
+              </>
+            ) : (
+              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                <p className="text-gray-500">
+                  No questions available in this section.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <QuestionPalette
+              sections={sections.map((section) => ({
+                name: section.name,
+                questions: section.questions,
+                markedForReview: section.markedForReview,
+                loading: section.loading,
+              }))}
+              currentSectionIndex={currentSectionIndex}
+              currentQuestionIndex={currentQuestionIndex}
+              selectedAnswers={selectedAnswers}
+              onSelectQuestion={(sectionIndex, questionIndex) => {
+                setCurrentSectionIndex(sectionIndex);
+                setCurrentQuestionIndex(questionIndex);
+              }}
+              className="sticky top-24"
+            />
+
+            <div className="grid gap-4 rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-900">
+                  Attempt Summary
+                </span>
+                <span>
+                  {answeredCount}/{totalQuestions}
+                </span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 text-gray-700">
+                    <span
+                      className="h-2 w-2 rounded-full bg-green-500"
+                      aria-hidden="true"
+                    />
+                    Answered
+                  </span>
+                  <span>{answeredCount}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 text-gray-700">
+                    <span
+                      className="h-2 w-2 rounded-full bg-yellow-500"
+                      aria-hidden="true"
+                    />
+                    Marked for review
+                  </span>
+                  <span>
+                    {sections.reduce(
+                      (sum, sec) => sum + (sec.markedForReview?.size || 0),
+                      0
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 text-gray-700">
+                    <span
+                      className="h-2 w-2 rounded-full bg-gray-300"
+                      aria-hidden="true"
+                    />
+                    Not answered
+                  </span>
+                  <span>{totalQuestions - answeredCount}</span>
+                </div>
               </div>
             </div>
           </div>
-        ) : currentQuestion ? (
-          <>
-            <QuestionDisplay
-              question={currentQuestion}
-              selectedAnswer={selectedAnswers[currentQuestion.id] || null}
-              onAnswerSelect={handleAnswerSelect}
-              questionNumber={currentQuestionIndex + 1}
-              totalQuestions={currentSection.questions.length}
-              isMarkedForReview={isMarkedForReview}
-              onToggleMarkForReview={handleToggleMarkForReview}
-              className="mb-6"
-            />
-
-            <TestControls
-              onPrevious={() => handleQuestionNavigation("prev")}
-              onNext={() => handleQuestionNavigation("next")}
-              onSubmit={handleManualSubmit}
-              isFirstQuestion={isFirstQuestion && currentSectionIndex === 0}
-              isLastQuestion={isLastQuestionInSection && isLastSection}
-              isMarkedForReview={isMarkedForReview}
-              onToggleMarkForReview={handleToggleMarkForReview}
-            />
-          </>
-        ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-            <p className="text-gray-500">
-              No questions available in this section.
-            </p>
-          </div>
-        )}
+        </div>
       </main>
 
       {/* Footer */}
