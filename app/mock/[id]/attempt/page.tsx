@@ -810,7 +810,7 @@ export default function MockTestAttemptPage() {
                 min
               </p>
               <p className="mt-2 text-sm text-gray-600">
-                Timer starts when you click "Start Test" and auto-submits when
+                Timer starts when you click &quot;Start Test&quot; and auto-submits when
                 time runs out.
               </p>
             </div>
