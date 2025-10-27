@@ -7,6 +7,7 @@ import {
   getSectionQuestions,
   fetchCourseBySlug,
   getCourseById,
+  getCourseDetails,
   Question,
   SectionDetails as BaseSectionDetails,
   Course,
@@ -168,22 +169,67 @@ export default function MockTestAttemptPage() {
       // Fetch course info
       let courseData: Course | null = null;
 
+      console.debug("[MockAttempt] Loading course", {
+        rawParam: id,
+        timestamp: new Date().toISOString(),
+      });
+
       if (typeof id === "string") {
         try {
           courseData = await getCourseById(id);
+          console.debug("[MockAttempt] getCourseById result", {
+            id,
+            timer: courseData?.mock_test_timer_seconds,
+          });
         } catch (err) {
           const axiosError = err as AxiosError;
           if (axiosError?.response?.status !== 404) {
-            console.warn("Direct course lookup by ID failed:", err);
+            console.warn("[MockAttempt] Direct course lookup by ID failed", err);
           }
         }
       }
 
       if (!courseData) {
         courseData = await fetchCourseBySlug(id as string);
+        console.debug("[MockAttempt] fetchCourseBySlug fallback", {
+          id,
+          timer: courseData?.mock_test_timer_seconds,
+        });
       }
 
       if (!courseData) throw new Error("Course not found");
+
+      if (courseData.id) {
+        try {
+          const detailedCourse = await getCourseDetails(courseData.id);
+          console.debug("[MockAttempt] Detailed course fetch", {
+            id: courseData.id,
+            timer: detailedCourse?.mock_test_timer_seconds,
+          });
+          courseData = {
+            ...courseData,
+            ...detailedCourse,
+          };
+        } catch (err) {
+          console.warn("[MockAttempt] Failed to hydrate course details", err);
+        }
+      }
+
+      const normalizedTimer = Number(courseData.mock_test_timer_seconds);
+      const safeTimer = Number.isFinite(normalizedTimer) && normalizedTimer > 0
+        ? normalizedTimer
+        : undefined;
+
+      courseData = {
+        ...courseData,
+        mock_test_timer_seconds: safeTimer ?? undefined,
+      };
+
+      console.debug("[MockAttempt] Final course payload", {
+        id: courseData.id,
+        timer: courseData.mock_test_timer_seconds,
+        title: courseData.title,
+      });
 
       setCourseInfo(courseData);
 
@@ -242,6 +288,10 @@ export default function MockTestAttemptPage() {
     setInitialTimerSeconds(duration);
     setTimeRemaining(duration);
     setTestStarted(true);
+    console.debug("[MockAttempt] Test started", {
+      courseId: courseInfo?.id,
+      appliedDuration: duration,
+    });
     await loadAllSections();
     // Timer will be initialized by the useEffect that depends on testStarted and course timer
   };
@@ -361,6 +411,10 @@ export default function MockTestAttemptPage() {
     if (!courseInfo) return;
 
     const duration = courseInfo.mock_test_timer_seconds ?? 3600;
+    console.debug("[MockAttempt] Applying course duration", {
+      courseId: courseInfo.id,
+      durationSeconds: duration,
+    });
     setInitialTimerSeconds(duration);
 
     if (!testStarted) {
