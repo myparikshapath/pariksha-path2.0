@@ -45,6 +45,7 @@ const EditCoursePage = () => {
         is_free: courseData.is_free,
         discount_percent: courseData.discount_percent,
         validity_period_days: courseData.validity_period_days,
+        mock_test_timer_seconds: courseData.mock_test_timer_seconds,
         thumbnail_url: courseData.thumbnail_url,
         icon_url: courseData.icon_url,
         banner_url: courseData.banner_url,
@@ -384,37 +385,39 @@ const EditCoursePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="validity_period_days">
-                  Validity Period (Days)
+                <Label htmlFor="mock_test_timer_seconds">
+                  Mock Test Timer (Minutes)
                 </Label>
                 <Input
-                  id="validity_period_days"
+                  id="mock_test_timer_seconds"
                   type="number"
                   min={1}
-                  max={3650}
-                  required={true}
+                  max={14400}
                   value={
-                    (formData.validity_period_days as unknown as string) ===
-                      "" || formData.validity_period_days === undefined
+                    (formData.mock_test_timer_seconds as unknown as string) ===
+                      "" || formData.mock_test_timer_seconds === undefined
                       ? ""
-                      : formData.validity_period_days
+                      : Math.floor((formData.mock_test_timer_seconds || 3600) / 60)
                   }
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === "") {
                       handleInputChange(
-                        "validity_period_days",
+                        "mock_test_timer_seconds",
                         "" as unknown as number
                       );
                     } else {
                       const num = parseInt(val, 10);
                       if (!isNaN(num)) {
-                        handleInputChange("validity_period_days", num);
+                        handleInputChange("mock_test_timer_seconds", num * 60); // Convert minutes to seconds
                       }
                     }
                   }}
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
                 />
+                <p className="text-xs text-gray-500">
+                  Duration for mock tests in minutes (1-240 minutes)
+                </p>
               </div>
 
               {/* <div className="space-y-2">

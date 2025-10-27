@@ -44,6 +44,7 @@ export default function NewExamPage() {
     is_free: false,
     discount_percent: 0,
     validity_period_days: 365,
+    mock_test_timer_seconds: 3600,
     material_ids: [],
     test_series_ids: [],
     thumbnail_url: "",
@@ -393,15 +394,48 @@ export default function NewExamPage() {
                 placeholder="365"
                 className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
               />
+            </div>
+            {/* Mock Test Timer */}
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="mock_test_timer_seconds">
+                Mock Test Timer (Minutes)
+              </Label>
+              <Input
+                id="mock_test_timer_seconds"
+                type="number"
+                min={1}
+                max={240}
+                value={
+                  (formData.mock_test_timer_seconds as unknown as string) ===
+                    "" || formData.mock_test_timer_seconds === undefined
+                    ? ""
+                    : Math.floor(
+                        (formData.mock_test_timer_seconds || 3600) / 60
+                      )
+                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    handleInputChange(
+                      "mock_test_timer_seconds",
+                      "" as unknown as number
+                    );
+                  } else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      handleInputChange("mock_test_timer_seconds", num * 60); // Convert minutes to seconds
+                    }
+                  }
+                }}
+                placeholder="60"
+                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
+              />
               <p className="text-sm text-slate-600">
-                Number of days the course access is valid after enrollment
-                (1-3650 days)
+                Duration for mock tests in minutes (1-240 minutes)
               </p>
             </div>
           </CardContent>
         </Card>
-
-        {/* Sections */}
         <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
             <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
