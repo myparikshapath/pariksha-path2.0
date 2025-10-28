@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
@@ -8,130 +8,142 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
+  BarChart3,
+  RefreshCw,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import api from "@/utils/api";
-
-interface Exam {
-  id: string;
-  title: string;
-  code: string;
-  category: string;
-  sub_category: string;
-  description: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-// Optional: define API response type
-interface CourseResponse {
-  id?: string;
-  title?: string;
-  code?: string;
-  category?: string;
-  sub_category?: string;
-  description?: string;
-  is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
+import {
+  Course,
+  CourseListPagination,
+  CourseSummary,
+  fetchCoursesAdmin,
+  getCourseSummary,
+  toggleCourseVisibility,
+} from "@/src/services/courseService";
 
 export default function AdminExamsPage() {
   const router = useRouter();
-  const [exams, setExams] = useState<Exam[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<CourseListPagination>({
+    total: 0,
+    page: 1,
+    limit: 12,
+    total_pages: 1,
+  });
+  const [summary, setSummary] = useState<CourseSummary | null>(null);
 
-  const limit = 12; // items per page
+  const limit = 12;
 
-  const loadExams = async () => {
+  const loadSummary = useCallback(async () => {
+    try {
+      const data = await getCourseSummary();
+      setSummary(data);
+    } catch (err) {
+      console.error("Failed to load summary", err);
+    }
+  }, []);
+
+  const loadCourses = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get("/courses", {
-        params: { limit: 1000, show_all: true },
+      const result = await fetchCoursesAdmin({
+        page: currentPage,
+        limit,
+        search: searchQuery || undefined,
+        show_all: true,
+        sort_order: "desc",
       });
 
-      const allCourses: CourseResponse[] = Array.isArray(response.data)
-        ? response.data
-        : response.data.courses || response.data.data || [];
-
-      const courses: Exam[] = allCourses.map((c) => ({
-        id: c.id || "",
-        title: c.title || "",
-        code: c.code || "",
-        category: c.category || "",
-        sub_category: c.sub_category || "",
-        description: c.description || "",
-        is_active: Boolean(c.is_active),
-        created_at: c.created_at || new Date().toISOString(),
-        updated_at: c.updated_at || new Date().toISOString(),
-      }));
-
-      setExams(courses);
+      setCourses(result.courses);
+      setPagination(result.pagination);
+      if (result.pagination.page && result.pagination.page !== currentPage) {
+        setCurrentPage(result.pagination.page);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load exams", err);
       setError("Failed to load exams. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchQuery]);
 
   useEffect(() => {
-    loadExams();
-  }, []);
+    loadCourses();
+  }, [loadCourses]);
 
-  const filteredExams = exams.filter((exam) =>
-    exam.title.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      setSearchQuery(searchInput.trim());
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const totalPages = useMemo(
+    () => pagination.total_pages ?? Math.max(1, Math.ceil(pagination.total / limit)),
+    [pagination.total_pages, pagination.total, limit]
   );
 
-  const totalPages = Math.ceil(filteredExams.length / limit);
-  const paginatedExams = filteredExams.slice(
-    (currentPage - 1) * limit,
-    currentPage * limit
-  );
+  const summaryCards = useMemo(() => {
+    if (!summary) return [];
+    const { total, active, inactive, last_updated_at } = summary;
+    const lastUpdatedLabel = last_updated_at
+      ? new Date(last_updated_at).toLocaleString()
+      : "-";
+    return [
+      {
+        label: "Total Exams",
+        value: total,
+        accent: "text-emerald-700",
+      },
+      {
+        label: "Active",
+        value: active,
+        accent: "text-green-600",
+      },
+      {
+        label: "Inactive",
+        value: inactive,
+        accent: "text-amber-600",
+      },
+      {
+        label: "Last Updated",
+        value: lastUpdatedLabel,
+        accent: "text-slate-600",
+      },
+    ];
+  }, [summary]);
 
   const toggleVisibility = async (examId: string) => {
     try {
-      const response = await api.put(`/courses/${examId}/toggle-visibility`);
-      if (response.status === 200 && response.data.course) {
-        const updatedCourse: CourseResponse = response.data.course;
-        setExams((prev) =>
+      const response = await toggleCourseVisibility(examId);
+      if (response?.course) {
+        setCourses((prev) =>
           prev.map((exam) =>
             exam.id === examId
-              ? { ...exam, is_active: Boolean(updatedCourse.is_active) }
+              ? { ...exam, is_active: Boolean(response.course.is_active) }
               : exam
           )
         );
+        loadSummary();
       }
     } catch (err) {
       console.error(err);
       alert("Failed to toggle course visibility.");
     }
   };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center text-gray-600">
-        Loading courses...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center text-red-600">
-        <p>{error}</p>
-        <Button onClick={loadExams} className="mt-4">
-          Retry
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -156,38 +168,88 @@ export default function AdminExamsPage() {
           </div>
           <div className="flex gap-3 flex-wrap">
             <Button
-              onClick={loadExams}
+              onClick={() => {
+                setSearchInput("");
+                setSearchQuery("");
+                setCurrentPage(1);
+                loadCourses();
+                loadSummary();
+              }}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-5 sm:px-6 py-2 sm:py-3"
             >
-              Refresh
+              <RefreshCw className="h-4 w-4" /> Refresh
             </Button>
           </div>
         </div>
       </div>
 
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-full bg-red-100 flex-shrink-0">
+              <BarChart3 className="h-5 w-5 text-red-500" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-800 mb-1">
+                {error}
+              </h3>
+              <Button
+                variant="ghost"
+                onClick={loadCourses}
+                className="px-0 text-red-600 hover:text-red-700"
+              >
+                Retry loading
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {summaryCards.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          {summaryCards.map(({ label, value, accent }) => (
+            <div
+              key={label}
+              className="bg-white rounded-2xl border border-emerald-100 shadow-md px-5 py-4 flex flex-col gap-1"
+            >
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {label}
+              </span>
+              <span className={`text-2xl font-semibold ${accent}`}>{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Search Input */}
       <input
         type="text"
         placeholder="Search exams..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
         className="w-full mb-8 border rounded-full px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
       />
 
       {/* Exams Grid */}
-      {paginatedExams.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+          {Array.from({ length: limit }).map((_, index) => (
+            <div
+              key={index}
+              className="h-48 rounded-2xl bg-slate-100 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : courses.length === 0 ? (
         <div className="text-center py-16 border-2 border-dashed border-slate-300 rounded-2xl bg-white/50">
           <p className="text-slate-600 text-lg mb-6 font-medium">
             No exams found
           </p>
-          <Button onClick={loadExams}>Reload</Button>
+          <Button onClick={loadCourses}>Reload</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-          {paginatedExams.map((exam) => (
+          {courses.map((exam) => (
             <motion.div
               key={exam.id}
               whileHover={{ scale: 1.0, y: -1 }}
@@ -250,7 +312,9 @@ export default function AdminExamsPage() {
                       e.stopPropagation();
                       router.push(
                         `/admin/exam/${encodeURIComponent(
-                          exam.code.toLowerCase().replace(/\s+/g, "-")
+                          (exam.code || exam.title)
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")
                         )}`
                       );
                     }}
@@ -266,7 +330,7 @@ export default function AdminExamsPage() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!loading && totalPages > 1 && (
         <div className="flex flex-wrap justify-center mt-8 gap-2 sm:gap-3 items-center">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -280,10 +344,11 @@ export default function AdminExamsPage() {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-3 sm:px-4 py-2 rounded-full border ${currentPage === page
+              className={`px-3 sm:px-4 py-2 rounded-full border ${
+                currentPage === page
                   ? "bg-[#2E4A3C] text-white shadow-md"
                   : "bg-gray-100 text-gray-700 hover:bg-green-100"
-                } transition`}
+              } transition`}
             >
               {page}
             </button>

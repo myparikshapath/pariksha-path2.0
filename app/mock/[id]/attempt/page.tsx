@@ -184,7 +184,10 @@ export default function MockTestAttemptPage() {
         } catch (err) {
           const axiosError = err as AxiosError;
           if (axiosError?.response?.status !== 404) {
-            console.warn("[MockAttempt] Direct course lookup by ID failed", err);
+            console.warn(
+              "[MockAttempt] Direct course lookup by ID failed",
+              err
+            );
           }
         }
       }
@@ -216,9 +219,10 @@ export default function MockTestAttemptPage() {
       }
 
       const normalizedTimer = Number(courseData.mock_test_timer_seconds);
-      const safeTimer = Number.isFinite(normalizedTimer) && normalizedTimer > 0
-        ? normalizedTimer
-        : undefined;
+      const safeTimer =
+        Number.isFinite(normalizedTimer) && normalizedTimer > 0
+          ? normalizedTimer
+          : undefined;
 
       courseData = {
         ...courseData,
@@ -760,13 +764,13 @@ export default function MockTestAttemptPage() {
       0
     );
 
-    const totalQuestionsPlanned = sections.reduce(
-      (sum, sec) => sum + (sec.question_count || 0),
-      0
-    );
+    // const totalQuestionsPlanned = sections.reduce(
+    //   (sum, sec) => sum + (sec.question_count || 0),
+    //   0
+    // );
 
     const totalQuestionsDisplay =
-      totalQuestionsLoaded > 0 ? totalQuestionsLoaded : totalQuestionsPlanned;
+      totalQuestionsLoaded > 0 ? totalQuestionsLoaded : 0;
 
     const hasLoadedCounts = totalQuestionsLoaded > 0;
 
@@ -810,8 +814,8 @@ export default function MockTestAttemptPage() {
                 min
               </p>
               <p className="mt-2 text-sm text-gray-600">
-                Timer starts when you click &quot;Start Test&quot; and auto-submits when
-                time runs out.
+                Timer starts when you click &quot;Start Test&quot; and
+                auto-submits when time runs out.
               </p>
             </div>
             <div className="rounded-lg border border-gray-200 p-4">
@@ -823,8 +827,10 @@ export default function MockTestAttemptPage() {
               </p>
               <p className="mt-2 text-sm text-gray-600">
                 {hasLoadedCounts
-                  ? "Based on the questions currently available across sections."
-                  : "Each question carries equal weight. There is no negative marking."}
+                  ? "You will face " +
+                    totalQuestionsDisplay +
+                    " questions in this exam. Good Luck!"
+                  : ""}
               </p>
             </div>
           </div>
@@ -849,14 +855,7 @@ export default function MockTestAttemptPage() {
                         </h3>
                         <p className="text-xs text-gray-500">
                           {displayCount} question
-                          {displayCount === 1 ? "" : "s"} loaded
-                          {loadedCount && loadedCount !== plannedCount
-                            ? ` (planned ${plannedCount})`
-                            : loadedCount
-                            ? ""
-                            : plannedCount
-                            ? ` planned`
-                            : ""}
+                          {displayCount === 1 ? "" : "s"}
                         </p>
                       </div>
                       {section.loading ? (

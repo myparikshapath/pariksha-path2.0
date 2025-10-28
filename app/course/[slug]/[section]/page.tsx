@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   getSectionQuestions,
@@ -13,6 +13,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   AlertCircle,
   Loader2,
@@ -20,6 +22,9 @@ import {
   BookOpen,
   Target,
   Filter,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Select,
@@ -58,8 +63,30 @@ const SectionQuestionsPage = () => {
     difficulty: "",
     topic: "",
   });
+  const [showAnswers, setShowAnswers] = useState(true);
+  const [showExplanations, setShowExplanations] = useState(true);
+  const [compactView, setCompactView] = useState(false);
 
   const sectionName = decodeURIComponent(section as string);
+
+  const topicOptions = useMemo(() => {
+    const topics = new Set<string>();
+    questions.forEach((q) => {
+      if (q.topic) {
+        topics.add(q.topic);
+      }
+    });
+    return Array.from(topics).sort((a, b) => a.localeCompare(b));
+  }, [questions]);
+
+  const difficultyBreakdown = useMemo(() => {
+    const counts = new Map<string, number>();
+    questions.forEach((q) => {
+      const key = (q.difficulty_level || "Unknown").toLowerCase();
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    return counts;
+  }, [questions]);
 
   const loadCourseAndSectionData = useCallback(async () => {
     try {

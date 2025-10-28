@@ -359,12 +359,11 @@ const EditCoursePage = () => {
                   min="0"
                   max="100"
                   required={true}
-                  // value={formData.discount_percent || 0}
                   value={
                     (formData.discount_percent as unknown as string) === "" ||
                     formData.discount_percent === undefined
                       ? ""
-                      : formData.discount_percent
+                      : formData.discount_percent || 0
                   }
                   onChange={(e) => {
                     const val = e.target.value;
