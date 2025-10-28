@@ -189,6 +189,42 @@ export interface UpdateCourseRequest {
   is_active?: boolean;
 }
 
+export interface CourseListPagination {
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+export interface CourseListResult {
+  message: string;
+  courses: Course[];
+  pagination: CourseListPagination;
+}
+
+export interface CourseListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
+  is_active?: boolean;
+  category?: Course["category"];
+  show_all?: boolean;
+}
+
+export interface CourseSummary {
+  total: number;
+  active: number;
+  inactive: number;
+  last_updated_at?: string | null;
+}
+
+export interface ToggleCourseVisibilityResponse {
+  message: string;
+  course: Pick<Course, "id" | "title" | "is_active">;
+}
+
 interface QuestionChanges {
   field: string;
   old_value: unknown;
@@ -215,12 +251,58 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
 export const fetchAvailableCourses = async (): Promise<Course[]> => {
   try {
     const response = await api.get("/courses?limit=200");
-    console.log("API Response:", response.data);
     // Handle both response formats
     const coursesData = response.data.data || response.data.courses || [];
     return Array.isArray(coursesData) ? coursesData : [];
   } catch (error) {
     console.error("Error fetching available courses:", error);
+    throw error;
+  }
+};
+
+export const fetchCoursesAdmin = async (
+  params: CourseListParams = {}
+): Promise<CourseListResult> => {
+  try {
+    const queryParams = {
+      page: params.page ?? 1,
+      limit: params.limit ?? 12,
+      search: params.search,
+      sort_by: params.sort_by ?? "updated_at",
+      sort_order: params.sort_order ?? "desc",
+      is_active: params.is_active,
+      category: params.category,
+      show_all: params.show_all ?? true,
+    };
+
+    const response = await api.get("/courses", {
+      params: queryParams,
+    });
+
+    const rawData = response.data ?? {};
+    const coursesData: Course[] = Array.isArray(rawData.data)
+      ? rawData.data
+      : Array.isArray(rawData.courses)
+      ? rawData.courses
+      : [];
+
+    const paginationSource = rawData.pagination ?? {};
+    const total = paginationSource.total ?? coursesData.length;
+    const limit = paginationSource.limit ?? queryParams.limit;
+
+    return {
+      message: rawData.message ?? "Courses retrieved successfully",
+      courses: coursesData,
+      pagination: {
+        total,
+        page: paginationSource.page ?? queryParams.page,
+        limit,
+        total_pages:
+          paginationSource.total_pages ?? Math.max(1, Math.ceil(total / limit)),
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching admin courses:", error);
     throw error;
   }
 };
@@ -396,6 +478,28 @@ export const deleteCourse = async (
     return response.data;
   } catch (error) {
     console.error("Error deleting course:", error);
+    throw error;
+  }
+};
+
+export const toggleCourseVisibility = async (
+  courseId: string
+): Promise<ToggleCourseVisibilityResponse> => {
+  try {
+    const response = await api.put(`/courses/${courseId}/toggle-visibility`);
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling course visibility:", error);
+    throw error;
+  }
+};
+
+export const getCourseSummary = async (): Promise<CourseSummary> => {
+  try {
+    const response = await api.get("/courses/summary");
+    return response.data.data ?? response.data;
+  } catch (error) {
+    console.error("Error fetching course summary:", error);
     throw error;
   }
 };
