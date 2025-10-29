@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Calendar, Award, Eye } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Award, Eye, RotateCcw } from "lucide-react";
 import api from "@/utils/api";
 import Link from "next/link";
 
@@ -159,8 +159,8 @@ export default function MockHistoryPage() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center mt-4">
-                <div className="w-2/3 bg-gray-200 rounded-full h-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
+                <div className="w-full sm:w-2/3 bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full ${
                       attempt.percentage >= 70
@@ -173,16 +173,31 @@ export default function MockHistoryPage() {
                   />
                 </div>
 
-                <Link href={`/mock/history/${attempt.id}`}>
+                <div className="flex gap-2 sm:justify-end">
                   <Button
-                    variant="outline"
                     size="sm"
                     className="flex items-center"
+                    onClick={() =>
+                      router.push(
+                        `/mock/${attempt.course.id}/attempt?historyAttemptId=${attempt.id}`
+                      )
+                    }
                   >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Retake
                   </Button>
-                </Link>
+
+                  <Link href={`/mock/history/${attempt.id}`}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Details
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

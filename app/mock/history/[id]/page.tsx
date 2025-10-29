@@ -318,13 +318,25 @@ export default function MockAttemptDetailsPage() {
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
+        <div className="px-4 py-5 sm:px-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
             {attemptDetails.course.title}
           </h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            {formatDate(attemptDetails.date) }
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-gray-500">
+              {formatDate(attemptDetails.date) }
+            </p>
+            <Button
+              onClick={() =>
+                router.push(
+                  `/mock/${attemptDetails.course.id}/attempt?historyAttemptId=${attemptDetails.id}`
+                )
+              }
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Retake Test
+            </Button>
+          </div>
         </div>
         <div className="border-t border-gray-200">
           <dl>
