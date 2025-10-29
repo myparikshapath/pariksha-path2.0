@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import type { AxiosError } from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   getSectionQuestions,
   fetchCourseBySlug,
@@ -13,6 +19,10 @@ import {
   Course,
   getCourseSections,
 } from "@/src/services/courseService";
+import {
+  MockHistoryAttemptDetails,
+} from "@/src/services/mockHistoryService";
+import { getMockHistoryAttempt } from "@/src/services/mockHistoryService";
 import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info, Loader2, TimerReset } from "lucide-react";
@@ -42,9 +52,66 @@ interface SectionDetails extends BaseSectionDetails {
   markedForReview: Set<string>; // Track questions marked for review by their IDs
 }
 
+const normalizeHistoryQuestion = (
+  attemptQuestion: MockHistoryAttemptDetails["question_attempts"][number]
+): Question => {
+  const baseQuestion = attemptQuestion.question;
+  return {
+    id: baseQuestion.id,
+    title: baseQuestion.title,
+    question_text: baseQuestion.question_text,
+    question_type: baseQuestion.question_type,
+    difficulty_level: baseQuestion.difficulty_level,
+    options: baseQuestion.options,
+    explanation: baseQuestion.explanation,
+    remarks: baseQuestion.remarks ?? undefined,
+    subject: baseQuestion.subject,
+    topic: baseQuestion.topic,
+    tags: baseQuestion.tags ?? [],
+    marks: baseQuestion.marks ?? 1,
+    created_at: baseQuestion.created_at ?? "",
+    updated_at: baseQuestion.updated_at ?? "",
+    is_active: baseQuestion.is_active ?? true,
+    created_by: baseQuestion.created_by ?? "",
+    question_image_urls: baseQuestion.question_image_urls ?? [],
+    explanation_image_urls: baseQuestion.explanation_image_urls ?? [],
+    remarks_image_urls: baseQuestion.remarks_image_urls ?? [],
+  };
+};
+
+type HistorySectionQuestions = Map<
+  string,
+  { question: Question; selectedOptionOrder: number | null }[]
+>;
+
+const groupHistoryQuestionsBySection = (
+  historyAttempt: MockHistoryAttemptDetails | null
+): HistorySectionQuestions => {
+  const groups: HistorySectionQuestions = new Map();
+  if (!historyAttempt) {
+    return groups;
+  }
+
+  historyAttempt.question_attempts.forEach((attempt) => {
+    const sectionName = attempt.question.section ?? "General";
+    const normalizedQuestion = normalizeHistoryQuestion(attempt);
+    const entry = groups.get(sectionName) ?? [];
+    entry.push({
+      question: normalizedQuestion,
+      selectedOptionOrder: attempt.selected_option_order,
+    });
+    groups.set(sectionName, entry);
+  });
+
+  return groups;
+};
+
 export default function MockTestAttemptPage() {
   const params = useParams();
   const { id } = params;
+  const searchParams = useSearchParams();
+  const historyAttemptId = searchParams.get("historyAttemptId");
+  const isHistoryRetake = Boolean(historyAttemptId);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,10 +133,11 @@ export default function MockTestAttemptPage() {
 
   // Load course and sections data
 
-  // Load questions for a section
+  // Load questions for a section (random mock mode). In history retake, this is skipped entirely.
   const loadSectionQuestions = useCallback(
     async (sectionName: string, sectionIndex: number) => {
       if (!courseInfo) return;
+      if (isHistoryRetake) return; // history retake uses fixed questions
 
       try {
         setSections((prev) => {
@@ -103,7 +171,7 @@ export default function MockTestAttemptPage() {
           return;
         }
 
-        // Fetch questions for the section with the specified limit
+        // Fetch questions for the section with the specified limit (randomized)
         const response = await getSectionQuestions(
           courseInfo.id,
           sectionName,
@@ -122,13 +190,8 @@ export default function MockTestAttemptPage() {
           );
         }
 
-        // Shuffle questions to get random ones each time
-        const shuffledQuestions = [...response.questions].sort(
-          () => Math.random() - 0.5
-        );
-
-        // Take only the number of questions specified by question_count
-        const limitedQuestions = shuffledQuestions.slice(0, questionLimit);
+        // No shuffle here; backend already returns random sample of limit
+        const limitedQuestions = response.questions.slice(0, questionLimit);
 
         setSections((prev) => {
           const updated = [...prev];
@@ -158,7 +221,7 @@ export default function MockTestAttemptPage() {
         });
       }
     },
-    [courseInfo, sections] // Added sections dependency to fix stale closure issue
+    [courseInfo, sections, isHistoryRetake] // Added sections dependency to fix stale closure issue
   );
 
   const loadCourseData = useCallback(async () => {
@@ -237,34 +300,61 @@ export default function MockTestAttemptPage() {
 
       setCourseInfo(courseData);
 
-      // Fetch sections
+      // Fetch sections (base structure)
       const sectionsResponse = await getCourseSections(courseData.id);
 
-      // Initialize sections state
-      const initialSections = sectionsResponse.sections.map(
-        (section) =>
-          ({
-            ...section,
-            questions: [],
-            loading: false,
-            error: null,
-            markedForReview: new Set<string>(),
-          } as SectionDetails)
-      );
+      // If this is a history retake, fetch the attempt and hydrate exact questions per section
+      if (isHistoryRetake && historyAttemptId) {
+        const attempt: MockHistoryAttemptDetails = await getMockHistoryAttempt(
+          historyAttemptId
+        );
 
-      setSections(initialSections);
+        // Group questions by their original section
+        const groups = groupHistoryQuestionsBySection(attempt);
 
-      // Load first section's questions will happen in useEffect after sections are set
+        // Build sections maintaining course ordering; fill questions from groups
+        const hydratedSections: SectionDetails[] = sectionsResponse.sections.map(
+          (section) => {
+            const items = groups.get(section.name) ?? [];
+            return {
+              ...section,
+              questions: items.map((it) => it.question),
+              loading: false,
+              error: null,
+              markedForReview: new Set<string>(),
+            } as SectionDetails;
+          }
+        );
+
+        setSections(hydratedSections);
+      } else {
+        // Normal mock mode: initialize empty and let loaders fetch randoms later
+        const initialSections = sectionsResponse.sections.map(
+          (section) =>
+            ({
+              ...section,
+              questions: [],
+              loading: false,
+              error: null,
+              markedForReview: new Set<string>(),
+            } as SectionDetails)
+        );
+        setSections(initialSections);
+      }
+
+      // Load first section questions later via effects (skipped for history mode)
     } catch (err) {
-      console.error("Error loading course data:", err);
+      console.error("Error loading course data:")
+      console.error(err);
       setError("Failed to load test. Please try again later.");
     } finally {
       setLoading(false);
     }
-  }, [id]); // Keep id as the only dependency
+  }, [id, isHistoryRetake, historyAttemptId]); // Keep dependencies minimal
 
   // Load all sections' questions
   const loadAllSections = useCallback(async () => {
+    if (isHistoryRetake) return; // already hydrated
     try {
       await Promise.all(
         sections.map((section, index) => {
@@ -283,7 +373,7 @@ export default function MockTestAttemptPage() {
       console.error("Error loading all sections:", error);
       setError("Failed to load all sections. Please try again.");
     }
-  }, [sections, loadSectionQuestions]);
+  }, [sections, loadSectionQuestions, isHistoryRetake]);
 
   // Handle starting the test
   const handleStartTest = async () => {
@@ -296,7 +386,9 @@ export default function MockTestAttemptPage() {
       courseId: courseInfo?.id,
       appliedDuration: duration,
     });
-    await loadAllSections();
+    if (!isHistoryRetake) {
+      await loadAllSections();
+    }
     // Timer will be initialized by the useEffect that depends on testStarted and course timer
   };
 
@@ -428,7 +520,8 @@ export default function MockTestAttemptPage() {
 
   // Separate effect to load first section questions after sections are loaded
   useEffect(() => {
-    // Prefetch questions for all sections before the test starts
+    // Prefetch questions for all sections before the test starts (skip for history retake)
+    if (isHistoryRetake) return;
     if (sections.length === 0 || testStarted) return;
 
     sections.forEach((section, index) => {
@@ -440,7 +533,7 @@ export default function MockTestAttemptPage() {
         void loadSectionQuestions(section.name, index);
       }
     });
-  }, [sections, loadSectionQuestions, testStarted]);
+  }, [sections, loadSectionQuestions, testStarted, isHistoryRetake]);
 
   // Persist answers and review marks in sessionStorage
   useEffect(() => {
