@@ -44,7 +44,7 @@ export default function MockPage() {
   const paidTestsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchTests:() => Promise<void> = async () => {
+    const fetchTests: () => Promise<void> = async () => {
       try {
         // const freeRes = await api.get("/courses?is_free=true&is_active=true");
         const freeRes = await api.get("/courses", {
