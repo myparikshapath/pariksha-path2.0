@@ -692,6 +692,7 @@ export default function MockTestAttemptPage() {
           attempted_questions: data.attempted_questions || 0,
           total_questions: data.total_questions || 0,
           time_spent_seconds: data.time_spent_seconds || 0,
+          negative_deductions: data.negative_deductions || 0,
 
           // Ensure section summaries have the correct field structure
           section_summaries: (data.section_summaries || []).map(
