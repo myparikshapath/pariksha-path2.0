@@ -26,6 +26,7 @@ export default function MockResultPage() {
     total_questions: number;
     time_spent_seconds: number;
     section_summaries: SectionSummary[];
+    negative_deductions?: number;
     course?: {
       title: string;
     };
@@ -111,21 +112,21 @@ export default function MockResultPage() {
         </div>
 
         {/* Main Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Stat
             label="Score"
             value={`${results.score} / ${results.max_score}`}
             icon="🎯"
             color="blue"
           />
-          <Stat
+          {/* <Stat
             label="Percentage"
             value={`${percentage}%`}
             icon="📊"
             color={
               percentage >= 70 ? "green" : percentage >= 50 ? "yellow" : "red"
             }
-          />
+          /> */}
           <Stat
             label="Accuracy"
             value={`${Math.round((results.accuracy || 0) * 100)}%`}

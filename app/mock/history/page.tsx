@@ -149,7 +149,7 @@ export default function MockHistoryPage() {
                       }`}
                     >
                       {attempt.score} / {attempt.max_score} (
-                      {attempt.percentage}%)
+                      {/* {attempt.percentage}%) */}
                     </div>
                     <div className="text-sm text-gray-500">
                       {attempt.attempted_questions} of {attempt.total_questions}{" "}
