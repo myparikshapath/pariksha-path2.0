@@ -601,13 +601,20 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                     }
                     onImagesUpdate={(images) => {
                       const updatedOptions = [...(question.options || [])];
+                      const prevOption: QuestionOption =
+                        updatedOptions[index] ?? {
+                          text: "",
+                          is_correct: false,
+                          order: index,
+                          image_urls: [],
+                        };
                       updatedOptions[index] = {
-                        ...(updatedOptions[index] || ({} as any)),
+                        ...prevOption,
                         image_urls: images,
-                      } as any;
+                      };
                       const updatedQuestion = {
                         ...question,
-                        options: updatedOptions as any,
+                        options: updatedOptions,
                       };
                       onSave(updatedQuestion);
                     }}

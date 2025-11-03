@@ -61,11 +61,11 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
   maxWidth = 600,
   maxHeight = 400,
 }) => {
+  const fixedUrls = useMemo(() => imageUrls.map((u) => fixImageUrl(u)), [imageUrls]);
+
   if (!imageUrls || imageUrls.length === 0) {
     return null;
   }
-
-  const fixedUrls = useMemo(() => imageUrls.map((u) => fixImageUrl(u)), [imageUrls]);
 
   return (
     <div className={`space-y-2 ${className}`}>

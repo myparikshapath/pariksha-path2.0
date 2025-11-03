@@ -4,11 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Course } from "@/src/services/courseService";
-import Image from "next/image";
 
 // Dynamically import CoursesSection with no SSR
 // const CoursesSection = dynamic(
@@ -34,7 +32,6 @@ interface UserData {
 }
 
 export default function StudentDashboard() {
-  const params = useParams();
   const router = useRouter();
   const { isLoggedIn } = useAuth() as { isLoggedIn: boolean };
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -45,29 +42,29 @@ export default function StudentDashboard() {
 
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
 
-  const isValidImageUrl = (url: string): boolean => {
-    if (!url) return false;
-    try {
-      const parsedUrl = new URL(url);
-      // Allow http/https protocols and check against allowed domains
-      const allowedDomains = [
-        "localhost",
-        "example.com",
-        "via.placeholder.com",
-        "picsum.photos",
-        "images.unsplash.com",
-        "cdn.example.com",
-        "your-domain.com",
-      ];
-      return allowedDomains.some(
-        (domain) =>
-          parsedUrl.hostname === domain ||
-          parsedUrl.hostname.endsWith("." + domain)
-      );
-    } catch {
-      return false;
-    }
-  };
+  // const isValidImageUrl = (url: string): boolean => {
+  //   if (!url) return false;
+  //   try {
+  //     const parsedUrl = new URL(url);
+  //     // Allow http/https protocols and check against allowed domains
+  //     const allowedDomains = [
+  //       "localhost",
+  //       "example.com",
+  //       "via.placeholder.com",
+  //       "picsum.photos",
+  //       "images.unsplash.com",
+  //       "cdn.example.com",
+  //       "your-domain.com",
+  //     ];
+  //     return allowedDomains.some(
+  //       (domain) =>
+  //         parsedUrl.hostname === domain ||
+  //         parsedUrl.hostname.endsWith("." + domain)
+  //     );
+  //   } catch {
+  //     return false;
+  //   }
+  // };
 
   useEffect(() => {
     const fetchCourses = async () => {
