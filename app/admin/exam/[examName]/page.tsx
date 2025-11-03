@@ -16,7 +16,6 @@ interface ExamContent {
   exam_code: string;
   title: string;
   description: string;
-  thumbnail_url?: string | null;
   banner_url?: string | null;
   exam_info_sections: ExamInfoSection[];
 }
@@ -38,7 +37,6 @@ export default function AdminExamDetailPage({
     exam_code: examNameRaw || "",
     title: examName,
     description: "",
-    thumbnail_url: null,
     banner_url: null,
     exam_info_sections: [
       {
@@ -77,7 +75,6 @@ export default function AdminExamDetailPage({
           exam_code: response.data.exam_code || examNameRaw,
           title: response.data.title || examName,
           description: response.data.description || "",
-          thumbnail_url: response.data.thumbnail_url || null,
           banner_url: response.data.banner_url || null,
           exam_info_sections: response.data.exam_info_sections || [],
         });
@@ -94,7 +91,6 @@ export default function AdminExamDetailPage({
           exam_code: examNameRaw || "",
           title: examName,
           description: "",
-          thumbnail_url: null,
           banner_url: null,
           exam_info_sections: [
             {
@@ -185,7 +181,6 @@ export default function AdminExamDetailPage({
       exam_code: examCodeForUrl,
       title: examContent.title.trim(),
       description: examContent.description.trim(),
-      thumbnail_url: examContent.thumbnail_url || null,
       banner_url: examContent.banner_url || null,
       exam_info_sections: examContent.exam_info_sections.map(
         (section: ExamInfoSection) => ({
@@ -282,47 +277,6 @@ export default function AdminExamDetailPage({
           }
           className="border px-3 py-2 rounded w-full mb-6 resize-none"
         />
-
-        {/* Linked Course */}
-        {/* <input
-          type="text"
-          placeholder="Linked Course ID"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setExamContent((prev: ExamContent) => ({
-              ...prev,
-              linked_course_id: e.target.value,
-            }))
-          }
-          className="border px-3 py-2 rounded w-full mb-6"
-        /> */}
-
-        {/* Thumbnail URL */}
-        {/* <input
-          type="url"
-          placeholder="Thumbnail URL (optional)"
-          value={examContent.thumbnail_url || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setExamContent((prev: ExamContent) => ({
-              ...prev,
-              thumbnail_url: e.target.value || null,
-            }))
-          }
-          className="border px-3 py-2 rounded w-full mb-6"
-        /> */}
-
-        {/* Banner URL */}
-        {/* <input
-          type="url"
-          placeholder="Banner URL (optional)"
-          value={examContent.banner_url || ""}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setExamContent((prev: ExamContent) => ({
-              ...prev,
-              banner_url: e.target.value || null,
-            }))
-          }
-          className="border px-3 py-2 rounded w-full mb-6"
-        /> */}
 
         {/* Add New Section */}
         <div className="mb-6 flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0">

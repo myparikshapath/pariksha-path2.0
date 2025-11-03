@@ -46,7 +46,6 @@ const EditCoursePage = () => {
         discount_percent: courseData.discount_percent,
         validity_period_days: courseData.validity_period_days,
         mock_test_timer_seconds: courseData.mock_test_timer_seconds,
-        thumbnail_url: courseData.thumbnail_url,
         icon_url: courseData.icon_url,
         banner_url: courseData.banner_url,
         tagline: courseData.tagline,
@@ -303,43 +302,6 @@ const EditCoursePage = () => {
                   className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 />
               </div>
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="thumbnail_url">Thumbnail URL</Label>
-                <Input
-                  id="thumbnail_url"
-                  value={formData.thumbnail_url || ""}
-                  onChange={(e) =>
-                    handleInputChange("thumbnail_url", e.target.value)
-                  }
-                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-                />
-              </div> */}
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="icon_url">Icon URL</Label>
-                <Input
-                  id="icon_url"
-                  value={formData.icon_url || ""}
-                  onChange={(e) =>
-                    handleInputChange("icon_url", e.target.value)
-                  }
-                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-                />
-              </div> */}
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="banner_url">Banner URL</Label>
-                <Input
-                  id="banner_url"
-                  value={formData.banner_url || ""}
-                  onChange={(e) =>
-                    handleInputChange("banner_url", e.target.value)
-                  }
-                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-                />
-              </div> */}
-
               <div className="space-y-2">
                 <Label htmlFor="tagline">Tagline</Label>
                 <Input
@@ -396,7 +358,9 @@ const EditCoursePage = () => {
                     (formData.mock_test_timer_seconds as unknown as string) ===
                       "" || formData.mock_test_timer_seconds === undefined
                       ? ""
-                      : Math.floor((formData.mock_test_timer_seconds || 3600) / 60)
+                      : Math.floor(
+                          (formData.mock_test_timer_seconds || 3600) / 60
+                        )
                   }
                   onChange={(e) => {
                     const val = e.target.value;

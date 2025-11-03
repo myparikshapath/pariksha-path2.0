@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 
 interface ImageDisplayProps {
@@ -61,38 +61,37 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
   maxWidth = 600,
   maxHeight = 400,
 }) => {
+  const fixedUrls = useMemo(() => imageUrls.map((u) => fixImageUrl(u)), [imageUrls]);
+
   if (!imageUrls || imageUrls.length === 0) {
     return null;
   }
 
   return (
     <div className={`space-y-2 ${className}`}>
-      {imageUrls.map((url, index) => {
-        const fixedUrl = fixImageUrl(url);
-        console.log(fixedUrl)
-        return (
-          <div key={index} className="relative">
-            <Image
-              src={fixedUrl}
-              alt={`${alt} ${index + 1}`}
-              width={maxWidth}
-              height={maxHeight}
-              className="rounded-lg border border-gray-200 shadow-sm object-contain"
-              style={{
-                maxWidth: '100%',
-                height: 'auto',
-                maxHeight: `${maxHeight}px`,
-              }}
-              unoptimized // For external URLs
-              onError={(e) => {
-                console.error('Image failed to load:', fixedUrl);
-                // Hide the image on error
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-        );
-      })}
+      {fixedUrls.map((fixedUrl, index) => (
+        <div key={index} className="relative">
+          <Image
+            src={fixedUrl}
+            alt={`${alt} ${index + 1}`}
+            width={maxWidth}
+            height={maxHeight}
+            className="rounded-lg border border-gray-200 shadow-sm object-contain"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+              maxHeight: `${maxHeight}px`,
+            }}
+            unoptimized
+            loading="lazy"
+            decoding="async"
+            sizes={`(max-width: ${maxWidth}px) 100vw, ${maxWidth}px`}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </div>
+      ))}
     </div>
   );
 };

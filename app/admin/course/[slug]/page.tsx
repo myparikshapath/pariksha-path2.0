@@ -47,7 +47,7 @@ const CourseDetailPage = () => {
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [operationLoading, setOperationLoading] = useState(false);
   const [isEditingSection, setIsEditingSection] = useState<string | null>(null);
-  const [tempQuestionCount, setTempQuestionCount] = useState<string>("0");
+  const [tempQuestionCount, setTempQuestionCount] = useState<string>("1");
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   const handleUploadQuestions = (section: string) =>
@@ -311,6 +311,7 @@ const CourseDetailPage = () => {
                           <input
                             type="number"
                             value={tempQuestionCount}
+                            min = {1}
                             onChange={(e) =>
                               setTempQuestionCount(e.target.value)
                             }

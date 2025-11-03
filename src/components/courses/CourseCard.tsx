@@ -14,27 +14,15 @@ const CourseCard: React.FC<CourseCardProps> = ({
   onEnroll,
   isEnrolled = false,
 }) => {
-
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
-        {course.thumbnail_url && course.thumbnail_url.startsWith("http") ? (
-          <div className="relative w-full h-48">
-            <Image
-              src={course.thumbnail_url}
-              alt={course.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
-        ) : (
-          <div className="w-full h-48 bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center">
-            <span className="text-4xl text-gray-400">
-              {course.title.charAt(0)}
-            </span>
-          </div>
-        )}
+        <div className="w-full h-48 bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center">
+          <span className="text-4xl text-gray-400">
+            {course.title.charAt(0)}
+          </span>
+        </div>
+
         <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
           {course.category}
         </div>

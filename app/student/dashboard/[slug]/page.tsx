@@ -4,11 +4,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Course } from "@/src/services/courseService";
-import Image from "next/image";
 
 // Dynamically import CoursesSection with no SSR
 // const CoursesSection = dynamic(
@@ -34,7 +32,6 @@ interface UserData {
 }
 
 export default function StudentDashboard() {
-  const params = useParams();
   const router = useRouter();
   const { isLoggedIn } = useAuth() as { isLoggedIn: boolean };
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -45,29 +42,29 @@ export default function StudentDashboard() {
 
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
 
-  const isValidImageUrl = (url: string): boolean => {
-    if (!url) return false;
-    try {
-      const parsedUrl = new URL(url);
-      // Allow http/https protocols and check against allowed domains
-      const allowedDomains = [
-        "localhost",
-        "example.com",
-        "via.placeholder.com",
-        "picsum.photos",
-        "images.unsplash.com",
-        "cdn.example.com",
-        "your-domain.com",
-      ];
-      return allowedDomains.some(
-        (domain) =>
-          parsedUrl.hostname === domain ||
-          parsedUrl.hostname.endsWith("." + domain)
-      );
-    } catch {
-      return false;
-    }
-  };
+  // const isValidImageUrl = (url: string): boolean => {
+  //   if (!url) return false;
+  //   try {
+  //     const parsedUrl = new URL(url);
+  //     // Allow http/https protocols and check against allowed domains
+  //     const allowedDomains = [
+  //       "localhost",
+  //       "example.com",
+  //       "via.placeholder.com",
+  //       "picsum.photos",
+  //       "images.unsplash.com",
+  //       "cdn.example.com",
+  //       "your-domain.com",
+  //     ];
+  //     return allowedDomains.some(
+  //       (domain) =>
+  //         parsedUrl.hostname === domain ||
+  //         parsedUrl.hostname.endsWith("." + domain)
+  //     );
+  //   } catch {
+  //     return false;
+  //   }
+  // };
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -181,32 +178,21 @@ export default function StudentDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {enrolledCourses.map((course) =>
           course && course.title ? (
-            <Card key={course.id} className="hover:shadow-md transition-all py-4">
+            <Card
+              key={course.id}
+              className="hover:shadow-md transition-all py-4"
+            >
               <CardHeader className="pb-2">
                 <CardTitle className="text-base line-clamp-2">
                   {course.title || "Untitled Course"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {course.thumbnail_url &&
-                  isValidImageUrl(course.thumbnail_url) ? (
-                  <div className="relative w-full h-40 mb-2">
-                    <Image
-                      src={course.thumbnail_url}
-                      alt={course.title || "Course"}
-                      fill
-                      className="object-cover rounded-md"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-40 bg-gray-100 flex items-center justify-center rounded-md py-8">
-                    <span className="text-3xl text-gray-400">
-                      {course.title
-                        ? course.title.charAt(0).toUpperCase()
-                        : "?"}
-                    </span>
-                  </div>
-                )}
+                <div className="w-full h-40 bg-gray-100 flex items-center justify-center rounded-md py-8">
+                  <span className="text-3xl text-gray-400">
+                    {course.title ? course.title.charAt(0).toUpperCase() : "?"}
+                  </span>
+                </div>
 
                 <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                   {course.description}

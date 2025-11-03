@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -47,7 +46,6 @@ export default function NewExamPage() {
     mock_test_timer_seconds: 3600,
     material_ids: [],
     test_series_ids: [],
-    thumbnail_url: "",
     icon_url: "",
     priority_order: 0,
     banner_url: "",
@@ -94,8 +92,6 @@ export default function NewExamPage() {
         throw new Error("Sub-category is required");
       if (!formData.description.trim())
         throw new Error("Description is required");
-      if (!formData.thumbnail_url.trim())
-        throw new Error("Thumbnail URL is required");
       if (sections.length === 0)
         throw new Error("At least one section is required");
 
@@ -488,71 +484,6 @@ export default function NewExamPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Media URLs */}
-        {/* <Card className="bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-lg border-b border-emerald-200/50">
-            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-              Media
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 p-6">
-            <div className="space-y-2">
-              <Label htmlFor="thumbnail_url">Thumbnail URL *</Label>
-              <Input
-                id="thumbnail_url"
-                value={formData.thumbnail_url}
-                onChange={(e) =>
-                  handleInputChange("thumbnail_url", e.target.value)
-                }
-                placeholder="https://example.com/thumbnail.jpg"
-                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="icon_url">Icon URL</Label>
-                <Input
-                  id="icon_url"
-                  value={formData.icon_url || ""}
-                  onChange={(e) =>
-                    handleInputChange("icon_url", e.target.value)
-                  }
-                  placeholder="https://example.com/icon.png"
-                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="banner_url">Banner URL</Label>
-                <Input
-                  id="banner_url"
-                  value={formData.banner_url || ""}
-                  onChange={(e) =>
-                    handleInputChange("banner_url", e.target.value)
-                  }
-                  placeholder="https://example.com/banner.jpg"
-                  className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tagline">Tagline</Label>
-              <Input
-                id="tagline"
-                value={formData.tagline || ""}
-                onChange={(e) => handleInputChange("tagline", e.target.value)}
-                placeholder="e.g., Master Physics for JEE Main"
-                className="bg-white/80 border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400/20 transition-all duration-200"
-              />
-            </div>
-          </CardContent>
-        </Card> */}
-
         {/* Submit Buttons */}
         <div className="flex justify-end gap-4 flex-wrap pt-6 border-t border-slate-200">
           <Button

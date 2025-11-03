@@ -108,7 +108,6 @@ const SectionQuestionsPage = () => {
         price: courseData.price,
         is_free: courseData.is_free,
         discount_percent: courseData.discount_percent,
-        thumbnail_url: courseData.thumbnail_url,
         icon_url: courseData.icon_url,
         banner_url: courseData.banner_url,
         tagline: courseData.tagline,
@@ -195,7 +194,18 @@ const SectionQuestionsPage = () => {
   const handleDeleteQuestion = async (questionId: string) => {
     try {
       await deleteQuestion(questionId);
-      setQuestions((prev) => prev.filter((q) => q.id !== questionId));
+      setQuestions((prev) => {
+        const idx = prev.findIndex((q) => q.id === questionId);
+        const next = prev.filter((q) => q.id !== questionId);
+        // Adjust the active index: if we deleted the last item, move left
+        setActiveQuestionIndex((prevIdx) => {
+          if (next.length === 0) return 0;
+          if (idx === -1) return Math.min(prevIdx, next.length - 1);
+          if (prevIdx > idx) return prevIdx - 1; // shift left if following items moved
+          return Math.min(prevIdx, next.length - 1);
+        });
+        return next;
+      });
       setEditingQuestionId(null); // Exit editing mode if currently editing
       toast.success("Question deleted successfully");
     } catch (error: unknown) {
@@ -226,6 +236,14 @@ const SectionQuestionsPage = () => {
       setActiveQuestionIndex(0);
     }
   }, [pagination.page]);
+
+  // Ensure the active index is always within bounds when questions change
+  useEffect(() => {
+    setActiveQuestionIndex((prev) => {
+      if (questions.length === 0) return 0;
+      return Math.min(prev, questions.length - 1);
+    });
+  }, [questions.length]);
 
   const renderQuestion = (question: Question) => {
     // Convert Question to QuestionResponse format for the editor
@@ -443,7 +461,8 @@ const SectionQuestionsPage = () => {
                   </Button>
                 ))}
               </div>
-              {renderQuestion(questions[activeQuestionIndex])}
+              {questions[activeQuestionIndex] &&
+                renderQuestion(questions[activeQuestionIndex])}
             </div>
             <div className="flex justify-between items-center gap-4">
               <Button
