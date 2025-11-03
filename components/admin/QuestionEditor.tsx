@@ -460,6 +460,30 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             />
           </div>
 
+          {/* Question Images (editing mode) */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Question Images</Label>
+            <ImageDisplay
+              imageUrls={question.question_image_urls || []}
+              alt="Question image"
+              className="mb-2"
+            />
+            <ImageUpload
+              questionId={question.id}
+              imageType="question"
+              existingImages={question.question_image_urls || []}
+              onImagesUpdate={(images) => {
+                const updatedQuestion = {
+                  ...question,
+                  question_image_urls: images,
+                };
+                onSave(updatedQuestion);
+              }}
+              maxImages={3}
+              className="mb-4"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="question_type">Question Type</Label>
@@ -521,40 +545,75 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             <Label>Options</Label>
             <div className="space-y-2 mt-2">
               {(formData.options || []).map((option, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  <Input
-                    value={option.text}
-                    onChange={(e) =>
-                      handleOptionChange(index, "text", e.target.value)
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <Input
+                      value={option.text}
+                      onChange={(e) =>
+                        handleOptionChange(index, "text", e.target.value)
+                      }
+                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant={option.is_correct ? "default" : "outline"}
+                      size="sm"
+                      onClick={() =>
+                        handleOptionChange(
+                          index,
+                          "is_correct",
+                          !option.is_correct
+                        )
+                      }
+                    >
+                      {option.is_correct ? "Correct" : "Mark Correct"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeOption(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Option Images (editing mode) */}
+                  <ImageDisplay
+                    imageUrls={
+                      (question.options?.[index]?.image_urls as string[]) || []
                     }
-                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                    className="flex-1"
+                    alt={`Option ${String.fromCharCode(65 + index)} image`}
+                    className="mb-1"
+                    maxWidth={300}
+                    maxHeight={150}
                   />
-                  <Button
-                    type="button"
-                    variant={option.is_correct ? "default" : "outline"}
-                    size="sm"
-                    onClick={() =>
-                      handleOptionChange(
-                        index,
-                        "is_correct",
-                        !option.is_correct
-                      )
+                  <ImageUpload
+                    questionId={question.id}
+                    imageType="option"
+                    optionIndex={index}
+                    existingImages={
+                      (question.options?.[index]?.image_urls as string[]) || []
                     }
-                  >
-                    {option.is_correct ? "Correct" : "Mark Correct"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeOption(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    onImagesUpdate={(images) => {
+                      const updatedOptions = [...(question.options || [])];
+                      updatedOptions[index] = {
+                        ...(updatedOptions[index] || ({} as any)),
+                        image_urls: images,
+                      } as any;
+                      const updatedQuestion = {
+                        ...question,
+                        options: updatedOptions as any,
+                      };
+                      onSave(updatedQuestion);
+                    }}
+                    maxImages={2}
+                    className="mb-2"
+                  />
                 </div>
               ))}
               <Button
@@ -581,6 +640,29 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
             />
           </div>
 
+          {/* Explanation Images (editing mode) */}
+          <div className="space-y-2">
+            <ImageDisplay
+              imageUrls={question.explanation_image_urls || []}
+              alt="Explanation image"
+              className="mb-1"
+            />
+            <ImageUpload
+              questionId={question.id}
+              imageType="explanation"
+              existingImages={question.explanation_image_urls || []}
+              onImagesUpdate={(images) => {
+                const updatedQuestion = {
+                  ...question,
+                  explanation_image_urls: images,
+                };
+                onSave(updatedQuestion);
+              }}
+              maxImages={2}
+              className="mb-4"
+            />
+          </div>
+
           <div>
             <Label htmlFor="remarks">Remarks</Label>
             <Textarea
@@ -589,6 +671,29 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               onChange={(e) => handleInputChange("remarks", e.target.value)}
               placeholder="Enter remarks"
               rows={2}
+            />
+          </div>
+
+          {/* Remarks Images (editing mode) */}
+          <div className="space-y-2">
+            <ImageDisplay
+              imageUrls={question.remarks_image_urls || []}
+              alt="Remarks image"
+              className="mb-1"
+            />
+            <ImageUpload
+              questionId={question.id}
+              imageType="remarks"
+              existingImages={question.remarks_image_urls || []}
+              onImagesUpdate={(images) => {
+                const updatedQuestion = {
+                  ...question,
+                  remarks_image_urls: images,
+                };
+                onSave(updatedQuestion);
+              }}
+              maxImages={2}
+              className="mb-4"
             />
           </div>
 
