@@ -127,7 +127,6 @@ export interface Course {
   price: number;
   is_free: boolean;
   code?: string;
-  thumbnail_url?: string;
   discount_percent?: number;
   validity_period_days?: number;
   mock_test_timer_seconds?: number;
@@ -162,7 +161,6 @@ export interface CreateCourseRequest {
   mock_test_timer_seconds?: number;
   material_ids?: string[];
   test_series_ids?: string[];
-  thumbnail_url: string;
   icon_url?: string;
   priority_order?: number;
   banner_url?: string;
@@ -181,7 +179,6 @@ export interface UpdateCourseRequest {
   mock_test_timer_seconds?: number;
   material_ids?: string[];
   test_series_ids?: string[];
-  thumbnail_url?: string;
   icon_url?: string;
   priority_order?: number;
   banner_url?: string;

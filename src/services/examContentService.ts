@@ -12,7 +12,6 @@ export interface ExamContent {
 	exam_code: string;
 	title: string;
 	description: string;
-	thumbnail_url?: string | null;
 	banner_url?: string | null;
 	exam_info_sections: ExamInfoSection[];
 	linked_course_id?: string; // ✅ add this line

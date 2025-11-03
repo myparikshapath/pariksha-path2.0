@@ -108,7 +108,6 @@ const SectionQuestionsPage = () => {
         price: courseData.price,
         is_free: courseData.is_free,
         discount_percent: courseData.discount_percent,
-        thumbnail_url: courseData.thumbnail_url,
         icon_url: courseData.icon_url,
         banner_url: courseData.banner_url,
         tagline: courseData.tagline,
