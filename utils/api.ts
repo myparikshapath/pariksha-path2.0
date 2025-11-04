@@ -7,8 +7,8 @@ const logger = (message: string, data?: unknown) => {
 };
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/v1",
-  // baseURL: "http://myparikshapath-env.eba-rbnf3ip3.ap-south-1.elasticbeanstalk.com/api/v1"
+  // baseURL: "http://localhost:8000/api/v1",
+  baseURL: "http://myparikshapath-env.eba-rbnf3ip3.ap-south-1.elasticbeanstalk.com/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
