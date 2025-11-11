@@ -2,8 +2,11 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import SecureTokenStorage from "./secureStorage";
 import { Console } from "console";
 
-// Set up logging for this module
+// Set up logging for this module (silenced in production)
+const isProd =
+  typeof process !== "undefined" && process.env.NODE_ENV === "production";
 const logger = (message: string, data?: unknown) => {
+  if (isProd) return;
   console.log(`[API] ${message}`, data ? data : "");
 };
 
@@ -22,12 +25,11 @@ const getBaseURL = () => {
   ) {
     url = url.replace("http://", "https://");
   }
-  // return "http://localhost:8000/api/v1"
+  // return "http://localhost:8000/api/v1";
   return url;
 };
 
 const api = axios.create({
-  // baseURL: "http://localhost:8000/api/v1",
   baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",

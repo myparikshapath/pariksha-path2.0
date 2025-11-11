@@ -1,12 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  fetchAvailableCourses,
-  deleteCourse,
-  Course,
-} from "@/src/services/courseService";
+import { deleteCourse, Course } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,10 +25,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteCourseDialog from "@/components/admin/DeleteCourseDialog";
+import { useCoursesStore } from "@/stores/courses";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 
 const AddExam = () => {
   const router = useRouter();
-  const [courses, setCourses] = useState<Course[]>([]);
+  const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
+  const allIds = useStoreSelector(useCoursesStore, (s) => s.allIds);
+  const fetchAll = useStoreSelector(useCoursesStore, (s) => s.fetchAll);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -45,23 +46,22 @@ const AddExam = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [operationLoading, setOperationLoading] = useState(false);
 
-  useEffect(() => {
-    loadCourses();
-  }, []);
-
-  const loadCourses = async () => {
+  const loadCourses = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchAvailableCourses();
-      setCourses(Array.isArray(data) ? data : []);
+      await fetchAll();
     } catch (e: unknown) {
       console.error("Error loading courses:", e);
       setError(e instanceof Error ? e.message : "Failed to load courses");
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchAll]);
+
+  useEffect(() => {
+    void loadCourses();
+  }, [loadCourses]);
 
   const handleCourseClick = (course: Course) => {
     const slug = course.code?.toLowerCase().replace(/\s+/g, "-") || course.id;
@@ -98,7 +98,10 @@ const AddExam = () => {
   };
 
   // Frontend Pagination Logic
-  const filteredCourses = courses.filter(
+  const filteredCourses = allIds
+    .map((id) => byId[id])
+    .filter(Boolean)
+    .filter(
     (course) =>
       course.title.toLowerCase().includes(search.toLowerCase()) ||
       course.code?.toLowerCase().includes(search.toLowerCase())

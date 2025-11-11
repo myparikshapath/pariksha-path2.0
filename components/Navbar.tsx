@@ -1,13 +1,13 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
-import api from "@/utils/api";
-import SecureTokenStorage from "@/utils/secureStorage";
+import { useAuthStore } from "@/stores/auth";
+import { useCoursesStore } from "@/stores/courses";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 import {
   Accordion,
   AccordionItem,
@@ -30,7 +30,9 @@ type GroupType = { category: string; items: SubGroup[] };
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const { isLoggedIn, role, logout } = useAuth();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const role = useAuthStore((s) => s.role);
+  const logout = useAuthStore((s) => s.logout);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
@@ -55,66 +57,56 @@ const Navbar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [hoveredDropdown]);
 
-  // Fetch only active courses
+  // Load courses from Zustand store (with TTL + request dedupe under the hood)
+  const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
+  const allIds = useStoreSelector(useCoursesStore, (s) => s.allIds);
+  const fetchAll = useStoreSelector(useCoursesStore, (s) => s.fetchAll);
+
   useEffect(() => {
-    const fetchCourses = async () => {
+    let mounted = true;
+    const run = async () => {
       try {
         setLoading(true);
-        const token = SecureTokenStorage.getAccessToken();
-        const res = await api.get("/courses", {
-          params: { limit: 100 },
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-
-        const allCourses: Course[] = Array.isArray(res.data)
-          ? res.data
-          : res.data.courses || res.data.data || [];
-
-        const activeCourses: Course[] = allCourses.filter(
-          (c) =>
-            c.is_active === true ||
-            c.is_active === "true" ||
-            c.is_active === 1
-        );
-
-        const grouped: GroupType[] = Object.entries(
-          activeCourses.reduce<Record<string, Record<string, ExamItem[]>>>(
-            (acc, c) => {
-              if (!c.category) return acc;
-              if (!acc[c.category]) acc[c.category] = {};
-              const sub = c.sub_category || "General";
-              if (!acc[c.category][sub]) acc[c.category][sub] = [];
-              acc[c.category][sub].push({
-                title: c.title,
-                code: c.code,
-              });
-              return acc;
-            },
-            {}
-          )
-        ).map(([category, subs]) => ({
-          category,
-          items: Object.entries(subs).map(([subCategory, exams]) => ({
-            subCategory,
-            exams: exams.sort((a, b) => a.title.localeCompare(b.title)),
-          })),
-        }));
-
-        setGroupedData(grouped);
-        if (grouped.length > 0) setActiveCategory(grouped[0].category);
-      } catch (err: unknown) {
-        // Fully type-safe error handling
-        if (err instanceof Error) {
-          console.error("🔥 Error fetching courses:", err.message);
-        } else {
-          console.error("🔥 Unknown error fetching courses:", err);
-        }
+        await fetchAll();
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
-    fetchCourses();
-  }, []);
+    void run();
+    return () => { mounted = false; };
+  }, [fetchAll]);
+
+  // Derive grouped data from store state
+  const derivedGrouped = useMemo(() => {
+    const allCourses = allIds.map((id) => byId[id]).filter(Boolean) as Course[];
+    const activeCourses = allCourses.filter(
+      (c) => c && (c.is_active === true || c.is_active === "true" || (c as any).is_active === 1)
+    );
+    const grouped: GroupType[] = Object.entries(
+      activeCourses.reduce<Record<string, Record<string, ExamItem[]>>>((acc, c) => {
+        if (!c.category) return acc;
+        if (!acc[c.category]) acc[c.category] = {};
+        const sub = c.sub_category || "General";
+        if (!acc[c.category][sub]) acc[c.category][sub] = [];
+        acc[c.category][sub].push({ title: c.title, code: c.code });
+        return acc;
+      }, {})
+    ).map(([category, subs]) => ({
+      category,
+      items: Object.entries(subs).map(([subCategory, exams]) => ({
+        subCategory,
+        exams: exams.sort((a, b) => a.title.localeCompare(b.title)),
+      })),
+    }));
+    return grouped;
+  }, [allIds, byId]);
+
+  useEffect(() => {
+    setGroupedData(derivedGrouped);
+    if (derivedGrouped.length > 0 && !activeCategory) {
+      setActiveCategory(derivedGrouped[0].category);
+    }
+  }, [derivedGrouped]);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 

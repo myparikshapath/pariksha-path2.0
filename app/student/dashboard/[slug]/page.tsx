@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/stores/auth";
 import api from "@/utils/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Course } from "@/src/services/courseService";
+import type { Course } from "@/src/services/courseService";
+import { get as cachedGet } from "@/utils/request";
+import { useCoursesStore } from "@/stores/courses";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 
 // Dynamically import CoursesSection with no SSR
 // const CoursesSection = dynamic(
@@ -33,57 +36,22 @@ interface UserData {
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const { isLoggedIn } = useAuth() as { isLoggedIn: boolean };
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn) as boolean;
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
 
-  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
-
-  // const isValidImageUrl = (url: string): boolean => {
-  //   if (!url) return false;
-  //   try {
-  //     const parsedUrl = new URL(url);
-  //     // Allow http/https protocols and check against allowed domains
-  //     const allowedDomains = [
-  //       "localhost",
-  //       "example.com",
-  //       "via.placeholder.com",
-  //       "picsum.photos",
-  //       "images.unsplash.com",
-  //       "cdn.example.com",
-  //       "your-domain.com",
-  //     ];
-  //     return allowedDomains.some(
-  //       (domain) =>
-  //         parsedUrl.hostname === domain ||
-  //         parsedUrl.hostname.endsWith("." + domain)
-  //     );
-  //   } catch {
-  //     return false;
-  //   }
-  // };
+  const enrolledIds = useStoreSelector(useCoursesStore, (s) => s.enrolledIds);
+  const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
+  const fetchEnrolled = useStoreSelector(useCoursesStore, (s) => s.fetchEnrolled);
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      if (userData?.enrolled_courses?.length) {
-        try {
-          const responses = await Promise.all(
-            userData.enrolled_courses.map((id) => api.get(`/courses/${id}`))
-          );
-          setEnrolledCourses(
-            responses.map((res) => res.data.course || res.data).filter(Boolean)
-          );
-        } catch (err) {
-          console.error("Error fetching courses:", err);
-        }
-      }
-    };
-
-    fetchCourses();
-  }, [userData]);
+    if (userData) {
+      void fetchEnrolled();
+    }
+  }, [userData, fetchEnrolled]);
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
@@ -96,10 +64,10 @@ export default function StudentDashboard() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get<UserData>("/auth/me");
+      const data = await cachedGet<UserData>("/auth/me", undefined, { ttlMs: 2 * 60 * 1000 });
 
-      if (response.data) {
-        setUserData(response.data);
+      if (data) {
+        setUserData(data as UserData);
       } else {
         throw new Error("No user data received");
       }
@@ -176,7 +144,7 @@ export default function StudentDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {enrolledCourses.map((course) =>
+        {enrolledIds.map((id) => byId[id]).map((course) =>
           course && course.title ? (
             <Card
               key={course.id}

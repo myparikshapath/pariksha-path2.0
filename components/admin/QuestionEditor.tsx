@@ -433,6 +433,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 value={formData.title || ""}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 placeholder="Question title"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
               />
             </div>
 
@@ -443,6 +444,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                 value={formData.subject || ""}
                 onChange={(e) => handleInputChange("subject", e.target.value)}
                 placeholder="Subject"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
               />
             </div>
           </div>
@@ -457,12 +459,15 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               }
               placeholder="Enter the question text"
               rows={4}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition min-h-[100px]"
             />
           </div>
 
           {/* Question Images (editing mode) */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Question Images</Label>
+            <Label className="text-sm font-medium bg-red-300">
+              Question Images
+            </Label>
             <ImageDisplay
               imageUrls={question.question_image_urls || []}
               alt="Question image"
@@ -493,7 +498,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   handleInputChange("question_type", value)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -513,7 +518,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   handleInputChange("difficulty_level", value)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition">
                   <SelectValue placeholder="Select difficulty" />
                 </SelectTrigger>
                 <SelectContent>
@@ -537,6 +542,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                   )
                 }
                 placeholder="Year"
+                className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
               />
             </div>
           </div>
@@ -556,7 +562,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                         handleOptionChange(index, "text", e.target.value)
                       }
                       placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                      className="flex-1"
+                      className="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
                     />
                     <Button
                       type="button"
@@ -601,13 +607,14 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                     }
                     onImagesUpdate={(images) => {
                       const updatedOptions = [...(question.options || [])];
-                      const prevOption: QuestionOption =
-                        updatedOptions[index] ?? {
-                          text: "",
-                          is_correct: false,
-                          order: index,
-                          image_urls: [],
-                        };
+                      const prevOption: QuestionOption = updatedOptions[
+                        index
+                      ] ?? {
+                        text: "",
+                        is_correct: false,
+                        order: index,
+                        image_urls: [],
+                      };
                       updatedOptions[index] = {
                         ...prevOption,
                         image_urls: images,
@@ -644,6 +651,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               onChange={(e) => handleInputChange("explanation", e.target.value)}
               placeholder="Enter explanation"
               rows={3}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition min-h-[80px]"
             />
           </div>
 
@@ -678,6 +686,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               onChange={(e) => handleInputChange("remarks", e.target.value)}
               placeholder="Enter remarks"
               rows={2}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition min-h-[60px]"
             />
           </div>
 
@@ -711,6 +720,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
               value={formData.topic || ""}
               onChange={(e) => handleInputChange("topic", e.target.value)}
               placeholder="Topic"
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
             />
           </div>
 
@@ -741,6 +751,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({
                       (e.target as HTMLInputElement).value = "";
                     }
                   }}
+                  className="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"
                 />
                 <Button
                   type="button"

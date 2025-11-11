@@ -28,6 +28,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info, Loader2, TimerReset } from "lucide-react";
 import dynamic from "next/dynamic";
 import QuestionPalette from "@/components/mock/QuestionPalette";
+import { useTestsStore } from "@/stores/tests";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 
 // Import components with no SSR
 const SectionNavigation = dynamic(
@@ -113,15 +115,23 @@ export default function MockTestAttemptPage() {
   const historyAttemptId = searchParams.get("historyAttemptId");
   const isHistoryRetake = Boolean(historyAttemptId);
 
+  const courseIdStr = typeof id === "string" ? id : String(id);
+  const storeInit = useTestsStore((s) => s.init);
+  const startTestStore = useTestsStore((s) => s.startTest);
+  const setAnswerStore = useTestsStore((s) => s.setAnswer);
+  const toggleReviewStore = useTestsStore((s) => s.toggleReview);
+  const setIndicesStore = useTestsStore((s) => s.setIndices);
+  const setCourseStateStore = useTestsStore((s) => s.setCourseState);
+  const submitStore = useTestsStore((s) => s.submit);
+  const persistSnapshotStore = useTestsStore((s) => s.persistSnapshot);
+  const restoreSnapshotStore = useTestsStore((s) => s.restoreSnapshot);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [courseInfo, setCourseInfo] = useState<Course | null>(null);
   const [sections, setSections] = useState<SectionDetails[]>([]);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<{
-    [key: string]: string;
-  }>({});
+  // Answers are now managed in the tests store; rely on cs.selectedAnswers
   const [testStarted, setTestStarted] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0); // Timer will be set from course data
   const [initialTimerSeconds, setInitialTimerSeconds] = useState<number | null>(
@@ -130,6 +140,26 @@ export default function MockTestAttemptPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const submitRef = useRef<(() => Promise<void> | void) | null>(null);
+
+  const cs = useTestsStore((s) => (courseInfo?.id ? s.byCourseId[courseInfo.id] : undefined));
+
+  // Ensure the tests store slice exists as soon as we know the course, to avoid setAnswer no-op
+  useEffect(() => {
+    if (!courseInfo?.id) return;
+    const st = useTestsStore.getState();
+    const exists = st.byCourseId[courseInfo.id];
+    if (!exists) {
+      const minimalSections = sections.map((s) => ({
+        name: s.name,
+        question_count: s.question_count,
+        questions: (s.questions || []).map((q) => ({ id: q.id })),
+        loading: s.loading,
+        error: s.error,
+        markedForReview: s.markedForReview,
+      }));
+      storeInit(courseInfo.id, minimalSections, courseInfo.mock_test_timer_seconds ?? 3600);
+    }
+  }, [courseInfo?.id, sections, storeInit, courseInfo?.mock_test_timer_seconds]);
 
   // Load course and sections data
 
@@ -193,18 +223,38 @@ export default function MockTestAttemptPage() {
         // No shuffle here; backend already returns random sample of limit
         const limitedQuestions = response.questions.slice(0, questionLimit);
 
-        setSections((prev) => {
-          const updated = [...prev];
-          updated[sectionIndex] = {
-            ...updated[sectionIndex],
-            questions: limitedQuestions,
-            loading: false,
-            error: null,
-            markedForReview:
-              updated[sectionIndex]?.markedForReview || new Set(),
-          };
-          return updated;
+        const nextSections = sections.map((sec, idx) => {
+          const clonedMarked = sec?.markedForReview
+            ? new Set(sec.markedForReview)
+            : new Set<string>();
+          if (idx === sectionIndex) {
+            return {
+              ...sec,
+              questions: limitedQuestions,
+              loading: false,
+              error: null,
+              markedForReview: clonedMarked,
+            } as SectionDetails;
+          }
+          return {
+            ...sec,
+            markedForReview: clonedMarked,
+          } as SectionDetails;
         });
+
+        setSections(nextSections);
+
+        if (courseInfo?.id) {
+          const mirroredSections = nextSections.map((sec) => ({
+            name: sec.name,
+            question_count: sec.question_count,
+            questions: (sec.questions || []).map((q) => ({ id: q.id })),
+            loading: sec.loading,
+            error: sec.error,
+            markedForReview: sec.markedForReview,
+          }));
+          setCourseStateStore(courseInfo.id, { sections: mirroredSections });
+        }
       } catch (err) {
         console.error(
           `Error loading questions for section ${sectionName}:`,
@@ -327,6 +377,15 @@ export default function MockTestAttemptPage() {
         );
 
         setSections(hydratedSections);
+        // Initialize store state for this course
+        storeInit(courseData.id, hydratedSections.map((s) => ({
+          name: s.name,
+          question_count: s.question_count,
+          questions: s.questions.map((q) => ({ id: q.id })),
+          loading: s.loading,
+          error: s.error,
+          markedForReview: s.markedForReview,
+        })), courseData.mock_test_timer_seconds ?? 3600);
       } else {
         // Normal mock mode: initialize empty and let loaders fetch randoms later
         const initialSections = sectionsResponse.sections.map(
@@ -340,6 +399,15 @@ export default function MockTestAttemptPage() {
             } as SectionDetails)
         );
         setSections(initialSections);
+        // Initialize store state for this course
+        storeInit(courseData.id, initialSections.map((s) => ({
+          name: s.name,
+          question_count: s.question_count,
+          questions: [],
+          loading: s.loading,
+          error: s.error,
+          markedForReview: s.markedForReview,
+        })), courseData.mock_test_timer_seconds ?? 3600);
       }
 
       // Load first section questions later via effects (skipped for history mode)
@@ -386,6 +454,22 @@ export default function MockTestAttemptPage() {
       courseId: courseInfo?.id,
       appliedDuration: duration,
     });
+    if (courseInfo?.id) {
+      // Ensure store slice exists before using any store actions
+      const st = useTestsStore.getState();
+      if (!st.byCourseId[courseInfo.id]) {
+        const minimalSections = sections.map((s) => ({
+          name: s.name,
+          question_count: s.question_count,
+          questions: (s.questions || []).map((q) => ({ id: q.id })),
+          loading: s.loading,
+          error: s.error,
+          markedForReview: s.markedForReview,
+        }));
+        storeInit(courseInfo.id, minimalSections, duration);
+      }
+      startTestStore(courseInfo.id, duration, () => submitRef.current?.());
+    }
     if (!isHistoryRetake) {
       await loadAllSections();
     }
@@ -394,21 +478,27 @@ export default function MockTestAttemptPage() {
 
   // Handle answer selection
   const handleAnswerSelect = (answer: string) => {
-    if (!currentQuestion) return;
-
-    setSelectedAnswers((prev) => {
-      const newAnswers = {
-        ...prev,
-        [currentQuestion.id]: answer,
-      };
-      return newAnswers;
-    });
+    if (!currentQuestion || !courseInfo?.id) return;
+    const st = useTestsStore.getState();
+    if (!st.byCourseId[courseInfo.id]) {
+      const minimalSections = sections.map((s) => ({
+        name: s.name,
+        question_count: s.question_count,
+        questions: (s.questions || []).map((q) => ({ id: q.id })),
+        loading: s.loading,
+        error: s.error,
+        markedForReview: s.markedForReview,
+      }));
+      storeInit(courseInfo.id, minimalSections, initialTimerSeconds ?? courseInfo.mock_test_timer_seconds ?? 3600);
+    }
+    setAnswerStore(courseInfo.id, currentQuestion.id, answer);
   };
 
   // Handle navigation between sections
   const handleSectionChange = (index: number) => {
     setCurrentSectionIndex(index);
     setCurrentQuestionIndex(0);
+    if (courseInfo?.id) setIndicesStore(courseInfo.id, index, 0);
 
     // Load questions if not already loaded
     const section = sections[index];
@@ -419,40 +509,19 @@ export default function MockTestAttemptPage() {
 
   // Handle marking question for review
   const handleToggleMarkForReview = () => {
-    if (!currentQuestion) return;
-
-    setSections((prev) => {
-      const updated = [...prev];
-      const section = updated[currentSectionIndex];
-      const markedForReview = new Set(section.markedForReview);
-
-      if (markedForReview.has(currentQuestion.id)) {
-        markedForReview.delete(currentQuestion.id);
-      } else {
-        markedForReview.add(currentQuestion.id);
-      }
-
-      updated[currentSectionIndex] = {
-        ...section,
-        markedForReview,
-      };
-
-      return updated;
-    });
+    if (!currentQuestion || !courseInfo?.id) return;
+    toggleReviewStore(courseInfo.id, currentSectionIndex, currentQuestion.id);
   };
 
-  // Calculate answered counts for each section
+  // Calculate answered counts for each section based on store answers
   const answeredCounts = useMemo(() => {
     const counts: { [key: string]: number } = {};
-
+    const answers = cs?.selectedAnswers || {};
     sections.forEach((section) => {
-      counts[section.name] = section.questions.filter(
-        (q) => selectedAnswers[q.id] !== undefined
-      ).length;
+      counts[section.name] = section.questions.filter((q) => answers[q.id] !== undefined).length;
     });
-
     return counts;
-  }, [sections, selectedAnswers]);
+  }, [sections, cs?.selectedAnswers]);
 
   // Get current section and question
   const currentSection = sections[currentSectionIndex];
@@ -537,65 +606,15 @@ export default function MockTestAttemptPage() {
 
   // Persist answers and review marks in sessionStorage
   useEffect(() => {
-    if (!courseInfo || sections.length === 0) return;
-    const key = `mock_state_${courseInfo.id}`;
-    try {
-      const state = {
-        selectedAnswers,
-        markedBySection: sections.reduce<Record<string, string[]>>(
-          (acc, sec) => {
-            acc[sec.name] = Array.from(
-              sec.markedForReview || new Set<string>()
-            );
-            return acc;
-          },
-          {}
-        ),
-        currentSectionIndex,
-        currentQuestionIndex,
-      };
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem(key, JSON.stringify(state));
-      }
-    } catch (e) {
-      console.error("Failed to persist mock state", e);
-    }
-  }, [
-    courseInfo,
-    sections,
-    selectedAnswers,
-    currentSectionIndex,
-    currentQuestionIndex,
-  ]);
+    if (!courseInfo?.id) return;
+    persistSnapshotStore(courseInfo.id);
+  }, [courseInfo?.id, cs?.selectedAnswers, cs?.sections, cs?.currentSectionIndex, cs?.currentQuestionIndex, cs?.timeRemaining]);
 
   // Restore persisted state after sections/questions are available
   useEffect(() => {
-    if (!courseInfo || sections.length === 0 || !testStarted) return;
-    const key = `mock_state_${courseInfo.id}`;
-    try {
-      const raw =
-        typeof window !== "undefined" ? sessionStorage.getItem(key) : null;
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (parsed?.selectedAnswers) setSelectedAnswers(parsed.selectedAnswers);
-      if (typeof parsed?.currentSectionIndex === "number")
-        setCurrentSectionIndex(parsed.currentSectionIndex);
-      if (typeof parsed?.currentQuestionIndex === "number")
-        setCurrentQuestionIndex(parsed.currentQuestionIndex);
-      if (parsed?.markedBySection) {
-        setSections((prev) =>
-          prev.map((sec) => ({
-            ...sec,
-            markedForReview: new Set<string>(
-              parsed.markedBySection[sec.name] || []
-            ),
-          }))
-        );
-      }
-    } catch (e) {
-      console.error("Failed to restore mock state", e);
-    }
-  }, [courseInfo, sections.length, testStarted]);
+    if (!courseInfo?.id || !testStarted) return;
+    restoreSnapshotStore(courseInfo.id);
+  }, [courseInfo?.id, testStarted]);
 
   // Prevent accidental navigation while test is active and cleanup timer
   useEffect(() => {
@@ -607,6 +626,9 @@ export default function MockTestAttemptPage() {
       }
       return;
     }
+
+    // Do not block navigation while we are submitting
+    if (isSubmitting) return;
 
     const beforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -621,7 +643,7 @@ export default function MockTestAttemptPage() {
       window.removeEventListener("beforeunload", beforeUnload);
       // Don't clear the timer here as it's managed by the timer effect
     };
-  }, [testStarted]);
+  }, [testStarted, isSubmitting]);
 
   // Submit test
   const handleSubmitTest = useCallback(async () => {
@@ -639,23 +661,40 @@ export default function MockTestAttemptPage() {
         return acc;
       }, []);
 
-      // Get all question IDs from all sections
-      const allQuestionIds = sections.flatMap((section) =>
-        section.questions.map((question) => question.id)
+      // Read fresh store state at call-time to avoid stale closures
+      const stateNow = useTestsStore.getState();
+      const cur = courseInfo?.id ? stateNow.byCourseId[courseInfo.id] : undefined;
+
+      // Build union of question IDs from local sections, store sections, and answered keys
+      const idsFromLocal: string[] = sections.flatMap((section) => section.questions.map((q) => q.id));
+      const idsFromStoreSections: string[] = (cur?.sections || []).flatMap((sec) => (sec.questions || []).map((q) => q.id));
+      const idsFromAnswers: string[] = Object.keys(cur?.selectedAnswers || {});
+      const allQuestionIds: string[] = Array.from(
+        new Set<string>([
+          ...idsFromLocal,
+          ...idsFromStoreSections,
+          ...idsFromAnswers,
+        ].filter((x): x is string => Boolean(x)))
       );
 
       // Format answers according to the expected schema - include ALL questions
       // even unanswered ones (with null selected_option_order)
       const answers = allQuestionIds.map((qid) => {
-        const isAnswered =
-          selectedAnswers[qid] !== undefined && selectedAnswers[qid] !== null;
-        const rawAnswer = selectedAnswers[qid];
-        const parsedAnswer = isAnswered ? parseInt(rawAnswer) : null;
-        return {
-          question_id: qid,
-          selected_option_order: parsedAnswer,
-        };
+        const raw = cur?.selectedAnswers?.[qid];
+        const isAnswered = raw !== undefined && raw !== null;
+        const parsed = isAnswered ? parseInt(raw) : null;
+        return { question_id: qid, selected_option_order: parsed };
       });
+
+      if (answers.length === 0) {
+        const selectedCount = Object.keys(cur?.selectedAnswers || {}).length;
+        console.error("[MockAttempt] No question IDs found to submit", { sections, cs: cur });
+        if (selectedCount === 0) {
+          setIsSubmitting(false);
+          alert("No answers selected yet or questions not loaded. Please wait for sections to load and select at least one answer before submitting.");
+          return;
+        }
+      }
 
       try {
         const totalDuration =
@@ -744,6 +783,9 @@ export default function MockTestAttemptPage() {
         );
       }
 
+      // Use store submission for unified behavior and persistence
+      const totalDuration = initialTimerSeconds ?? courseInfo?.mock_test_timer_seconds ?? 3600;
+      await submitStore({ courseId: courseInfo.id, attemptKey: String(id), totalDuration });
       // Navigate to results page
       window.location.href = `/mock/${id}/attempt/result`;
     } catch (err) {
@@ -757,18 +799,18 @@ export default function MockTestAttemptPage() {
     id,
     initialTimerSeconds,
     isSubmitting,
+    submitStore,
     sections,
-    selectedAnswers,
-    timeRemaining,
   ]);
 
   useEffect(() => {
     submitRef.current = handleSubmitTest;
   }, [handleSubmitTest]);
 
-  // Timer effect
+  // Timer effect (bypass local interval if store timer is used)
   useEffect(() => {
     if (!testStarted || !initialTimerSeconds) return;
+    if (courseInfo?.id) return; // store manages timer
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -794,14 +836,10 @@ export default function MockTestAttemptPage() {
         timerRef.current = null;
       }
     };
-  }, [initialTimerSeconds, testStarted]);
+  }, [initialTimerSeconds, testStarted, courseInfo?.id]);
 
   // Manual submit with confirmation
   const handleManualSubmit = useCallback(() => {
-    const ok = window.confirm(
-      "Submit the test? You won't be able to change answers after submission."
-    );
-    if (!ok) return;
     void handleSubmitTest();
   }, [handleSubmitTest]);
 
@@ -1023,7 +1061,7 @@ export default function MockTestAttemptPage() {
     (sum, sec) => sum + sec.questions.length,
     0
   );
-  const answeredCount = Object.keys(selectedAnswers).length;
+  const answeredCount = Object.keys(cs?.selectedAnswers || {}).length;
   const progressPercentage =
     totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
 
@@ -1112,7 +1150,7 @@ export default function MockTestAttemptPage() {
               <>
                 <QuestionDisplay
                   question={currentQuestion}
-                  selectedAnswer={selectedAnswers[currentQuestion.id] || null}
+                  selectedAnswer={cs?.selectedAnswers?.[currentQuestion.id] || null}
                   onAnswerSelect={handleAnswerSelect}
                   questionNumber={currentQuestionIndex + 1}
                   totalQuestions={currentSection.questions.length}
@@ -1150,7 +1188,7 @@ export default function MockTestAttemptPage() {
               }))}
               currentSectionIndex={currentSectionIndex}
               currentQuestionIndex={currentQuestionIndex}
-              selectedAnswers={selectedAnswers}
+              selectedAnswers={cs?.selectedAnswers || {}}
               onSelectQuestion={(sectionIndex, questionIndex) => {
                 setCurrentSectionIndex(sectionIndex);
                 setCurrentQuestionIndex(questionIndex);

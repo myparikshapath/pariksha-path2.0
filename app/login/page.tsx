@@ -4,13 +4,13 @@ import api from "@/utils/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AxiosError } from "axios";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/stores/auth";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Eye, EyeOff } from "lucide-react"; // 👈 eye icons
 
 export default function Login() {
   const router = useRouter();
-  const { login } = useAuth();
+  const login = useAuthStore((s) => s.login);
   const { ref, cursorPos } = useCursorGlow();
 
   const [form, setForm] = useState({ email: "", password: "" });
@@ -39,7 +39,7 @@ export default function Login() {
         localStorage.setItem("access_token", access_token);
         localStorage.setItem("refresh_token", refresh_token);
 
-        login(access_token, refresh_token, userRole);
+        login(access_token, refresh_token, userRole, res.data.user);
 
         if (res.data.user.role === "admin") {
           router.push("/admin/dashboard");

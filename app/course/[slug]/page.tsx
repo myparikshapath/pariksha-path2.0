@@ -13,7 +13,7 @@ import {
   enrollInCourse,
 } from "@/src/services/courseService";
 import api from "@/utils/api";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/stores/auth";
 import Link from "next/link";
 
 // Define Razorpay types
@@ -61,7 +61,7 @@ const CoursePage = () => {
   const params = useParams();
   const router = useRouter();
   const { slug } = params;
-  const { user } = useAuth();
+  const user = useAuthStore((s) => s.user);
   logger("[LOAD DATA] User data", user);
 
   const [examContent, setExamContent] = useState<ExamContent | null>(null);

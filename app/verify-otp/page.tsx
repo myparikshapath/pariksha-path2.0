@@ -5,13 +5,13 @@ import { AxiosError } from "axios";
 import { motion } from "framer-motion";
 import { KeyRound } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/stores/auth";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
 
 export default function VerifyOtp() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const login = useAuthStore((s) => s.login);
 
   const [otp, setOtp] = useState("");
   const [email, setEmail] = useState("");

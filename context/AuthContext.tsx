@@ -1,131 +1,86 @@
-"use client";
-import { createContext, useContext, useState, useEffect } from "react";
-import api from "@/utils/api";
-import Loader from "@/components/loader";
-import SecureTokenStorage from "@/utils/secureStorage";
+// "use client";
+// import { createContext, useContext, useState, useEffect } from "react";
+// import Loader from "@/components/loader";
+// import SecureTokenStorage from "@/utils/secureStorage";
+// import { useAuthStore } from "@/stores/auth";
 
-interface User {
-    name: string;
-    email: string;
-    phone?: string;
-}
+// interface User {
+//     name: string;
+//     email: string;
+//     phone?: string;
+// }
 
-interface AuthContextType {
-    isLoggedIn: boolean | null; // allow null while checking
-    role: "student" | "admin" | null;
-    user: User | null;
-    loading: boolean;
-    login: (accessToken: string, refreshToken: string, role: "student" | "admin") => void;
-    logout: () => void;
-}
+// interface AuthContextType {
+//     isLoggedIn: boolean | null; // allow null while checking
+//     role: "student" | "admin" | null;
+//     user: User | null;
+//     loading: boolean;
+//     login: (accessToken: string, refreshToken: string, role: "student" | "admin") => void;
+//     logout: () => void;
+// }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+// const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-    const [role, setRole] = useState<"student" | "admin" | null>(null);
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [showLoader, setShowLoader] = useState(true); // control loader visibility
+// export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+//     const { isLoggedIn, role, user, loading, login: storeLogin, logout: storeLogout, bootstrap, setState } = useAuthStore();
+//     const [/*legacyLoading*/ , setLoading] = useState(true);
+//     const [showLoader, setShowLoader] = useState(true); // control loader visibility
 
-    const fetchUser = async () => {
-        try {
-            const token = SecureTokenStorage.getAccessToken();
-            const storedRole = SecureTokenStorage.getUserRole();
+//     const fetchUser = async () => {
+//         try {
+//             await bootstrap();
+//         } finally {
+//             // Ensure loader shows at least 3–4 seconds
+//             setTimeout(() => {
+//                 setShowLoader(false);
+//                 setLoading(false);
+//             }, 4000);
+//         }
+//     };
 
-            if (token && storedRole) {
-                setIsLoggedIn(true);
-                setRole(storedRole as "student" | "admin");
+//     useEffect(() => {
+//         fetchUser();
 
-                const res = await api.get("/auth/me");
-                const userData = res.data?.user ?? res.data;
-                setUser(userData ?? null);
-            } else {
-                setIsLoggedIn(false);
-                setRole(null);
-                setUser(null);
-            }
-        } catch (err) {
-            console.error("Failed to fetch user:", err);
-            setIsLoggedIn(false);
-            setRole(null);
-            setUser(null);
-        } finally {
-            // Ensure loader shows at least 3–4 seconds
-            setTimeout(() => {
-                setShowLoader(false);
-                setLoading(false);
-            }, 4000);
-        }
-    };
+//         // Listen for logout events from other tabs
+//         const handleStorageChange = (e: StorageEvent) => {
+//             if (e.key === 'logout' && e.newValue) {
+//                 // Another tab logged out, clear this tab's state
+//                 SecureTokenStorage.clearAllTokens();
+//                 setState({ isLoggedIn: false, role: null, user: null });
+//             }
+//         };
 
-    useEffect(() => {
-        fetchUser();
+//         window.addEventListener('storage', handleStorageChange);
 
-        // Listen for logout events from other tabs
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'logout' && e.newValue) {
-                // Another tab logged out, clear this tab's state
-                SecureTokenStorage.clearAllTokens();
-                setIsLoggedIn(false);
-                setRole(null);
-                setUser(null);
-            }
-        };
+//         // Cleanup function
+//         return () => {
+//             window.removeEventListener('storage', handleStorageChange);
+//         };
+//         // eslint-disable-next-line react-hooks/exhaustive-deps
+//     }, []);
 
-        window.addEventListener('storage', handleStorageChange);
+//     // Show full-screen loader while fetching user or during fixed delay
+//     if (showLoader || isLoggedIn === null || loading) {
+//         return <Loader />;
+//     }
 
-        // Cleanup function
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+//     const login = (accessToken: string, refreshToken: string, role: "student" | "admin") => {
+//         void storeLogin(accessToken, refreshToken, role);
+//     };
 
-    // Show full-screen loader while fetching user or during fixed delay
-    if (showLoader || isLoggedIn === null || loading) {
-        return <Loader />;
-    }
+//     const logout = () => {
+//         storeLogout();
+//     };
 
-    const login = (accessToken: string, refreshToken: string, role: "student" | "admin") => {
-        const accessStored = SecureTokenStorage.setAccessToken(accessToken);
-        const refreshStored = SecureTokenStorage.setRefreshToken(refreshToken);
-        const roleStored = SecureTokenStorage.setUserRole(role);
+//     return (
+//         <AuthContext.Provider value={{ isLoggedIn, role, user, loading, login, logout }}>
+//             {children}
+//         </AuthContext.Provider>
+//     );
+// };
 
-        if (!accessStored || !refreshStored || !roleStored) {
-            console.error("Failed to store authentication tokens securely");
-            return;
-        }
-
-        setIsLoggedIn(true);
-        setRole(role);
-        // Fire and forget fetchUser to update user info
-        fetchUser();
-    };
-
-    const logout = () => {
-        SecureTokenStorage.clearAllTokens();
-        setIsLoggedIn(false);
-        setRole(null);
-        setUser(null);
-
-        // Dispatch storage event to notify other tabs
-        window.dispatchEvent(new StorageEvent('storage', {
-            key: 'logout',
-            newValue: Date.now().toString(),
-            storageArea: localStorage
-        }));
-    };
-
-    return (
-        <AuthContext.Provider value={{ isLoggedIn, role, user, loading, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
-
-export const useAuth = () => {
-    const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
-    return ctx;
-};
+// export const useAuth = () => {
+//     const ctx = useContext(AuthContext);
+//     if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+//     return ctx;
+// };
