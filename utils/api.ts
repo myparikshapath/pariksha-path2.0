@@ -1,14 +1,34 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import SecureTokenStorage from "./secureStorage";
+import { Console } from "console";
 
 // Set up logging for this module
 const logger = (message: string, data?: unknown) => {
   console.log(`[API] ${message}`, data ? data : "");
 };
 
+const getBaseURL = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  console.log("envUrl", envUrl);
+  let url =
+    envUrl && envUrl.length > 0
+      ? envUrl
+      : "https://pariksha-path-backend.onrender.com/api/v1";
+
+  if (
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    url.startsWith("http://")
+  ) {
+    url = url.replace("http://", "https://");
+  }
+  // return "http://localhost:8000/api/v1"
+  return url;
+};
+
 const api = axios.create({
   // baseURL: "http://localhost:8000/api/v1",
-  baseURL: "http://myparikshapath-env.eba-rbnf3ip3.ap-south-1.elasticbeanstalk.com/api/v1",
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },
@@ -26,10 +46,13 @@ api.interceptors.request.use(
           data: config.data,
         });
       } else {
-        logger(`Request to ${config.method?.toUpperCase()} ${config.url} (No token)`, {
-          headers: config.headers,
-          data: config.data,
-        });
+        logger(
+          `Request to ${config.method?.toUpperCase()} ${config.url} (No token)`,
+          {
+            headers: config.headers,
+            data: config.data,
+          }
+        );
       }
     }
 
@@ -54,21 +77,31 @@ api.interceptors.request.use(
 // Response interceptor - Log responses and errors
 api.interceptors.response.use(
   (response) => {
-    logger(`Response from ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-      status: response.status,
-      data: response.data,
-      headers: response.headers,
-    });
+    logger(
+      `Response from ${response.config.method?.toUpperCase()} ${
+        response.config.url
+      }`,
+      {
+        status: response.status,
+        data: response.data,
+        headers: response.headers,
+      }
+    );
     return response;
   },
   (error: AxiosError) => {
-    logger(`Response error from ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-      headers: error.response?.headers,
-    });
+    logger(
+      `Response error from ${error.config?.method?.toUpperCase()} ${
+        error.config?.url
+      }`,
+      {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        headers: error.response?.headers,
+      }
+    );
     return Promise.reject(error);
   }
 );
@@ -95,21 +128,25 @@ const processQueue = (error: any, token: string | null = null) => {
 api.interceptors.response.use(
   (resp) => resp,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-          }
-          return api(originalRequest);
-        }).catch(err => {
-          throw err;
-        });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            throw err;
+          });
       }
 
       originalRequest._retry = true;
@@ -122,12 +159,16 @@ api.interceptors.response.use(
         }
 
         // Attempt to refresh token
-        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {}, {
-          headers: {
-            "Authorization": `Bearer ${refreshToken}`,
-            "Content-Type": "application/json"
+        const response = await axios.post(
+          `${api.defaults.baseURL}/auth/refresh`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const { access_token, refresh_token } = response.data;
 
@@ -154,14 +195,16 @@ api.interceptors.response.use(
           SecureTokenStorage.clearAllTokens();
 
           // Dispatch logout event to other tabs
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'logout',
-            newValue: Date.now().toString(),
-            storageArea: localStorage
-          }));
+          window.dispatchEvent(
+            new StorageEvent("storage", {
+              key: "logout",
+              newValue: Date.now().toString(),
+              storageArea: localStorage,
+            })
+          );
 
           // Redirect to login page
-          if (window.location.pathname !== '/login') {
+          if (window.location.pathname !== "/login") {
             window.location.href = "/login";
           }
         }
