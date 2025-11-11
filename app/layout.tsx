@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingContact from "@/components/FloatingContact";
 import { AuthProvider } from "@/context/AuthContext";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,8 @@ export const metadata: Metadata = {
   icons: "/favicon.ico",
   openGraph: {
     title: "My Pariksha Path",
-    description: "Prepare for government exams with live classes, mock tests, and notes.",
+    description:
+      "Prepare for government exams with live classes, mock tests, and notes.",
     url: "https://www.myparikshapath.in",
     siteName: "My Pariksha Path",
     images: [
@@ -89,6 +91,7 @@ export default function RootLayout({
           <Footer />
           <FloatingContact />
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
