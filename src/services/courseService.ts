@@ -243,7 +243,7 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
       undefined,
       { ttlMs: 5 * 60 * 1000 }
     );
-    return (response as any).courses || (response as any).data || [];
+    return response.courses ?? response.data ?? [];
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
     throw error;
@@ -258,7 +258,7 @@ export const fetchAvailableCourses = async (): Promise<Course[]> => {
       { ttlMs: 5 * 60 * 1000 }
     );
     // Handle both response formats
-    const coursesData = (response as any).data || (response as any).courses || [];
+    const coursesData = response.data ?? response.courses ?? [];
     return Array.isArray(coursesData) ? coursesData : [];
   } catch (error) {
     console.error("Error fetching available courses:", error);
@@ -330,7 +330,11 @@ export const getCourseDetails = async (courseId: string): Promise<Course> => {
       { ttlMs: 5 * 60 * 1000 }
     );
     console.log(response);
-    return (response as any).course || (response as any);
+    if (typeof response === "object" && response !== null && "course" in response) {
+      const r = response as { course?: Course };
+      return (r.course as Course) ?? ({} as Course);
+    }
+    return response as Course;
   } catch (error) {
     console.error("Error fetching course details:", error);
     throw error;
@@ -657,12 +661,16 @@ export const getCourseSections = async (
   sections: SectionDetails[];
 }> => {
   try {
-    const response = await cachedGet(
+    const response = await cachedGet<{
+      message: string;
+      course: { id: string; title: string; code: string };
+      sections: SectionDetails[];
+    }>(
       `/courses/${courseId}/sections`,
       undefined,
       { ttlMs: 60 * 1000 }
     );
-    return response as any;
+    return response;
   } catch (error) {
     console.error("Error fetching course sections:", error);
     throw error;

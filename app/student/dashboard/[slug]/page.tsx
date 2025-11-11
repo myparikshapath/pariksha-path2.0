@@ -41,8 +41,6 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug || "";
-
   const enrolledIds = useStoreSelector(useCoursesStore, (s) => s.enrolledIds);
   const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
   const fetchEnrolled = useStoreSelector(useCoursesStore, (s) => s.fetchEnrolled);
