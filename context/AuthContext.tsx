@@ -211,11 +211,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setRole(null);
             setUser(null);
         } finally {
-            // Ensure loader shows at least 3–4 seconds
-            setTimeout(() => {
-                setShowLoader(false);
-                setLoading(false);
-            }, 4000);
+            // Hide loader immediately when fetch completes
+            setShowLoader(false);
+            setLoading(false);
         }
     };
 
