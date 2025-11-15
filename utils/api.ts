@@ -10,11 +10,15 @@ const logger = (message: string, data?: unknown) => {
 const getBaseURL = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
   console.log("envUrl", envUrl);
+  // Local testing - use localhost
+  // return "http://localhost:8000/api/v1";
+  
+  // Uncomment below to use Render backend
   let url =
     envUrl && envUrl.length > 0
       ? envUrl
       : "https://pariksha-path-backend.onrender.com/api/v1";
-
+  
   if (
     typeof window !== "undefined" &&
     window.location.protocol === "https:" &&
@@ -22,7 +26,6 @@ const getBaseURL = () => {
   ) {
     url = url.replace("http://", "https://");
   }
-  // return "http://localhost:8000/api/v1"
   return url;
 };
 
