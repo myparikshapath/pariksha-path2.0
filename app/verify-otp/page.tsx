@@ -67,10 +67,8 @@ export default function VerifyOtp() {
   const handleResend = async () => {
     try {
       setLoading(true);
-      const endpoint =
-        otpType === "login"
-          ? "/auth/resend-login-otp"
-          : "/auth/resend-verification-email";
+      // Both login and registration OTP resend use the same endpoint
+      const endpoint = "/auth/resend-verification-email";
       const res = await api.post(endpoint, { email });
       setMessage(res.data.message || "OTP resent successfully");
     } catch (err) {
