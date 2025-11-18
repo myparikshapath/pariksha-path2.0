@@ -15,13 +15,13 @@ const getBaseURL = () => {
   console.log("envUrl", envUrl);
   // Local testing - use localhost
   // return "http://localhost:8000/api/v1";
-  
+
   // Uncomment below to use Render backend
   let url =
     envUrl && envUrl.length > 0
       ? envUrl
-      : "https://pariksha-path-backend.onrender.com/api/v1";
-  
+      : "https://pariksha-path-backend-8rm9.onrender.com";
+
   if (
     typeof window !== "undefined" &&
     window.location.protocol === "https:" &&
