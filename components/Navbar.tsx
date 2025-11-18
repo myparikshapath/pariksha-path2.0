@@ -1,13 +1,13 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
-import api from "@/utils/api";
-import SecureTokenStorage from "@/utils/secureStorage";
+import { useAuthStore } from "@/stores/auth";
+import { useCoursesStore } from "@/stores/courses";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 import {
   Accordion,
   AccordionItem,
@@ -30,7 +30,9 @@ type GroupType = { category: string; items: SubGroup[] };
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
-  const { isLoggedIn, role, logout } = useAuth();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const role = useAuthStore((s) => s.role);
+  const logout = useAuthStore((s) => s.logout);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
@@ -55,66 +57,65 @@ const Navbar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [hoveredDropdown]);
 
-  // Fetch only active courses
+  // Load courses from Zustand store (with TTL + request dedupe under the hood)
+  const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
+  const allIds = useStoreSelector(useCoursesStore, (s) => s.allIds);
+  const fetchAll = useStoreSelector(useCoursesStore, (s) => s.fetchAll);
+
   useEffect(() => {
-    const fetchCourses = async () => {
+    let mounted = true;
+    const run = async () => {
       try {
         setLoading(true);
-        const token = SecureTokenStorage.getAccessToken();
-        const res = await api.get("/courses", {
-          params: { limit: 100 },
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-
-        const allCourses: Course[] = Array.isArray(res.data)
-          ? res.data
-          : res.data.courses || res.data.data || [];
-
-        const activeCourses: Course[] = allCourses.filter(
-          (c) =>
-            c.is_active === true ||
-            c.is_active === "true" ||
-            c.is_active === 1
-        );
-
-        const grouped: GroupType[] = Object.entries(
-          activeCourses.reduce<Record<string, Record<string, ExamItem[]>>>(
-            (acc, c) => {
-              if (!c.category) return acc;
-              if (!acc[c.category]) acc[c.category] = {};
-              const sub = c.sub_category || "General";
-              if (!acc[c.category][sub]) acc[c.category][sub] = [];
-              acc[c.category][sub].push({
-                title: c.title,
-                code: c.code,
-              });
-              return acc;
-            },
-            {}
-          )
-        ).map(([category, subs]) => ({
-          category,
-          items: Object.entries(subs).map(([subCategory, exams]) => ({
-            subCategory,
-            exams: exams.sort((a, b) => a.title.localeCompare(b.title)),
-          })),
-        }));
-
-        setGroupedData(grouped);
-        if (grouped.length > 0) setActiveCategory(grouped[0].category);
-      } catch (err: unknown) {
-        // Fully type-safe error handling
-        if (err instanceof Error) {
-          console.error("🔥 Error fetching courses:", err.message);
-        } else {
-          console.error("🔥 Unknown error fetching courses:", err);
-        }
+        await fetchAll();
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
-    fetchCourses();
-  }, []);
+    void run();
+    return () => {
+      mounted = false;
+    };
+  }, [fetchAll]);
+
+  // Derive grouped data from store state
+  const derivedGrouped = useMemo(() => {
+    const allCourses = allIds.map((id) => byId[id]).filter(Boolean) as Course[];
+    const activeCourses = allCourses.filter((c) => {
+      if (!c) return false;
+      if (c.is_active === true) return true;
+      if (c.is_active === "true") return true;
+      if (typeof c.is_active === "number" && c.is_active === 1) return true;
+      return false;
+    });
+    const grouped: GroupType[] = Object.entries(
+      activeCourses.reduce<Record<string, Record<string, ExamItem[]>>>(
+        (acc, c) => {
+          if (!c.category) return acc;
+          if (!acc[c.category]) acc[c.category] = {};
+          const sub = c.sub_category || "General";
+          if (!acc[c.category][sub]) acc[c.category][sub] = [];
+          acc[c.category][sub].push({ title: c.title, code: c.code });
+          return acc;
+        },
+        {}
+      )
+    ).map(([category, subs]) => ({
+      category,
+      items: Object.entries(subs).map(([subCategory, exams]) => ({
+        subCategory,
+        exams: exams.sort((a, b) => a.title.localeCompare(b.title)),
+      })),
+    }));
+    return grouped;
+  }, [allIds, byId]);
+
+  useEffect(() => {
+    setGroupedData(derivedGrouped);
+    if (derivedGrouped.length > 0 && !activeCategory) {
+      setActiveCategory(derivedGrouped[0].category);
+    }
+  }, [derivedGrouped, activeCategory]);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
@@ -156,18 +157,20 @@ const Navbar: React.FC = () => {
                       hoveredDropdown === link.name ? null : link.name
                     )
                   }
-                  className={`capitalize flex items-center space-x-1 transition-colors text-md font-bold cursor-pointer no-underline ${hoveredDropdown === link.name
-                    ? "text-[#869C51]"
-                    : "text-gray-900 hover:text-[#4f5c38]"
-                    }`}
+                  className={`capitalize flex items-center space-x-1 transition-colors text-md font-bold cursor-pointer no-underline ${
+                    hoveredDropdown === link.name
+                      ? "text-[#869C51]"
+                      : "text-gray-900 hover:text-[#4f5c38]"
+                  }`}
                 >
                   {link.name}
                 </button>
               ) : (
                 <Link
                   href={link.href!}
-                  className={`capitalize hover:text-[#6B7B4D] transition-colors ${isActive(link.href!) ? "text-[#869C51]" : "text-gray-900"
-                    } text-[16px] cursor-pointer`}
+                  className={`capitalize hover:text-[#6B7B4D] transition-colors ${
+                    isActive(link.href!) ? "text-[#869C51]" : "text-gray-900"
+                  } text-[16px] cursor-pointer`}
                 >
                   {link.name}
                 </Link>
@@ -200,16 +203,19 @@ const Navbar: React.FC = () => {
                         {loading ? (
                           <div className="p-6 text-gray-500">Loading...</div>
                         ) : groupedData.length === 0 ? (
-                          <div className="p-6 text-gray-500">No active exams</div>
+                          <div className="p-6 text-gray-500">
+                            No active exams
+                          </div>
                         ) : (
                           groupedData.map((group) => (
                             <button
                               key={group.category}
                               onClick={() => setActiveCategory(group.category)}
-                              className={`w-full text-left px-5 py-3 text-lg font-bold capitalize transition-all duration-150 ${activeCategory === group.category
-                                ? "bg-yellow-400 text-gray-800 shadow-inner"
-                                : "text-gray-700 hover:text-gray-800 hover:bg-yellow-100"
-                                }`}
+                              className={`w-full text-left px-5 py-3 text-lg font-bold capitalize transition-all duration-150 ${
+                                activeCategory === group.category
+                                  ? "bg-yellow-400 text-gray-800 shadow-inner"
+                                  : "text-gray-700 hover:text-gray-800 hover:bg-yellow-100"
+                              }`}
                             >
                               {group.category}
                             </button>
@@ -234,11 +240,16 @@ const Navbar: React.FC = () => {
                                         <motion.div
                                           key={ex.code}
                                           whileHover={{ scale: 1.03, y: -3 }}
-                                          transition={{ type: "spring", stiffness: 260 }}
+                                          transition={{
+                                            type: "spring",
+                                            stiffness: 260,
+                                          }}
                                         >
                                           <Link
                                             href={`/course/${ex.code}`}
-                                            onClick={() => setHoveredDropdown(null)}
+                                            onClick={() =>
+                                              setHoveredDropdown(null)
+                                            }
                                             className="block rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center font-semibold text-gray-700 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-500 shadow-sm transition-all capitalize"
                                           >
                                             {ex.title}
@@ -266,7 +277,9 @@ const Navbar: React.FC = () => {
         <div className="hidden lg:flex items-center space-x-4">
           {isLoggedIn && (
             <Link
-              href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
+              href={
+                role === "admin" ? "/admin/dashboard" : "/student/dashboard"
+              }
               className="bg-gray-200 text-[#2E4A3C] px-6 py-2 rounded font-bold hover:bg-gray-300 shadow-xl transition transform hover:-translate-y-1 capitalize"
             >
               {role === "admin" ? "Admin Dashboard" : "Dashboard"}
@@ -293,9 +306,17 @@ const Navbar: React.FC = () => {
         {/* MOBILE TOGGLE */}
         <div className="lg:hidden">
           {menuOpen ? (
-            <X size={28} className="cursor-pointer" onClick={() => setMenuOpen(false)} />
+            <X
+              size={28}
+              className="cursor-pointer"
+              onClick={() => setMenuOpen(false)}
+            />
           ) : (
-            <Menu size={28} className="cursor-pointer" onClick={() => setMenuOpen(true)} />
+            <Menu
+              size={28}
+              className="cursor-pointer"
+              onClick={() => setMenuOpen(true)}
+            />
           )}
         </div>
       </div>
@@ -321,12 +342,20 @@ const Navbar: React.FC = () => {
                         </AccordionTrigger>
                         <AccordionContent className="space-y-2 pl-1">
                           {loading ? (
-                            <div className="p-2 text-gray-500 text-sm">Loading...</div>
+                            <div className="p-2 text-gray-500 text-sm">
+                              Loading...
+                            </div>
                           ) : groupedData.length === 0 ? (
-                            <div className="p-2 text-gray-500 text-sm">No active exams</div>
+                            <div className="p-2 text-gray-500 text-sm">
+                              No active exams
+                            </div>
                           ) : (
                             groupedData.map((group) => (
-                              <Accordion key={group.category} type="single" collapsible>
+                              <Accordion
+                                key={group.category}
+                                type="single"
+                                collapsible
+                              >
                                 <AccordionItem value={group.category}>
                                   <AccordionTrigger className="text-base font-semibold text-gray-900 capitalize px-2 py-2 rounded-md bg-yellow-50 hover:bg-yellow-100 transition cursor-pointer">
                                     {group.category}
@@ -334,7 +363,10 @@ const Navbar: React.FC = () => {
 
                                   <AccordionContent className="pl-4 space-y-1">
                                     {group.items.map((sub) => (
-                                      <div key={sub.subCategory} className="flex flex-col space-y-1">
+                                      <div
+                                        key={sub.subCategory}
+                                        className="flex flex-col space-y-1"
+                                      >
                                         {sub.exams.map((ex) => (
                                           <Link
                                             key={ex.code}
@@ -359,8 +391,11 @@ const Navbar: React.FC = () => {
                     <Link
                       href={link.href!}
                       onClick={() => setMenuOpen(false)}
-                      className={`block text-lg font-bold capitalize cursor-pointer ${isActive(link.href!) ? "text-yellow-600" : "text-gray-900 hover:text-yellow-600"
-                        }`}
+                      className={`block text-lg font-bold capitalize cursor-pointer ${
+                        isActive(link.href!)
+                          ? "text-yellow-600"
+                          : "text-gray-900 hover:text-yellow-600"
+                      }`}
                     >
                       {link.name}
                     </Link>
@@ -372,7 +407,11 @@ const Navbar: React.FC = () => {
               <div className="pt-2 border-t border-gray-200 space-y-2">
                 {isLoggedIn && (
                   <Link
-                    href={role === "admin" ? "/admin/dashboard" : "/student/dashboard"}
+                    href={
+                      role === "admin"
+                        ? "/admin/dashboard"
+                        : "/student/dashboard"
+                    }
                     onClick={() => setMenuOpen(false)}
                     className="block bg-yellow-400 text-black px-4 py-2 rounded font-bold text-center hover:bg-yellow-500 cursor-pointer"
                   >

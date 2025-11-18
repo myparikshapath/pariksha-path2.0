@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/stores/auth";
 
 interface StudentRouteProps {
   children: React.ReactNode;
@@ -12,7 +12,9 @@ export const StudentRoute: React.FC<StudentRouteProps> = ({
   children,
   fallbackPath = "/unauthorized"
 }) => {
-  const { isLoggedIn, role, loading } = useAuth();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const role = useAuthStore((s) => s.role);
+  const loading = useAuthStore((s) => s.loading);
   const router = useRouter();
 
   useEffect(() => {

@@ -63,11 +63,11 @@ export default function ContactPage() {
                             <a href="tel:+919876543210" className="flex items-center gap-3 text-gray-700 hover:text-[#2E4A3C] transition">
                                 <Phone size={22} /> +91 9876543210
                             </a>
-                            <a href="mailto:support@parikshapath.com" className="flex items-center gap-3 text-gray-700 hover:text-[#2E4A3C] transition">
-                                <Mail size={22} /> support@parikshapath.com
+                            <a href="mailto:support@myparikshapath.in" className="flex items-center gap-3 text-gray-700 hover:text-[#2E4A3C] transition">
+                                <Mail size={22} /> support@myparikshapath.in
                             </a>
                             <a
-                                href="https://wa.me/919876543210"
+                                href="https://wa.me/918059562135"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-3 w-fit text-white bg-[#25D366] px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 hover:scale-100"

@@ -1,12 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-    fetchAvailableCourses,
-    deleteCourse,
-    Course,
-} from "@/src/services/courseService";
+import { deleteCourse, Course } from "@/src/services/courseService";
 import {
     Card,
     CardContent,
@@ -29,10 +25,14 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteCourseDialog from "@/components/admin/DeleteCourseDialog";
+import { useCoursesStore } from "@/stores/courses";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 
 const AddExam = () => {
     const router = useRouter();
-    const [courses, setCourses] = useState<Course[]>([]);
+    const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
+    const allIds = useStoreSelector(useCoursesStore, (s) => s.allIds);
+    const fetchAll = useStoreSelector(useCoursesStore, (s) => s.fetchAll);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -47,27 +47,24 @@ const AddExam = () => {
         router.push(`/admin/add-material/${slug}`);
     };
 
-    useEffect(() => {
-        loadCourses();
-    }, []);
-
-    const loadCourses = async () => {
+    const loadCourses = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-
-            // Use direct axios call to bypass authentication
-            const data = await fetchAvailableCourses();
-            console.log('API Response:', data);
-
-            setCourses(Array.isArray(data) ? data : []);
+            await fetchAll();
         } catch (e: unknown) {
             console.error('Error loading courses:', e);
             setError(e instanceof Error ? e.message : "Failed to load courses");
         } finally {
             setLoading(false);
         }
-    };
+    }, [fetchAll]);
+
+    useEffect(() => {
+        void loadCourses();
+    }, [loadCourses]);
+
+    const courses = allIds.map((id) => byId[id]).filter(Boolean) as Course[];
 
     const handleAddExam = () => {
         // Navigate to the new exam page

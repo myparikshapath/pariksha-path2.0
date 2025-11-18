@@ -1,5 +1,6 @@
 import api from "@/utils/api";
 import type { AxiosError } from "axios";
+import { get as cachedGet } from "@/utils/request";
 
 // Question option interface with images
 export interface QuestionOption {
@@ -237,8 +238,12 @@ interface DeletedQuestion extends QuestionResponse {
 // Course functions
 export const fetchEnrolledCourses = async (): Promise<Course[]> => {
   try {
-    const response = await api.get("/courses/enrolled");
-    return response.data.courses || [];
+    const response = await cachedGet<{ courses?: Course[]; data?: Course[] }>(
+      "/courses/enrolled",
+      undefined,
+      { ttlMs: 5 * 60 * 1000 }
+    );
+    return response.courses ?? response.data ?? [];
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
     throw error;
@@ -247,9 +252,13 @@ export const fetchEnrolledCourses = async (): Promise<Course[]> => {
 
 export const fetchAvailableCourses = async (): Promise<Course[]> => {
   try {
-    const response = await api.get("/courses?limit=200");
+    const response = await cachedGet<{ data?: Course[]; courses?: Course[] }>(
+      "/courses",
+      { limit: 200 },
+      { ttlMs: 5 * 60 * 1000 }
+    );
     // Handle both response formats
-    const coursesData = response.data.data || response.data.courses || [];
+    const coursesData = response.data ?? response.courses ?? [];
     return Array.isArray(coursesData) ? coursesData : [];
   } catch (error) {
     console.error("Error fetching available courses:", error);
@@ -315,9 +324,17 @@ export const enrollInCourse = async (courseId: string): Promise<void> => {
 
 export const getCourseDetails = async (courseId: string): Promise<Course> => {
   try {
-    const response = await api.get(`/courses/${courseId}`);
+    const response = await cachedGet<{ course?: Course } | Course>(
+      `/courses/${courseId}`,
+      undefined,
+      { ttlMs: 5 * 60 * 1000 }
+    );
     console.log(response);
-    return response.data.course || response.data;
+    if (typeof response === "object" && response !== null && "course" in response) {
+      const r = response as { course?: Course };
+      return (r.course as Course) ?? ({} as Course);
+    }
+    return response as Course;
   } catch (error) {
     console.error("Error fetching course details:", error);
     throw error;
@@ -327,8 +344,12 @@ export const getCourseDetails = async (courseId: string): Promise<Course> => {
 // 👇 New function (simple alias, same pattern as getCourseDetails)
 export const getCourseById = async (courseId: string): Promise<Course> => {
   try {
-    const response = await api.get(`/courses/${courseId}`);
-    return response.data.course;
+    const response = await cachedGet<{ course: Course }>(
+      `/courses/${courseId}`,
+      undefined,
+      { ttlMs: 5 * 60 * 1000 }
+    );
+    return response.course;
   } catch (error) {
     console.error("Error fetching course by ID:", error);
     throw error;
@@ -640,8 +661,16 @@ export const getCourseSections = async (
   sections: SectionDetails[];
 }> => {
   try {
-    const response = await api.get(`/courses/${courseId}/sections`);
-    return response.data;
+    const response = await cachedGet<{
+      message: string;
+      course: { id: string; title: string; code: string };
+      sections: SectionDetails[];
+    }>(
+      `/courses/${courseId}/sections`,
+      undefined,
+      { ttlMs: 60 * 1000 }
+    );
+    return response;
   } catch (error) {
     console.error("Error fetching course sections:", error);
     throw error;

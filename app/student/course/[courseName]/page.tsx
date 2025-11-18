@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchAvailableCourses, Course } from "@/src/services/courseService";
+import type { Course } from "@/src/services/courseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,8 @@ import {
   FileText,
 } from "lucide-react";
 import Link from "next/link";
+import { useCoursesStore } from "@/stores/courses";
+import { useStoreSelector } from "@/hooks/useStoreSelector";
 
 const MaterialDetailPage = () => {
   const params = useParams();
@@ -20,22 +22,26 @@ const MaterialDetailPage = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const byId = useStoreSelector(useCoursesStore, (s) => s.byId);
+  const allIds = useStoreSelector(useCoursesStore, (s) => s.allIds);
+  const fetchAll = useStoreSelector(useCoursesStore, (s) => s.fetchAll);
 
   const loadCourse = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const courses = await fetchAvailableCourses();
-      console.log(courses);
-      const foundCourse = courses.find((c) => {
-        const courseSlug = c.id || c.code?.toLowerCase().replace(/\s+/g, "-");
-        console.log(courseSlug);
-        return courseSlug === params.courseName;
-      });
-      // console.log(params.slug);
-
-      // console.log(foundCourse);
+      // Ensure courses are loaded into the store (cached with TTL in service)
+      await fetchAll();
+      const param = String(params.courseName);
+      const foundCourse =
+        allIds
+          .map((id) => byId[id])
+          .find((c) => {
+            if (!c) return false;
+            const codeSlug = c.code?.toLowerCase().replace(/\s+/g, "-");
+            return c.id === param || codeSlug === param;
+          }) || null;
 
       if (foundCourse) {
         setCourse(foundCourse);
@@ -48,7 +54,7 @@ const MaterialDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [params.courseName]);
+  }, [params.courseName, allIds, byId, fetchAll]);
 
   useEffect(() => {
     loadCourse();
@@ -75,8 +81,7 @@ const MaterialDetailPage = () => {
         <div className="flex items-center gap-4 mb-6">
           <Button
             onClick={handleBackClick}
-             
-             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Courses
@@ -103,8 +108,7 @@ const MaterialDetailPage = () => {
       <div className="flex items-center gap-4 mb-8">
         <Button
           onClick={handleBackClick}
-           
-           className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
+          className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 shadow-sm transition-all duration-200"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Courses
@@ -167,7 +171,6 @@ const MaterialDetailPage = () => {
                       <Button
                         asChild
                         size="sm"
-                         
                         className="flex items-center gap-2"
                       >
                         <span>

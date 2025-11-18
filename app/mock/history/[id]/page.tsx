@@ -164,7 +164,7 @@ export default function MockAttemptDetailsPage() {
               <ImageDisplay
                 imageUrls={qa.question.question_image_urls}
                 alt="Question image"
-                className="mb-4"
+                className="mb-4 "
               />
             )}
         </div>

@@ -6,9 +6,9 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Footer() {
-  const phoneNumber = "+91XXXXXXXXXX";
-  const email = "myparikshapath@gmail.com";
-  const whatsappNumber = "91XXXXXXXXXX";
+  const phoneNumber = "+918059562135";
+  const email = "support@myparikshapath.in";
+  const whatsappNumber = "918059562135";
 
   const pathname = usePathname();
   const router = useRouter();
