@@ -1,8 +1,16 @@
 "use client";
 import { motion, useAnimationFrame } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, Book, BarChart2, Globe, Cpu, BookOpen } from "lucide-react";
+import { Download, Book, BarChart2, Globe, Cpu, BookOpen, Search } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
 import Link from "next/link";
 import Image from "next/image";
 import CountUp from "react-countup";
@@ -21,6 +29,9 @@ export default function Home() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [courses, setCourses] = useState<any[]>([]);
+
 
   const testimonials = [
     { name: "Amit Sharma", text: "Cracked SBI PO in first attempt!" },
@@ -105,6 +116,53 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await api.get("/courses", {
+          params: { is_active: true, limit: 1000 },
+        });
+        console.log("BKL DATA:", res.data);
+        setCourses(res?.data?.data || []);
+      } catch (error) {
+        console.error("Error loading courses: ", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+  const filteredCourses = courses.filter(
+    (course) =>
+      search &&
+      (course.title?.toLowerCase().includes(search.toLowerCase()) ||
+        course.description?.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const [banners, setBanners] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await api.get("/banner");
+        console.log("BANNERS:", res.data);
+        setBanners(res.data?.banners || []);
+      } catch (err) {
+        console.error("Failed to load banners", err);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
+
+  const fixDoSpacesUrl = (url: string) => {
+    if (!url) return url;
+    if (url.includes('/pariksha-path-bucket/')) return url;
+    return url.replace(/^(https?:\/\/[^/]+)\/(banner\/.*)$/i, '$1/pariksha-path-bucket/$2');
+  };
+
+
+
   return (
     <main className="pt-0">
       {/* HERO SECTION */}
@@ -120,6 +178,19 @@ export default function Home() {
               India&apos;s Smartest Learning Platform for <br />
               <span className="text-yellow-300">Govt Exams & Boards</span>
             </motion.h1>
+
+            {/* SEARCH BAR */}
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 flex items-center bg-white rounded-xl shadow-md px-4 py-2">
+              <Search size={18} className="text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search exams like SSC CGL, UPSC, JEE..."
+                className="w-full px-3 py-2 bg-transparent outline-none text-gray-700 text-sm"
+              />
+            </div>
+
             <p className="mt-4 text-sm sm:text-base text-green-100 font-medium">
               Live Classes | Mock Tests | Notes | Doubt Solving
             </p>
@@ -154,6 +225,93 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* SEARCH RESULTS */}
+      {search && (
+        <section className="max-w-6xl mx-auto mt-16 px-4 sm:px-6">
+          <h2 className="text-center text-2xl font-bold text-[#2E4A3C] mb-8">
+            Results for "{search}"
+          </h2>
+
+          {filteredCourses.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {filteredCourses.map((course) => (
+                <Card key={course.id} className="shadow-md rounded-xl">
+                  <CardContent className="p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <h3 className="font-semibold text-[#2E4A3C] mb-2">
+                        {course.title}
+                      </h3>
+
+                      <p className="text-sm text-gray-600 line-clamp-3">
+                        {course.description || "No description provided"}
+                      </p>
+                    </div>
+
+                    <Link
+                      href={
+                        course.is_free
+                          ? `/mock/${course.id}/attempt`
+                          : `/course/${course.slug || course.title
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")
+                            .replace(/[^\w-]+/g, "")}`
+                      }
+                      className={`mt-4 text-center py-2 rounded-xl font-semibold ${course.is_free
+                        ? "bg-yellow-400 text-[#2E4A3C]"
+                        : "bg-[#2E4A3C] text-white"
+                        }`}
+                    >
+                      {course.is_free ? "Attempt Now" : "Buy Now"}
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">
+              No exam found for "{search}"
+            </p>
+          )}
+        </section>
+      )}
+
+
+      {/* yahan aa gaya curousel */}
+      {/* FULL WIDTH BANNER CAROUSEL */}
+      {/* FULL WIDTH DYNAMIC BANNER CAROUSEL */}
+      {banners.length > 0 && (
+        <section className="w-full bg-white">
+          <Carousel
+            opts={{
+              align: "center",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {banners.map((banner, index) => (
+                <CarouselItem key={banner.id || index} className="w-full">
+                  <div className="relative w-full h-[220px] sm:h-[320px] md:h-[450px] lg:h-[550px]">
+                    <Image
+                      src={fixDoSpacesUrl(banner.image_url)}
+                      alt={`Banner ${index + 1}`}
+                      fill
+                      priority={index === 0}
+                      className="object-cover"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            {/* Arrows */}
+            <CarouselPrevious className="left-4 bg-white/80 hover:bg-white" />
+            <CarouselNext className="right-4 bg-white/80 hover:bg-white" />
+          </Carousel>
+        </section>
+      )}
+
 
       {/* KEY FEATURES */}
       <section className="max-w-6xl mx-auto mt-16 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center px-4 sm:px-6 md:px-0">

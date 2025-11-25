@@ -209,24 +209,24 @@ const SectionUploadPage = () => {
                 className={`relative border-3 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 group ${isDragActive
                   ? "border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50 scale-105 shadow-2xl"
                   : "border-emerald-300 hover:border-emerald-400 hover:bg-gradient-to-br hover:from-emerald-25 hover:to-green-25 hover:shadow-xl"
-                }`}
+                  }`}
               >
                 <input {...getInputProps()} />
                 <div className="flex flex-col items-center justify-center space-y-6">
                   <div className={`p-6 rounded-full transition-all duration-300 ${isDragActive
                     ? "bg-emerald-100 scale-110"
                     : "bg-gradient-to-br from-emerald-100 to-green-100 group-hover:scale-105"
-                  }`}>
+                    }`}>
                     <Upload className={`w-12 h-12 transition-colors duration-300 ${isDragActive
                       ? "text-emerald-600"
                       : "text-emerald-500"
-                    }`} />
+                      }`} />
                   </div>
                   <div className="space-y-2">
                     <p className={`text-xl font-semibold transition-colors duration-300 ${isDragActive
                       ? "text-emerald-700"
                       : "text-gray-700"
-                    }`}>
+                      }`}>
                       {isDragActive
                         ? "Drop your CSV file here!"
                         : "Drag & drop your CSV file here"}

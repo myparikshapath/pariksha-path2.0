@@ -364,33 +364,29 @@ const CoursePage = () => {
     header: string;
     content: string;
   }) => {
-    if (section.header.toLowerCase().includes("syllabus")) {
-      const lines = section.content
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean);
+    // TRY PARSING CONTENT INTO JSON (FOR TABLE)
+    try {
+      const parsed = JSON.parse(section.content);
 
-      if (lines.length >= 2) {
-        const subjects = lines[0].split(",").map((s) => s.trim());
-        const details = lines[1].split(",").map((d) => d.trim());
-
+      // ✅ If parsed content is a table array
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].col1) {
         return (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto mt-4">
             <table className="w-full border-collapse text-left text-gray-700">
               <thead className="bg-[#2E4A3C] text-white">
                 <tr>
                   <th className="px-4 py-2 border border-gray-300">Subject</th>
-                  <th className="px-4 py-2 border border-gray-300">Details</th>
+                  <th className="px-4 py-2 border border-gray-300">Marks</th>
                 </tr>
               </thead>
               <tbody>
-                {subjects.map((subject, idx) => (
+                {parsed.map((row: any, idx: number) => (
                   <tr key={idx} className="odd:bg-white even:bg-gray-50">
                     <td className="px-4 py-2 border border-gray-300 font-medium">
-                      {subject}
+                      {row.col1}
                     </td>
                     <td className="px-4 py-2 border border-gray-300">
-                      {details[idx] || "-"}
+                      {row.col2}
                     </td>
                   </tr>
                 ))}
@@ -399,8 +395,11 @@ const CoursePage = () => {
           </div>
         );
       }
+    } catch (err) {
+      // Not a JSON table, ignore
     }
 
+    // ✅ Normal text display
     return (
       <div
         className="prose max-w-none text-black leading-relaxed"
@@ -408,6 +407,8 @@ const CoursePage = () => {
       />
     );
   };
+
+
 
   return (
     <div className="container mx-auto px-8 py-12">
@@ -442,15 +443,15 @@ const CoursePage = () => {
           className={`cursor-pointer px-10 py-3 text-xl font-bold rounded-xl shadow-2xl transition-all duration-300 ease-in-out ${isProcessing
             ? "opacity-60 cursor-not-allowed"
             : course?.is_free || course?.price === 0
-            ? "bg-green-600 hover:bg-green-700 hover:scale-105 text-white"
-            : "bg-[#2d8a5b] hover:scale-105 hover:shadow-green-400/50 text-white"
+              ? "bg-green-600 hover:bg-green-700 hover:scale-105 text-white"
+              : "bg-[#2d8a5b] hover:scale-105 hover:shadow-green-400/50 text-white"
             }`}
         >
           {isProcessing
             ? "Processing…"
             : course?.is_free || course?.price === 0
-            ? "🚀 Enroll Now"
-            : "🚀 Buy Now"}
+              ? "🚀 Enroll Now"
+              : "🚀 Buy Now"}
         </button>
       </div>
 
