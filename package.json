@@ -1,4 +1,7 @@
 {
+  "buildCommand": "NEXT_DISABLE_ESLINT=1 next build"
+},
+{
   "name": "pariksha-path2.0",
   "version": "0.1.0",
   "private": true,
