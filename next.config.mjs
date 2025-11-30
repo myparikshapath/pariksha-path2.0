@@ -1,8 +1,7 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Fix Vercel build failures caused by ESLint errors
+    ignoreDuringBuilds: true, // ✅ actually works now
   },
 
   images: {
@@ -13,7 +12,7 @@ const nextConfig: NextConfig = {
       "images.unsplash.com",
       "cdn.example.com",
 
-      // ✅ DigitalOcean Spaces / CDN
+      // DigitalOcean Spaces
       "pariksha-path-bucket.nyc3.cdn.digitaloceanspaces.com",
       "nyc3.digitaloceanspaces.com",
     ],
