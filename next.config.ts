@@ -1,32 +1,33 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	images: {
-		domains: [
-			"localhost",
-			"via.placeholder.com",
-			"picsum.photos",
-			"images.unsplash.com",
-			"cdn.example.com",
+  eslint: {
+    ignoreDuringBuilds: true, // ✅ Fix Vercel build failures caused by ESLint errors
+  },
 
-			// ✅ DigitalOcean Spaces / CDN
-			"pariksha-path-bucket.nyc3.cdn.digitaloceanspaces.com",
-			"nyc3.digitaloceanspaces.com",
-		],
+  images: {
+    domains: [
+      "localhost",
+      "via.placeholder.com",
+      "picsum.photos",
+      "images.unsplash.com",
+      "cdn.example.com",
 
-		remotePatterns: [
-			{
-				protocol: "https",
-				hostname: "**",
-			},
-			{
-				protocol: "http",
-				hostname: "**",
-			},
-		],
-	},
-	eslint: {
-    ignoreDuringBuilds: true,
+      // ✅ DigitalOcean Spaces / CDN
+      "pariksha-path-bucket.nyc3.cdn.digitaloceanspaces.com",
+      "nyc3.digitaloceanspaces.com",
+    ],
+
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
   },
 };
 
