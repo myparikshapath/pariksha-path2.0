@@ -20,7 +20,7 @@ const getBaseURL = () => {
 	let url =
 		envUrl && envUrl.length > 0
 			? envUrl
-			: "https://pariksha-path-backend-8rm9.onrender.com";
+			: "pariksha-path-backend-production.up.railway.app";
 
 	if (
 		typeof window !== "undefined" &&
